@@ -116,6 +116,33 @@
   .btn-primary:hover{background:#f06a37;}
   .login-error{color:#e07a5f;font-size:13px;margin-top:12px;text-align:center;min-height:16px;}
 
+  /* ---------- WELCOME / TYPING SCREEN ---------- */
+  #welcome-screen{
+    display:none;
+    position:fixed;inset:0;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(227,91,42,0.14), transparent 60%),
+      var(--bg);
+    align-items:center;justify-content:center;
+    z-index:200;
+    padding:24px;
+  }
+  #welcome-screen.show{display:flex;}
+  .welcome-text{
+    font-family:var(--font-display);
+    font-size:clamp(24px, 6vw, 44px);
+    color:var(--cream);
+    text-align:center;
+    letter-spacing:1px;
+    line-height:1.4;
+  }
+  #welcome-typed .accent{ color:var(--ember); }
+  .welcome-cursor{
+    color:var(--ember);
+    animation: blink 0.9s step-end infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
   /* ---------- APP SHELL ---------- */
   #app-screen{display:none;min-height:100vh;flex-direction:column;}
   header{
@@ -296,6 +323,11 @@
     <button class="btn btn-primary" onclick="tryLogin()">Giriş Yap</button>
     <div class="login-error" id="login-error"></div>
   </div>
+</div>
+
+<!-- WELCOME / TYPING SCREEN -->
+<div id="welcome-screen">
+  <div class="welcome-text"><span id="welcome-typed"></span><span class="welcome-cursor">|</span></div>
 </div>
 
 <!-- APP -->
@@ -480,12 +512,52 @@ function tryLogin(){
   if(u === (credentials.username||'').toLowerCase() && p === credentials.password){
     err.textContent = '';
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'flex';
-    renderAll();
+    playWelcomeAnimation();
   }else{
     err.textContent = 'Kullanıcı adı veya şifre hatalı.';
   }
 }
+
+function playWelcomeAnimation(){
+  const screen = document.getElementById('welcome-screen');
+  const typedEl = document.getElementById('welcome-typed');
+  const parts = [
+    { text: 'Giriş yapılıyor... ', accent:false },
+    { text: 'Hoşgeldin!', accent:true }
+  ];
+  const fullPlain = parts.map(p=>p.text).join('');
+  typedEl.innerHTML = '';
+  screen.classList.add('show');
+
+  let charIndex = 0;
+  const speed = 55; // ms / harf
+
+  function typeNext(){
+    if(charIndex >= fullPlain.length){
+      setTimeout(()=>{
+        screen.classList.remove('show');
+        document.getElementById('app-screen').style.display = 'flex';
+        renderAll();
+      }, 650);
+      return;
+    }
+    charIndex++;
+    // o ana kadar yazılan kısmı, doğru renklerle (accent kısmı turuncu) yeniden oluştur
+    let remaining = charIndex;
+    let html = '';
+    for(const part of parts){
+      if(remaining <= 0) break;
+      const take = Math.min(remaining, part.text.length);
+      const chunk = part.text.slice(0, take);
+      html += part.accent ? `<span class="accent">${chunk}</span>` : chunk;
+      remaining -= take;
+    }
+    typedEl.innerHTML = html;
+    setTimeout(typeNext, speed);
+  }
+  typeNext();
+}
+
 document.getElementById('login-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') tryLogin(); });
 document.getElementById('login-user').addEventListener('keydown', e=>{ if(e.key==='Enter') tryLogin(); });
 
