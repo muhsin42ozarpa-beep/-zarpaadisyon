@@ -897,6 +897,7 @@ function arpaLauncherDragEnd(event){
 }
 
 function toggleArpaAssistant(){
+  if(window.matchMedia('(max-width:700px)').matches)return;
   if(!currentUser || currentUser.role!=='admin')return;
   const panel=document.getElementById('arpa-panel');
   if(!panel)return;
@@ -957,7 +958,8 @@ function arpaSetVisibility(){
   const appVisible=document.getElementById('app-screen')?.style.display!=='none';
   const welcomeActive=document.getElementById('welcome-screen')?.classList.contains('show');
   const isPatron=!!(currentUser && currentUser.role==='admin' && currentUser.username);
-  const canShow=isPatron && arpaAppReady && appVisible && !welcomeActive;
+  const isMobile=window.matchMedia('(max-width:700px)').matches;
+  const canShow=isPatron && !isMobile && arpaAppReady && appVisible && !welcomeActive;
   launcher.style.display=canShow?'flex':'none';
   if(!canShow){
     panel.classList.remove('open');
@@ -966,7 +968,10 @@ function arpaSetVisibility(){
   }
 }
 
+window.addEventListener('resize', arpaSetVisibility);
+
 function arpaAsk(){
+  if(window.matchMedia('(max-width:700px)').matches)return;
   if(!currentUser || currentUser.role!=='admin')return;
   const input=document.getElementById('arpa-input');
   const q=(input.value||'').trim();
