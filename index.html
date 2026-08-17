@@ -344,10 +344,10 @@
 
 
 /* ARPA ASİSTAN */
-.arpa-launcher{position:fixed;right:18px;bottom:18px;width:48px;height:48px;border:1px solid var(--ember);border-radius:50%;background:var(--bg-panel2);color:var(--cream);display:none;align-items:center;justify-content:center;font-size:25px;cursor:pointer;z-index:9998;box-shadow:0 8px 25px rgba(0,0,0,.35),0 0 0 2px rgba(227,91,42,.12);user-select:none;-webkit-user-select:none}
-.arpa-panel{position:fixed;right:18px;bottom:78px;width:min(390px,calc(100vw - 36px));height:52vh;min-height:320px;background:var(--bg-panel);border:1px solid var(--line);border-radius:16px;z-index:9999;box-shadow:0 15px 50px rgba(0,0,0,.45);display:none;flex-direction:column;overflow:hidden}
+.arpa-launcher{position:fixed;left:18px;right:auto;bottom:18px;width:48px;height:48px;border:1px solid var(--ember);border-radius:50%;background:var(--bg-panel2);color:var(--cream);display:none;align-items:center;justify-content:center;font-size:25px;cursor:pointer;z-index:9998;box-shadow:0 8px 25px rgba(0,0,0,.35),0 0 0 2px rgba(227,91,42,.12);user-select:none;-webkit-user-select:none;touch-action:none}
+.arpa-panel{position:fixed;left:18px;right:auto;bottom:78px;width:min(390px,calc(100vw - 36px));height:52vh;min-height:320px;background:var(--bg-panel);border:1px solid var(--line);border-radius:16px;z-index:9999;box-shadow:0 15px 50px rgba(0,0,0,.45);display:none;flex-direction:column;overflow:hidden}
 .arpa-panel.open{display:flex}.arpa-panel-head{padding:12px 14px;background:var(--bg-panel2);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.arpa-panel-head:active{cursor:grabbing}.arpa-panel-head strong{font-size:15px}.arpa-close{background:none;border:0;color:var(--cream-dim);font-size:22px;cursor:pointer}.arpa-chat{padding:12px;background:var(--bg-panel);display:flex;flex-direction:column;gap:8px;overflow:auto;flex:1}.arpa-msg{padding:9px 11px;border-radius:11px;line-height:1.4;font-size:13px;max-width:88%}.arpa-msg.bot{background:var(--bg);border:1px solid var(--line)}.arpa-msg.user{background:var(--ember);color:#1c1815;align-self:flex-end}.arpa-input-row{display:flex;gap:7px;padding:10px;background:var(--bg-panel2);border-top:1px solid var(--line)}.arpa-input-row input{flex:1}
-@media(max-width:700px){.arpa-launcher{position:fixed;right:14px;bottom:76px;width:44px;height:44px;margin:0;background:var(--bg-panel2);z-index:10000}.arpa-panel{right:8px;left:8px;bottom:126px;width:auto;height:48vh}}
+@media(max-width:700px){.arpa-launcher{position:fixed;left:14px;right:auto;bottom:76px;width:44px;height:44px;margin:0;background:var(--bg-panel2);z-index:10000;touch-action:none}.arpa-panel{right:8px;left:8px;bottom:126px;width:auto;height:48vh}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -530,7 +530,7 @@
 
 <div class="toast" id="toast"></div>
 
-<div id="arpa-launcher" class="arpa-launcher" title="Arpa Asistan" onclick="toggleArpaAssistant()">🤖</div>
+<div id="arpa-launcher" class="arpa-launcher" title="Arpa Asistan" onclick="arpaLauncherClick(event)">🤖</div>
 <div id="arpa-panel" class="arpa-panel">
   <div class="arpa-panel-head">
     <strong>🤖 Arpa Asistan</strong>
@@ -547,9 +547,14 @@
 <script>
 // Arpa panel başlığından sürükleme.
 document.getElementById('arpa-panel')?.querySelector('.arpa-panel-head')?.addEventListener('pointerdown', arpaStartDrag);
+// Mobilde asistan düğmesi de parmakla taşınabilir.
+document.getElementById('arpa-launcher')?.addEventListener('pointerdown', arpaLauncherDragStart);
 window.addEventListener('pointermove', arpaDragMove);
+window.addEventListener('pointermove', arpaLauncherDragMove);
 window.addEventListener('pointerup', arpaEndDrag);
+window.addEventListener('pointerup', arpaLauncherDragEnd);
 window.addEventListener('pointercancel', arpaEndDrag);
+window.addEventListener('pointercancel', arpaLauncherDragEnd);
 
 // ---------- Firebase ----------
 const firebaseConfig = {
@@ -733,7 +738,25 @@ setInterval(()=>{
 // ---------- ARPA ASİSTAN ----------
 let arpaWelcomeShown=false;
 let arpaDragState=null;
+let arpaLauncherDragState=null;
+let arpaLauncherDragged=false;
+let arpaSuppressLauncherClick=false;
+let arpaAppReady=false;
 let arpaAudioContext=null;
+let arpaReplyTimer=null;
+
+function arpaResetConversation(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  if(arpaReplyTimer){
+    clearTimeout(arpaReplyTimer);
+    arpaReplyTimer=null;
+  }
+  const chat=document.getElementById('arpa-chat');
+  const input=document.getElementById('arpa-input');
+  if(chat) chat.innerHTML='';
+  if(input) input.value='';
+  arpaWelcomeShown=false;
+}
 
 function arpaAddMessage(text,type='bot'){
   const chat=document.getElementById('arpa-chat');
@@ -788,6 +811,63 @@ function arpaWelcome(){
   arpaSpeak(msg);
 }
 
+function arpaLauncherClick(event){
+  if(arpaSuppressLauncherClick){
+    arpaSuppressLauncherClick=false;
+    event?.preventDefault();
+    event?.stopPropagation();
+    return;
+  }
+  toggleArpaAssistant();
+}
+
+function arpaLauncherDragStart(event){
+  // Sürükleme özelliği yalnızca mobil/tablet genişliğinde aktif.
+  if(window.innerWidth>700)return;
+  if(event.button!==undefined && event.button!==0)return;
+  const launcher=document.getElementById('arpa-launcher');
+  if(!launcher || launcher.style.display==='none')return;
+  const rect=launcher.getBoundingClientRect();
+  arpaLauncherDragged=false;
+  arpaLauncherDragState={
+    pointerId:event.pointerId,
+    startX:event.clientX,
+    startY:event.clientY,
+    left:rect.left,
+    top:rect.top,
+    width:rect.width,
+    height:rect.height
+  };
+  try{launcher.setPointerCapture(event.pointerId);}catch(e){}
+}
+
+function arpaLauncherDragMove(event){
+  if(!arpaLauncherDragState || event.pointerId!==arpaLauncherDragState.pointerId)return;
+  const dx=event.clientX-arpaLauncherDragState.startX;
+  const dy=event.clientY-arpaLauncherDragState.startY;
+  if(!arpaLauncherDragged && Math.hypot(dx,dy)<6)return;
+  arpaLauncherDragged=true;
+  const launcher=document.getElementById('arpa-launcher');
+  if(!launcher)return;
+  const margin=6;
+  const maxLeft=Math.max(margin,window.innerWidth-arpaLauncherDragState.width-margin);
+  const maxTop=Math.max(margin,window.innerHeight-arpaLauncherDragState.height-margin);
+  const left=Math.min(maxLeft,Math.max(margin,arpaLauncherDragState.left+dx));
+  const top=Math.min(maxTop,Math.max(margin,arpaLauncherDragState.top+dy));
+  launcher.style.left=left+'px';
+  launcher.style.top=top+'px';
+  launcher.style.right='auto';
+  launcher.style.bottom='auto';
+  event.preventDefault();
+}
+
+function arpaLauncherDragEnd(event){
+  if(!arpaLauncherDragState || (event.pointerId!==undefined && event.pointerId!==arpaLauncherDragState.pointerId))return;
+  if(arpaLauncherDragged)arpaSuppressLauncherClick=true;
+  arpaLauncherDragState=null;
+  arpaLauncherDragged=false;
+}
+
 function toggleArpaAssistant(){
   if(!currentUser || currentUser.role!=='admin')return;
   const panel=document.getElementById('arpa-panel');
@@ -795,7 +875,11 @@ function toggleArpaAssistant(){
   arpaClickSound();
   const willOpen=!panel.classList.contains('open');
   panel.classList.toggle('open',willOpen);
-  if(willOpen)arpaWelcome();
+  if(willOpen){
+    arpaWelcome();
+  }else{
+    arpaResetConversation();
+  }
 }
 
 function arpaStartDrag(event){
@@ -841,12 +925,16 @@ function arpaSetVisibility(){
   const launcher=document.getElementById('arpa-launcher');
   const panel=document.getElementById('arpa-panel');
   if(!launcher || !panel)return;
-  // Arpa Asistan yalnızca giriş yapmış Patron/Admin hesabında görünür.
+  // Arpa Asistan yalnızca Patron/Admin giriş animasyonu tamamen bittikten sonra görünür.
+  const appVisible=document.getElementById('app-screen')?.style.display!=='none';
+  const welcomeActive=document.getElementById('welcome-screen')?.classList.contains('show');
   const isPatron=!!(currentUser && currentUser.role==='admin' && currentUser.username);
-  launcher.style.display=isPatron?'flex':'none';
-  if(!isPatron){
+  const canShow=isPatron && arpaAppReady && appVisible && !welcomeActive;
+  launcher.style.display=canShow?'flex':'none';
+  if(!canShow){
     panel.classList.remove('open');
     arpaDragState=null;
+    arpaResetConversation();
   }
 }
 
@@ -894,7 +982,14 @@ function arpaAsk(){
   }else if(x.includes('merhaba')||x.includes('selam')){
     answer='Selam patronum! Arpa Asistan göreve hazır. 😄';
   }
-  setTimeout(()=>{arpaAddMessage(answer,'bot');arpaSpeak(answer);},150);
+  if(arpaReplyTimer)clearTimeout(arpaReplyTimer);
+  arpaReplyTimer=setTimeout(()=>{
+    arpaReplyTimer=null;
+    const panel=document.getElementById('arpa-panel');
+    if(!panel || !panel.classList.contains('open'))return;
+    arpaAddMessage(answer,'bot');
+    arpaSpeak(answer);
+  },150);
 }
 
 function tryLogin(){
@@ -915,8 +1010,10 @@ function tryLogin(){
 }
 function playWelcomeAnimation(name){
   const screen=document.getElementById('welcome-screen'),typedEl=document.getElementById('welcome-typed');
+  arpaAppReady=false;
+  arpaSetVisibility();
   const full='Giriş yapılıyor... '+`Hoşgeldin ${name}`;typedEl.innerHTML='';screen.classList.add('show');let i=0;
-  function next(){if(i>=full.length){setTimeout(()=>{screen.classList.remove('show');document.getElementById('app-screen').style.display='flex';updateRoleUI();renderAll();},550);return;}i++;typedEl.innerHTML=full.slice(0,i);setTimeout(next,35);}next();
+  function next(){if(i>=full.length){setTimeout(()=>{screen.classList.remove('show');document.getElementById('app-screen').style.display='flex';arpaAppReady=true;updateRoleUI();renderAll();},550);return;}i++;typedEl.innerHTML=full.slice(0,i);setTimeout(next,35);}next();
 }
 function updateRoleUI(){
   const admin=currentUser.role==='admin';
@@ -941,6 +1038,7 @@ function updateTestUI(){
   b.textContent=testMode?'Test Modunu Kapat ve Sil':'Test Modunu Aç';b.classList.toggle('test-active',testMode);e.style.display='none';i.textContent=testMode?'TEST MODU AKTİF — sayfayı/uygulamayı kapatıp açsan da test verileri korunur. Kapatınca test verileri silinir, ana veriler kalır.':'Test modu kapalı. Ana veriler kullanılacak.';
 }
 function logout(){
+  arpaAppReady=false;
   stopPresence();
   clearLoginSession();
   sessionRestored=true;
