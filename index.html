@@ -520,8 +520,8 @@
       <div id="payment-methods" style="display:none">
         <div style="font-size:12px;color:var(--cream-dim);margin-bottom:6px">Ödeme yöntemi</div>
         <div class="payment-methods">
-          <button type="button" class="btn" onclick="payOrder('nakit')">💵 Nakit Ödendi</button>
-          <button type="button" class="btn" onclick="payOrder('kart')">💳 Kart Ödendi</button>
+          <button type="button" class="btn" onpointerup="payOrder('nakit', event)" onclick="if(!window.PointerEvent) payOrder('nakit', event)">💵 Nakit Ödendi</button>
+          <button type="button" class="btn" onpointerup="payOrder('kart', event)" onclick="if(!window.PointerEvent) payOrder('kart', event)">💳 Kart Ödendi</button>
         </div>
       </div>
     </div>
@@ -1161,20 +1161,37 @@ function showPaymentMethods(){
   document.getElementById('payment-methods').style.display='block';
 }
 let paymentProcessing=false;
-function payOrder(method){
+function payOrder(method,event){
+  if(event){event.preventDefault();event.stopPropagation();}
   if(paymentProcessing)return;
   if(!currentUser || currentUser.role!=='admin'||!currentMasa)return;
-  const total=tableTotal(currentMasa);
-  if(total<=0){closeOrder();return;}
-  paymentProcessing=true;
+
+  const data=activeState();
   const masaId=currentMasa;
+  const total=tableTotal(masaId);
+  if(total<=0){closeOrder();return;}
+
+  paymentProcessing=true;
+  const orderBackup=JSON.parse(JSON.stringify(data.tables[masaId]||{}));
   const sale={amount:total,at:Date.now(),by:currentUser.name||currentUser.username,paymentMethod:method};
-  delete activeState().tables[masaId];
   const ref=testMode?testSalesRef:salesRef;
-  ref.push(sale).then(()=>{
-    queueSave();showToast((method==='kart'?'Kart':'Nakit')+' ödendi: '+fmt(total));closeOrder();
-  }).catch(()=>{
-    showToast('Ödeme kaydedilemedi, tekrar deneyin.');
+
+  // Tek dokunuşta anında görsel tepki ver: masayı kapat ve kullanıcıya sonucu göster.
+  delete data.tables[masaId];
+  queueSave();
+  showToast((method==='kart'?'Kart':'Nakit')+' ödendi: '+fmt(total));
+  closeOrder();
+
+  ref.push(sale).catch(e=>{
+    console.error('Ödeme kaydetme hatası',e);
+    // Firebase satış kaydı başarısızsa siparişi kaybetme. Masa hâlâ boşsa geri yükle.
+    const currentData=activeState();
+    if(!currentData.tables[masaId] && Object.keys(orderBackup).length){
+      currentData.tables[masaId]=orderBackup;
+      queueSave();
+      renderMasaGrid();
+    }
+    showToast('Ödeme kaydedilemedi — masa geri yüklendi. Tekrar deneyin.');
   }).finally(()=>{paymentProcessing=false;});
 }
 
