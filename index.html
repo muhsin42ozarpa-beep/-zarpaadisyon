@@ -283,6 +283,7 @@
   .kasa-card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 18px;flex:1;min-width:130px;}
   .kasa-card .k-lbl{font-size:11px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:1px;}
   .kasa-card .k-val{font-family:var(--font-display);font-size:22px;color:var(--ember);margin-top:4px;}
+  .reset-warning{display:none;margin-top:6px;font-size:10px;color:var(--ember);letter-spacing:.2px;line-height:1.25;}
   .today-earn-card{flex-basis:100%;padding:20px 22px}
   .today-earn-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
   .today-earn-card .today-total{font-family:var(--font-display);font-size:38px;line-height:1;color:var(--ember);margin-top:7px}
@@ -290,13 +291,7 @@
   .today-pay-box{background:var(--bg-panel2);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
   .today-pay-box span{display:block;font-size:10px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:.9px}
   .today-pay-box strong{display:block;font-family:var(--font-display);font-size:20px;margin-top:4px}
-  .today-pay-graph{margin-top:14px;display:flex;flex-direction:column;gap:9px}
-  .today-graph-row{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:9px;font-size:11px;color:var(--cream-dim)}
-  .today-graph-track{height:12px;background:var(--bg);border:1px solid var(--line);border-radius:999px;overflow:hidden}
-  .today-graph-fill{height:100%;width:0;border-radius:999px;transition:width .25s ease;background:linear-gradient(90deg,var(--ember-dim),var(--ember))}
-  .today-graph-fill.cash{background:linear-gradient(90deg,var(--ok-dim),var(--ok))}
-  .today-graph-value{min-width:72px;text-align:right;color:var(--cream)}
-  @media(max-width:620px){.today-earn-card{padding:16px}.today-earn-card .today-total{font-size:32px}.today-breakdown{grid-template-columns:1fr 1fr}.today-graph-row{grid-template-columns:42px 1fr auto}}
+  @media(max-width:620px){.today-earn-card{padding:16px}.today-earn-card .today-total{font-size:32px}.today-breakdown{grid-template-columns:1fr 1fr}}
 
   .toast{
     position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
@@ -489,22 +484,10 @@
                 <strong id="earn-day-card">0₺</strong>
               </div>
             </div>
-            <div class="today-pay-graph">
-              <div class="today-graph-row">
-                <span>Nakit</span>
-                <div class="today-graph-track"><div class="today-graph-fill cash" id="earn-cash-bar"></div></div>
-                <span class="today-graph-value" id="earn-cash-graph-value">0₺</span>
-              </div>
-              <div class="today-graph-row">
-                <span>Kart</span>
-                <div class="today-graph-track"><div class="today-graph-fill" id="earn-card-bar"></div></div>
-                <span class="today-graph-value" id="earn-card-graph-value">0₺</span>
-              </div>
-            </div>
           </div>
-          <div class="kasa-card"><div class="k-lbl">Bu Hafta</div><div class="k-val" id="earn-week">0₺</div></div>
-          <div class="kasa-card"><div class="k-lbl">Bu Ay</div><div class="k-val" id="earn-month">0₺</div></div>
-          <div class="kasa-card"><div class="k-lbl">Bu Yıl</div><div class="k-val" id="earn-year">0₺</div></div>
+          <div class="kasa-card"><div class="k-lbl">Bu Hafta</div><div class="k-val" id="earn-week">0₺</div><div class="reset-warning" id="earn-week-reset"></div></div>
+          <div class="kasa-card"><div class="k-lbl">Bu Ay</div><div class="k-val" id="earn-month">0₺</div><div class="reset-warning" id="earn-month-reset"></div></div>
+          <div class="kasa-card"><div class="k-lbl">Bu Yıl</div><div class="k-val" id="earn-year">0₺</div><div class="reset-warning" id="earn-year-reset"></div></div>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:12px">
           <button class="btn danger" onclick="resetEarnings()">Kazanç Geçmişini Sıfırla</button>
@@ -1418,6 +1401,37 @@ function renderEmployees(){const el=document.getElementById('employee-list');if(
 function fireEmployee(id){if(!confirm('Bu çalışan kovulsun mu? Hesabı artık giriş yapamayacak.'))return;usersRef.child(id).remove().then(()=>showToast('Çalışan kovuldu'));}
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function startOfDay(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();}
+let lastEarningsDayKey='';
+function setResetWarning(id,days){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(days>=1 && days<=3){
+    el.textContent='Sıfırlanmasına son '+days+' gün';
+    el.style.display='block';
+  }else{
+    el.textContent='';
+    el.style.display='none';
+  }
+}
+function updateEarningsResetWarnings(now){
+  const dayMs=24*60*60*1000;
+  const todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+
+  const dow=todayStart.getDay()||7; // Pazartesi=1 ... Pazar=7
+  const nextWeek=new Date(todayStart);
+  nextWeek.setDate(nextWeek.getDate()+(8-dow)); // sonraki Pazartesi 00:00
+
+  const nextMonth=new Date(now.getFullYear(),now.getMonth()+1,1);
+  const nextYear=new Date(now.getFullYear()+1,0,1);
+
+  const weekDays=Math.round((nextWeek.getTime()-todayStart.getTime())/dayMs);
+  const monthDays=Math.round((nextMonth.getTime()-todayStart.getTime())/dayMs);
+  const yearDays=Math.round((nextYear.getTime()-todayStart.getTime())/dayMs);
+
+  setResetWarning('earn-week-reset',weekDays);
+  setResetWarning('earn-month-reset',monthDays);
+  setResetWarning('earn-year-reset',yearDays);
+}
 function renderEarnings(){
   if(!document.getElementById('earn-day')||currentUser.role!=='admin')return;
 
@@ -1455,20 +1469,15 @@ function renderEarnings(){
   const cashEl=document.getElementById('earn-day-cash');
   const cardEl=document.getElementById('earn-day-card');
   const countEl=document.getElementById('earn-day-count');
-  const cashGraphVal=document.getElementById('earn-cash-graph-value');
-  const cardGraphVal=document.getElementById('earn-card-graph-value');
-  const cashBar=document.getElementById('earn-cash-bar');
-  const cardBar=document.getElementById('earn-card-bar');
 
   if(cashEl)cashEl.textContent=fmt(dayCash);
   if(cardEl)cardEl.textContent=fmt(dayCard);
   if(countEl)countEl.textContent=dayCount+' ödeme';
-  if(cashGraphVal)cashGraphVal.textContent=fmt(dayCash);
-  if(cardGraphVal)cardGraphVal.textContent=fmt(dayCard);
+  updateEarningsResetWarnings(now);
 
-  const max=Math.max(dayCash,dayCard,1);
-  if(cashBar)cashBar.style.width=(dayCash/max*100)+'%';
-  if(cardBar)cardBar.style.width=(dayCard/max*100)+'%';
+  // Gün değişimini takip et. Saat 00:00 sonrası günlük gösterge yeni gün için 0₺'dan başlar;
+  // satış geçmişi silinmediği için hafta / ay / yıl toplamları devam eder.
+  lastEarningsDayKey=now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
 }
 
 function resetEarnings(){
@@ -1493,6 +1502,22 @@ function setSpecialDateMinimum(){
   input.min=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
 }
 setSpecialDateMinimum();
+
+// Uygulama açık kalsa bile saat 00:00 olduğunda günlük kazancı yeni güne geçir.
+function scheduleEarningsMidnightRefresh(){
+  const now=new Date();
+  const nextMidnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,0,0,200);
+  setTimeout(()=>{
+    if(currentUser && currentUser.role==='admin')renderEarnings();
+    scheduleEarningsMidnightRefresh();
+  },Math.max(1000,nextMidnight.getTime()-Date.now()));
+}
+scheduleEarningsMidnightRefresh();
+
+// Telefon/PC gece uykuya geçtiyse, ekran tekrar açıldığında tarihi hemen kontrol et.
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible' && currentUser && currentUser.role==='admin')renderEarnings();
+});
 
 // ---------- init ----------
 // Firebase dinleyicileri (stateRef.on / authRef.on) yukarıda zaten kuruldu;
