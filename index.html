@@ -283,6 +283,21 @@
   .kasa-card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 18px;flex:1;min-width:130px;}
   .kasa-card .k-lbl{font-size:11px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:1px;}
   .kasa-card .k-val{font-family:var(--font-display);font-size:22px;color:var(--ember);margin-top:4px;}
+  .today-earn-card{flex-basis:100%;padding:20px 22px}
+  .today-earn-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .today-earn-card .today-total{font-family:var(--font-display);font-size:38px;line-height:1;color:var(--ember);margin-top:7px}
+  .today-breakdown{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:10px;margin-top:16px}
+  .today-pay-box{background:var(--bg-panel2);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .today-pay-box span{display:block;font-size:10px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:.9px}
+  .today-pay-box strong{display:block;font-family:var(--font-display);font-size:20px;margin-top:4px}
+  .today-pay-graph{margin-top:14px;display:flex;flex-direction:column;gap:9px}
+  .today-graph-row{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:9px;font-size:11px;color:var(--cream-dim)}
+  .today-graph-track{height:12px;background:var(--bg);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .today-graph-fill{height:100%;width:0;border-radius:999px;transition:width .25s ease;background:linear-gradient(90deg,var(--ember-dim),var(--ember))}
+  .today-graph-fill.cash{background:linear-gradient(90deg,var(--ok-dim),var(--ok))}
+  .today-graph-value{min-width:72px;text-align:right;color:var(--cream)}
+  @media(max-width:620px){.today-earn-card{padding:16px}.today-earn-card .today-total{font-size:32px}.today-breakdown{grid-template-columns:1fr 1fr}.today-graph-row{grid-template-columns:42px 1fr auto}}
+
   .toast{
     position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
     background:var(--ok);color:#132215;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;
@@ -456,7 +471,37 @@
       <div class="admin-block extra-admin">
         <h3>Kazançlar</h3>
         <div class="kasa-summary">
-          <div class="kasa-card"><div class="k-lbl">Bugün</div><div class="k-val" id="earn-day">0₺</div></div>
+          <div class="kasa-card today-earn-card">
+            <div class="today-earn-head">
+              <div>
+                <div class="k-lbl">Günlük Kazanç</div>
+                <div class="today-total" id="earn-day">0₺</div>
+              </div>
+              <div class="k-lbl" id="earn-day-count">0 ödeme</div>
+            </div>
+            <div class="today-breakdown">
+              <div class="today-pay-box">
+                <span>Nakit Ödeme</span>
+                <strong id="earn-day-cash">0₺</strong>
+              </div>
+              <div class="today-pay-box">
+                <span>Kart Ödeme</span>
+                <strong id="earn-day-card">0₺</strong>
+              </div>
+            </div>
+            <div class="today-pay-graph">
+              <div class="today-graph-row">
+                <span>Nakit</span>
+                <div class="today-graph-track"><div class="today-graph-fill cash" id="earn-cash-bar"></div></div>
+                <span class="today-graph-value" id="earn-cash-graph-value">0₺</span>
+              </div>
+              <div class="today-graph-row">
+                <span>Kart</span>
+                <div class="today-graph-track"><div class="today-graph-fill" id="earn-card-bar"></div></div>
+                <span class="today-graph-value" id="earn-card-graph-value">0₺</span>
+              </div>
+            </div>
+          </div>
           <div class="kasa-card"><div class="k-lbl">Bu Hafta</div><div class="k-val" id="earn-week">0₺</div></div>
           <div class="kasa-card"><div class="k-lbl">Bu Ay</div><div class="k-val" id="earn-month">0₺</div></div>
           <div class="kasa-card"><div class="k-lbl">Bu Yıl</div><div class="k-val" id="earn-year">0₺</div></div>
@@ -1169,24 +1214,37 @@ function payOrder(method){
   if(total<=0){ closeOrder(); return; }
 
   const orderBackup=JSON.parse(JSON.stringify(data.tables[masaId]||{}));
-  const sale={amount:total,at:Date.now(),by:currentUser.name||currentUser.username,paymentMethod:method};
+  const sale={
+    amount:total,
+    at:Date.now(),
+    by:currentUser.name||currentUser.username,
+    paymentMethod:method==='kart'?'kart':'nakit'
+  };
   const ref=testMode?testSalesRef:salesRef;
+  const saleNode=ref.push();
+  const saleId=saleNode.key;
 
-  // İlk normal tıklamada ödeme anında tamamlanır.
+  if(testMode)testSales[saleId]=sale;
+  else sales[saleId]=sale;
+
   delete data.tables[masaId];
   queueSave();
+  renderEarnings();
   closeOrder();
-  showToast((method==='kart'?'Kart':'Nakit')+' ödendi: '+fmt(total));
+  showToast((sale.paymentMethod==='kart'?'Kart':'Nakit')+' ödendi: '+fmt(total));
 
-  // Satış kaydını arka planda Firebase'e yaz. Hata olursa masayı geri yükle.
-  ref.push(sale).catch(e=>{
+  saleNode.set(sale).catch(e=>{
     console.error('Ödeme kaydetme hatası',e);
+    if(testMode)delete testSales[saleId];
+    else delete sales[saleId];
+
     const currentData=activeState();
     if(!currentData.tables[masaId] && Object.keys(orderBackup).length){
       currentData.tables[masaId]=orderBackup;
       queueSave();
-      renderMasaGrid();
     }
+    renderEarnings();
+    renderMasaGrid();
     showToast('Ödeme kaydedilemedi — masa geri yüklendi. Tekrar deneyin.');
   });
 }
@@ -1362,6 +1420,7 @@ function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':
 function startOfDay(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();}
 function renderEarnings(){
   if(!document.getElementById('earn-day')||currentUser.role!=='admin')return;
+
   const now=new Date();
   const day=startOfDay(now);
   const weekStart=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -1370,19 +1429,46 @@ function renderEarnings(){
   const weekStartTs=weekStart.getTime();
   const monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
   const yearStart=new Date(now.getFullYear(),0,1).getTime();
+
   let d=0,w=0,m=0,y=0;
+  let dayCash=0,dayCard=0,dayCount=0;
+
   Object.values(activeSales()).forEach(s=>{
     const t=Number(s.at)||0;
     const a=Number(s.amount)||0;
-    if(t>=day)d+=a;
+    if(t>=day){
+      d+=a;
+      dayCount++;
+      if((s.paymentMethod||'nakit')==='kart')dayCard+=a;
+      else dayCash+=a;
+    }
     if(t>=weekStartTs)w+=a;
     if(t>=monthStart)m+=a;
     if(t>=yearStart)y+=a;
   });
+
   document.getElementById('earn-day').textContent=fmt(d);
   document.getElementById('earn-week').textContent=fmt(w);
   document.getElementById('earn-month').textContent=fmt(m);
   document.getElementById('earn-year').textContent=fmt(y);
+
+  const cashEl=document.getElementById('earn-day-cash');
+  const cardEl=document.getElementById('earn-day-card');
+  const countEl=document.getElementById('earn-day-count');
+  const cashGraphVal=document.getElementById('earn-cash-graph-value');
+  const cardGraphVal=document.getElementById('earn-card-graph-value');
+  const cashBar=document.getElementById('earn-cash-bar');
+  const cardBar=document.getElementById('earn-card-bar');
+
+  if(cashEl)cashEl.textContent=fmt(dayCash);
+  if(cardEl)cardEl.textContent=fmt(dayCard);
+  if(countEl)countEl.textContent=dayCount+' ödeme';
+  if(cashGraphVal)cashGraphVal.textContent=fmt(dayCash);
+  if(cardGraphVal)cardGraphVal.textContent=fmt(dayCard);
+
+  const max=Math.max(dayCash,dayCard,1);
+  if(cashBar)cashBar.style.width=(dayCash/max*100)+'%';
+  if(cardBar)cardBar.style.width=(dayCard/max*100)+'%';
 }
 
 function resetEarnings(){
