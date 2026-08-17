@@ -1047,6 +1047,8 @@ function logout(){
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('login-user').value='';
   document.getElementById('login-pass').value='';
+  // Çıkış ekranında Arpa Asistan tamamen gizlenir; ses ve sohbet de temizlenir.
+  arpaSetVisibility();
 }
 
 // ---------- tabs ----------
