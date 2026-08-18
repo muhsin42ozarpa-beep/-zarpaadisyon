@@ -445,7 +445,7 @@
 
   #app-screen.desktop-patron > header{
     margin-left:250px;margin-right:14px;margin-top:14px;width:auto;min-height:66px;padding:10px 14px;
-    border:1px solid #6b747d;border-radius:11px;background:#252d36;position:sticky;top:10px;z-index:50;
+    border:1px solid #6b747d;border-radius:11px;background:#252d36;position:relative;top:auto;z-index:10;
     box-shadow:0 8px 24px rgba(0,0,0,.12)
   }
   #app-screen.desktop-patron > header .brand,#app-screen.desktop-patron > header nav.tabs{display:none!important}
@@ -513,10 +513,24 @@
   #app-screen.desktop-patron #view-admin.desktop-mode-reports .kasa-card:nth-child(4){border-top:3px solid #29b6d5}
   #app-screen.desktop-patron #view-admin.desktop-mode-reports .k-val{font-size:27px;color:#fff}
 
+  /* Finans — PC ve mobil aynı satış/kasa kaynağını kullanır */
+  #app-screen.desktop-patron #view-admin .desktop-finance-block{display:none}
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .desktop-settings-nav,
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .desktop-settings-block,
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .desktop-report-block{display:none!important}
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .desktop-finance-block{display:block!important}
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .finance-sync-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .finance-sync-card{background:#343b43;border:1px solid #4b5660;border-radius:13px;padding:16px;min-height:92px}
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .finance-sync-card.hero{grid-column:span 2;background:linear-gradient(135deg,#20b786,#159b73);border:0;color:#fff}
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .finance-sync-card span{display:block;color:#aeb7bf;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .finance-sync-card.hero span{color:rgba(255,255,255,.85)}
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .finance-sync-card strong{font-size:25px;color:#fff}
+  #app-screen.desktop-patron #view-admin.desktop-mode-finance .finance-sync-note{margin-top:12px;color:#9ea8b1;font-size:11px}
+
   /* Ayarlar */
   #app-screen.desktop-patron #view-admin.desktop-mode-settings{display:grid;grid-template-columns:280px minmax(0,1fr);gap:14px;align-items:start}
   #app-screen.desktop-patron #view-admin.desktop-mode-settings .desktop-page-head{grid-column:1/-1}
-  #app-screen.desktop-patron #view-admin.desktop-mode-settings .desktop-settings-nav{display:flex;grid-column:1;grid-row:2 / span 8;position:sticky;top:96px;flex-direction:column;background:#30373e;border:1px solid #424b54;border-radius:14px;padding:10px;gap:6px}
+  #app-screen.desktop-patron #view-admin.desktop-mode-settings .desktop-settings-nav{display:flex;grid-column:1;grid-row:2 / span 8;position:relative;top:auto;align-self:start;flex-direction:column;background:#30373e;border:1px solid #424b54;border-radius:14px;padding:10px;gap:6px}
   .desktop-settings-nav button{border:0;background:transparent;color:#e7ebee;padding:12px 13px;border-radius:8px;text-align:left;cursor:pointer;font-weight:700;font-size:12px}
   .desktop-settings-nav button.active{background:#4b4636;color:#ffac21;border-left:3px solid #ff9d0a}
   #app-screen.desktop-patron #view-admin.desktop-mode-settings .desktop-report-block{display:none!important}
@@ -864,7 +878,7 @@
   #pc-employee-shell .pce-brand strong{display:block;font-size:15px;line-height:1.15}.pce-brand small{display:block;color:#9aa5af;font-size:10px;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
   #pc-employee-shell .pce-nav{display:flex;flex-direction:column;gap:7px}.pce-nav button{width:100%;border:0;border-radius:8px;background:#ff9d0a;color:#fff;padding:12px 13px;text-align:left;font-weight:800;font-size:13px}
   #pc-employee-shell .pce-sidebar-foot{margin-top:auto;color:#87929c;font-size:11px;padding:10px;text-align:center}
-  #pc-employee-shell .pce-top{position:sticky;top:10px;z-index:2;margin:14px 14px 0 250px;min-height:66px;border:1px solid #6b747d;border-radius:11px;background:#252d36;display:flex;align-items:center;gap:10px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+  #pc-employee-shell .pce-top{position:relative;top:auto;z-index:2;margin:14px 14px 0 250px;min-height:66px;border:1px solid #6b747d;border-radius:11px;background:#252d36;display:flex;align-items:center;gap:10px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.12)}
   #pc-employee-shell .pce-menu{width:38px;height:38px;border:0;border-radius:8px;background:#1e2630;color:#fff;font-size:20px}
   #pc-employee-shell .pce-search{flex:1;background:#202730;border:1px solid #65717d;color:#fff;border-radius:8px;padding:11px 14px;font-size:13px;outline:none}
   #pc-employee-shell .pce-role{padding:10px 13px;border-radius:8px;background:#2563eb;color:#fff;font-size:11px;font-weight:800}
@@ -891,6 +905,7 @@
 /* ---------- PC ÇALIŞAN: yeni masa/sipariş arayüzü ---------- */
 @media(min-width:701px){
   #app-screen.desktop-patron.desktop-employee #desktop-nav-reports,
+  #app-screen.desktop-patron.desktop-employee #desktop-nav-finance,
   #app-screen.desktop-patron.desktop-employee #desktop-nav-accounts,
   #app-screen.desktop-patron.desktop-employee #desktop-nav-settings,
   #app-screen.desktop-patron.desktop-employee .desktop-top-search .menu-square,
@@ -953,6 +968,7 @@
     </div>
     <div class="desktop-sidebar-nav">
       <button id="desktop-nav-reports" onclick="desktopNavigate('reports')"><span class="nav-ico">▥</span>Raporlar</button>
+      <button id="desktop-nav-finance" onclick="desktopNavigate('finance')"><span class="nav-ico">▣</span>Finans</button>
       <button id="desktop-nav-masa" class="active" onclick="desktopNavigate('masa')"><span class="nav-ico">▦</span>Masalar</button>
       <button id="desktop-nav-accounts" onclick="desktopNavigate('accounts')"><span class="nav-ico">▣</span>Cari Hesaplar</button>
       <button id="desktop-nav-settings" onclick="desktopNavigate('settings')"><span class="nav-ico">⚙</span>Ayarlar</button>
@@ -1112,6 +1128,24 @@
         <div class="special-title"><h3>Test Modu</h3><button class="btn" id="test-mode-btn" onclick="toggleTestMode()">Aç</button></div>
         <div id="test-mode-info" class="empty-note">Test modu kapalı. Ana veriler kullanılacak.</div>
         <button class="btn danger" id="test-end-btn" style="display:none;width:100%;margin-top:8px" onclick="endTestMode()">Test Modunu Sonlandır ve Test Verilerini Sil</button>
+      </div>
+
+      <div class="admin-block extra-admin desktop-finance-block">
+        <h3>Finans</h3>
+        <div class="finance-sync-grid">
+          <div class="finance-sync-card hero"><span>Bugünkü Tahsilat</span><strong id="desktop-fin-day">0₺</strong></div>
+          <div class="finance-sync-card"><span>Nakit</span><strong id="desktop-fin-cash">0₺</strong></div>
+          <div class="finance-sync-card"><span>Kart</span><strong id="desktop-fin-card">0₺</strong></div>
+          <div class="finance-sync-card"><span>Kasa Açılış</span><strong id="desktop-fin-opening">0₺</strong></div>
+          <div class="finance-sync-card"><span>Bugünkü Giriş / Çıkış Net</span><strong id="desktop-fin-movement">0₺</strong></div>
+          <div class="finance-sync-card"><span>Beklenen Nakit Kasa</span><strong id="desktop-fin-cash-balance">0₺</strong></div>
+          <div class="finance-sync-card"><span>Bu Hafta</span><strong id="desktop-fin-week">0₺</strong></div>
+          <div class="finance-sync-card"><span>Bu Ay</span><strong id="desktop-fin-month">0₺</strong></div>
+          <div class="finance-sync-card"><span>Bu Yıl</span><strong id="desktop-fin-year">0₺</strong></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn btn-primary" onclick="openPatronTool('cash-open')">Kasa Açılışı</button><button class="btn" onclick="openPatronTool('cash-flow')">Kasa Giriş / Çıkış</button></div>
+        <div id="desktop-fin-movements" style="margin-top:14px"></div>
+        <div class="finance-sync-note">Mobil Finans ve PC Finans aynı ozarpa-sales satış kayıtları ile aynı kasa ayarlarını kullanır.</div>
       </div>
 
       <div class="admin-block extra-admin desktop-report-block">
@@ -1616,6 +1650,7 @@ function refreshSalesViews(){
   if(hasPatronAccess())renderEarnings();
   if(isMobilePos()&&['reports','finance','closed','logs'].includes(mposPage))mposRender();
   if(isDesktopPos()&&hasPatronAccess()&&desktopCurrentPage==='reports')renderEarnings();
+  if(isDesktopPos()&&hasPatronAccess()&&desktopCurrentPage==='finance')renderDesktopFinance();
 }
 salesRef.on('value',snap=>{sales=snap.val()||{};refreshSalesViews();});
 testSalesRef.on('value',snap=>{testSales=snap.val()||{};if(testMode)refreshSalesViews();});
@@ -2306,7 +2341,7 @@ function syncDesktopBrandLogo(){
   if(source&&target&&!target.src)target.src=source.src;
 }
 function clearPcEmployeeInlineGuards(){
-  ['desktop-nav-reports','desktop-nav-accounts','desktop-nav-settings','desktop-nav-masa','view-accounts','view-active-employees','view-admin','view-special','view-masa','tab-active-employees','tab-admin','tab-special'].forEach(id=>{
+  ['desktop-nav-reports','desktop-nav-finance','desktop-nav-accounts','desktop-nav-settings','desktop-nav-masa','view-accounts','view-active-employees','view-admin','view-special','view-masa','tab-active-employees','tab-admin','tab-special'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.removeProperty('display');
   });
   const quick=document.querySelector('#app-screen .desktop-top-search .menu-square');if(quick)quick.style.removeProperty('display');
@@ -2339,7 +2374,7 @@ function syncDesktopPatronShell(){
 
   if(employeeOnly){
     desktopCurrentPage='masa';
-    ['desktop-nav-reports','desktop-nav-accounts','desktop-nav-settings'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
+    ['desktop-nav-reports','desktop-nav-finance','desktop-nav-accounts','desktop-nav-settings'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
     const masaNav=document.getElementById('desktop-nav-masa');if(masaNav)masaNav.style.setProperty('display','flex','important');
     ['view-accounts','view-active-employees','view-admin','view-special'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
     const masaView=document.getElementById('view-masa');if(masaView)masaView.style.setProperty('display','block','important');
@@ -2376,7 +2411,7 @@ function forcePcEmployeeModernShell(){
   const sidebar=document.getElementById('desktop-sidebar');if(sidebar)sidebar.style.setProperty('display','flex','important');
   const legacyTabs=app.querySelector('header nav.tabs');if(legacyTabs)legacyTabs.style.setProperty('display','none','important');
   const brand=app.querySelector('header .brand');if(brand)brand.style.setProperty('display','none','important');
-  ['desktop-nav-reports','desktop-nav-accounts','desktop-nav-settings'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
+  ['desktop-nav-reports','desktop-nav-finance','desktop-nav-accounts','desktop-nav-settings'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
   const masaNav=document.getElementById('desktop-nav-masa');if(masaNav)masaNav.style.setProperty('display','flex','important');
   ['view-accounts','view-active-employees','view-admin','view-special'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
   const masaView=document.getElementById('view-masa');if(masaView)masaView.style.setProperty('display','block','important');
@@ -2396,10 +2431,10 @@ function desktopNavigate(page,silent=false){
   closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();closeDesktopPaymentPanel();desktopCurrentPage=page;
   if(page==='masa'){switchTab('masa');renderDesktopTableFilters();desktopFilterTables(desktopTableFilter||'open');}
   else if(page==='accounts'){switchTab('accounts');renderDesktopCariAccounts();}
-  else{desktopAdminMode=page==='settings'?'settings':'reports';switchTab('admin');const view=document.getElementById('view-admin');view.classList.toggle('desktop-mode-settings',desktopAdminMode==='settings');view.classList.toggle('desktop-mode-reports',desktopAdminMode==='reports');if(desktopAdminMode==='settings')desktopSettingsSection(desktopSettingsMode||'products');const title=document.getElementById('desktop-admin-title'),sub=document.getElementById('desktop-admin-subtitle');if(title)title.textContent=desktopAdminMode==='settings'?'Ayarlar':'Raporlar';if(sub)sub.textContent=desktopAdminMode==='settings'?'Ürün, çalışan ve işletme yönetimi':'Finansal özet ve kasa görünümü';}
+  else{desktopAdminMode=page==='settings'?'settings':(page==='finance'?'finance':'reports');switchTab('admin');const view=document.getElementById('view-admin');view.classList.toggle('desktop-mode-settings',desktopAdminMode==='settings');view.classList.toggle('desktop-mode-reports',desktopAdminMode==='reports');view.classList.toggle('desktop-mode-finance',desktopAdminMode==='finance');if(desktopAdminMode==='settings')desktopSettingsSection(desktopSettingsMode||'products');if(desktopAdminMode==='finance')renderDesktopFinance();const title=document.getElementById('desktop-admin-title'),sub=document.getElementById('desktop-admin-subtitle');if(title)title.textContent=desktopAdminMode==='settings'?'Ayarlar':(desktopAdminMode==='finance'?'Finans':'Raporlar');if(sub)sub.textContent=desktopAdminMode==='settings'?'Ürün, çalışan ve işletme yönetimi':(desktopAdminMode==='finance'?'Kasa, tahsilat ve ödeme dağılımı':'Finansal özet ve satış görünümü');}
   syncDesktopNav(page);desktopUpdateTopSearchUi();if(!silent)window.scrollTo({top:0,behavior:'smooth'});
 }
-function syncDesktopNav(page){['reports','masa','accounts','settings'].forEach(x=>document.getElementById('desktop-nav-'+x)?.classList.toggle('active',x===page));}
+function syncDesktopNav(page){['reports','finance','masa','accounts','settings'].forEach(x=>document.getElementById('desktop-nav-'+x)?.classList.toggle('active',x===page));}
 
 function desktopSettingsSection(section){
   desktopSettingsMode=section;
@@ -2791,6 +2826,7 @@ function completeOrderPayment(method,amountOverride=null,meta={}){
     at:Date.now(),
     by:currentUser.name||currentUser.username,
     paymentMethod:method==='kart'?'kart':'nakit',
+    source:'masa-odemesi',
     masaId:masaId,
     masaName:seatingTableLabel(masaId)
   };
@@ -3046,7 +3082,9 @@ function renderAdmin(){
     const v=document.getElementById('view-admin');
     v.classList.toggle('desktop-mode-settings',desktopAdminMode==='settings');
     v.classList.toggle('desktop-mode-reports',desktopAdminMode==='reports');
+    v.classList.toggle('desktop-mode-finance',desktopAdminMode==='finance');
     if(desktopAdminMode==='settings')desktopSettingsSection(desktopSettingsMode);
+    if(desktopAdminMode==='finance')renderDesktopFinance();
   }
 }
 
@@ -3124,6 +3162,16 @@ function updateEarningsResetWarnings(now){
   setResetWarning('earn-month-reset',monthDays);
   setResetWarning('earn-year-reset',yearDays);
 }
+function normalizedSaleAmount(s){
+  if(!s||typeof s!=='object')return 0;
+  const raw=s.amount!=null?s.amount:(s.total!=null?s.total:s.price);
+  const a=Number(raw)||0;
+  return Number.isFinite(a)&&a>=0?a:0;
+}
+function normalizedPaymentMethod(s){
+  const raw=String((s&&s.paymentMethod)||'nakit').toLocaleLowerCase('tr-TR');
+  return (raw.includes('kart')||raw.includes('card')||raw.includes('kredi'))?'kart':'nakit';
+}
 function calculateSalesMetrics(now=new Date()){
   const day=startOfDay(now);
   const weekStart=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -3133,13 +3181,13 @@ function calculateSalesMetrics(now=new Date()){
   const monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
   const yearStart=new Date(now.getFullYear(),0,1).getTime();
   let dayTotal=0,week=0,month=0,year=0,cash=0,card=0,count=0;
-  Object.values(activeSales()).forEach(s=>{
-    const t=Number(s&&s.at)||0;
-    const a=Number(s&&s.amount)||0;
-    if(!Number.isFinite(a)||a<0)return;
+  Object.values(activeSales()).forEach(sale=>{
+    const t=Number(sale&&sale.at)||0;
+    const a=normalizedSaleAmount(sale);
+    if(!t)return;
     if(t>=day){
       dayTotal+=a;count++;
-      if((s.paymentMethod||'nakit')==='kart')card+=a;else cash+=a;
+      if(normalizedPaymentMethod(sale)==='kart')card+=a;else cash+=a;
     }
     if(t>=weekStartTs)week+=a;
     if(t>=monthStart)month+=a;
@@ -3147,6 +3195,24 @@ function calculateSalesMetrics(now=new Date()){
   });
   return{day:dayTotal,week,month,year,cash,card,count};
 }
+function calculateFinanceMetrics(now=new Date()){
+  const m=calculateSalesMetrics(now);
+  const p=ensurePosAdmin();
+  const day=startOfDay(now);
+  const movements=(p.cashMovements||[]).filter(x=>Number(x&&x.at)>=day);
+  const movementNet=movements.reduce((sum,x)=>sum+(x.type==='out'?-Math.abs(Number(x.amount)||0):Math.abs(Number(x.amount)||0)),0);
+  const openingAt=Number(p.cashOpeningAt)||0;
+  const opening=(openingAt&&openingAt<day)?0:Math.max(0,Number(p.cashOpening)||0);
+  return Object.assign({},m,{opening,movementNet,cashBalance:opening+movementNet+m.cash,movementCount:movements.length,movements});
+}
+function renderDesktopFinance(){
+  const m=calculateFinanceMetrics(new Date());
+  const vals={'desktop-fin-day':m.day,'desktop-fin-cash':m.cash,'desktop-fin-card':m.card,'desktop-fin-opening':m.opening,'desktop-fin-movement':m.movementNet,'desktop-fin-cash-balance':m.cashBalance,'desktop-fin-week':m.week,'desktop-fin-month':m.month,'desktop-fin-year':m.year};
+  Object.entries(vals).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=fmt(v);});
+  const box=document.getElementById('desktop-fin-movements');
+  if(box){const rows=(m.movements||[]).slice().reverse().slice(0,12);box.innerHTML='<div style="font-weight:800;margin-bottom:8px">Bugünkü Kasa Hareketleri</div>'+(rows.length?rows.map(x=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #414a53"><span>${x.type==='out'?'Çıkış':'Giriş'}${x.note?' · '+escapeHtml(x.note):''}<small style="display:block;color:#9fa8b1">${new Date(Number(x.at)||Date.now()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}</small></span><strong>${x.type==='out'?'-':'+'}${fmt(Math.abs(Number(x.amount)||0))}</strong></div>`).join(''):'<div style="color:#9fa8b1">Bugün kasa hareketi yok.</div>');}
+}
+
 function renderEarnings(){
   if(!document.getElementById('earn-day')||!hasPatronAccess())return;
   const now=new Date(),m=calculateSalesMetrics(now);
@@ -3166,6 +3232,7 @@ function renderEarnings(){
   updateEarningsResetWarnings(now);
 
   lastEarningsDayKey=now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+  if(isDesktopPos()&&desktopCurrentPage==='finance')renderDesktopFinance();
 }
 
 function resetEarnings(){
@@ -3514,8 +3581,8 @@ function openPatronTool(action){
     patronToolFrame('Masa Zaman Renkleri','Son siparişten geçen süreye göre masa rengi',`<button onclick="resetPatronTableColors()" style="width:100%;height:42px;border:0;border-radius:8px;background:#ffb612;color:#202020;font-weight:900;margin-bottom:14px">Sıfırla</button>${cards}<button class="btn btn-primary" style="width:100%;margin-top:5px" onclick="savePatronTableColors()">Kaydet</button>`);return;
   }
 }
-function savePatronCashOpening(){ensurePosAdmin().cashOpening=Math.max(0,Number(document.getElementById('pt-cash-open')?.value)||0);queueSave();showToast('Kasa açılış tutarı kaydedildi');closePatronTool();}
-function addPatronCashMovement(){const type=document.getElementById('pt-flow-type')?.value==='out'?'out':'in',amount=Math.max(0,Number(document.getElementById('pt-flow-amount')?.value)||0),note=(document.getElementById('pt-flow-note')?.value||'').trim();if(!amount){showToast('Geçerli tutar girin');return;}ensurePosAdmin().cashMovements.push({type,amount,note,at:Date.now(),by:currentUser.name||currentUser.username});queueSave();showToast('Kasa hareketi eklendi');openPatronTool('cash-flow');}
+function savePatronCashOpening(){const p=ensurePosAdmin();p.cashOpening=Math.max(0,Number(document.getElementById('pt-cash-open')?.value)||0);p.cashOpeningAt=Date.now();queueSave();renderEarnings();if(isDesktopPos()&&desktopCurrentPage==='finance')renderDesktopFinance();if(isMobilePos()&&mposPage==='finance')mposRender();showToast('Kasa açılış tutarı kaydedildi');closePatronTool();}
+function addPatronCashMovement(){const type=document.getElementById('pt-flow-type')?.value==='out'?'out':'in',amount=Math.max(0,Number(document.getElementById('pt-flow-amount')?.value)||0),note=(document.getElementById('pt-flow-note')?.value||'').trim();if(!amount){showToast('Geçerli tutar girin');return;}ensurePosAdmin().cashMovements.push({type,amount,note,at:Date.now(),by:currentUser.name||currentUser.username});queueSave();renderEarnings();if(isDesktopPos()&&desktopCurrentPage==='finance')renderDesktopFinance();if(isMobilePos()&&mposPage==='finance')mposRender();showToast('Kasa hareketi eklendi');openPatronTool('cash-flow');}
 function setPatronRuleColor(i,c){const inp=document.getElementById('pt-rule-color-'+i),pre=document.getElementById('pt-color-preview-'+i);if(inp)inp.value=c;if(pre)pre.style.background=c;}
 function savePatronTableColors(){const rules=[];for(let i=0;i<3;i++){const raw=document.getElementById('pt-rule-min-'+i)?.value,color=document.getElementById('pt-rule-color-'+i)?.value;if(raw!==''&&Number.isFinite(Number(raw)))rules.push({minutes:Math.max(0,Number(raw)),color:color||'#607d8b'});}ensurePosAdmin().tableTimeRules=rules.sort((a,b)=>b.minutes-a.minutes);queueSave();renderMasaGrid();showToast('Masa zaman renkleri kaydedildi');closePatronTool();}
 function resetPatronTableColors(){ensurePosAdmin().tableTimeRules=[{minutes:45,color:'#c93b31'},{minutes:30,color:'#f39c12'}];queueSave();openPatronTool('table-colors');renderMasaGrid();}
@@ -3744,7 +3811,7 @@ function mposQuickTool(action){mposCloseQuickMenu();if(window.innerWidth>700)ope
 
 function mposRenderReports(c){const m=mposMetrics();c.innerHTML=`<h2 class="mpos-page-title">Raporlar</h2><div class="mpos-page-sub">Finansal özet ve satış görünümü</div><div class="mpos-kpis"><div class="mpos-kpi hero"><span>Bugünkü Kazanç</span><strong>${fmt(m.day)}</strong><div class="mpos-kpi-payments"><div class="mpos-kpi-payment"><span>Nakit</span><strong>${fmt(m.cash)}</strong></div><div class="mpos-kpi-payment"><span>Kart</span><strong>${fmt(m.card)}</strong></div></div></div><div class="mpos-kpi"><span>Bu Hafta</span><strong>${fmt(m.week)}</strong></div><div class="mpos-kpi"><span>Bu Ay</span><strong>${fmt(m.month)}</strong></div><div class="mpos-kpi"><span>Bu Yıl</span><strong>${fmt(m.year)}</strong></div></div>`;}
 function mposMetrics(){return calculateSalesMetrics(new Date());}
-function mposRenderFinance(c){const p=ensurePosAdmin(),m=mposMetrics(),mov=(p.cashMovements||[]).reduce((a,x)=>a+(x.type==='out'?-Number(x.amount||0):Number(x.amount||0)),0);c.innerHTML=`<h2 class="mpos-page-title">Finans</h2><div class="mpos-card"><h3><span>💵</span>Kasa</h3><div class="mpos-kpis"><div class="mpos-kpi"><span>Kasa Açılış</span><strong>${fmt(Number(p.cashOpening)||0)}</strong></div><div class="mpos-kpi"><span>Giriş / Çıkış Net</span><strong>${fmt(mov)}</strong></div><div class="mpos-kpi hero"><span>Bugünkü Tahsilat</span><strong>${fmt(m.day)}</strong></div></div></div><div class="mpos-card"><h3><span>▦</span>Ödeme Dağılımı</h3><div class="mpos-row"><span>Nakit</span><b>${fmt(m.cash)}</b></div><div class="mpos-row"><span>Kart</span><b>${fmt(m.card)}</b></div></div>`;}
+function mposRenderFinance(c){const m=calculateFinanceMetrics(new Date()),rows=(m.movements||[]).slice().reverse().slice(0,12);c.innerHTML=`<h2 class="mpos-page-title">Finans</h2><div class="mpos-page-sub">PC ve mobil aynı Firebase finans verisini kullanır</div><div class="mpos-card"><h3><span>💵</span>Kasa</h3><div class="mpos-kpis"><div class="mpos-kpi"><span>Kasa Açılış</span><strong>${fmt(m.opening)}</strong></div><div class="mpos-kpi"><span>Bugünkü Giriş / Çıkış Net</span><strong>${fmt(m.movementNet)}</strong></div><div class="mpos-kpi hero"><span>Bugünkü Tahsilat</span><strong>${fmt(m.day)}</strong></div><div class="mpos-kpi"><span>Beklenen Nakit Kasa</span><strong>${fmt(m.cashBalance)}</strong></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button class="mpos-btn" onclick="mposQuickTool('cash-open')">Kasa Açılışı</button><button class="mpos-btn secondary" onclick="mposQuickTool('cash-flow')">Giriş / Çıkış</button></div></div><div class="mpos-card"><h3><span>▦</span>Ödeme Dağılımı</h3><div class="mpos-row"><span>Nakit</span><b>${fmt(m.cash)}</b></div><div class="mpos-row"><span>Kart</span><b>${fmt(m.card)}</b></div></div><div class="mpos-card"><h3><span>▥</span>Dönem Toplamları</h3><div class="mpos-row"><span>Bu Hafta</span><b>${fmt(m.week)}</b></div><div class="mpos-row"><span>Bu Ay</span><b>${fmt(m.month)}</b></div><div class="mpos-row"><span>Bu Yıl</span><b>${fmt(m.year)}</b></div></div><div class="mpos-card"><h3><span>⇄</span>Bugünkü Kasa Hareketleri</h3>${rows.length?rows.map(x=>`<div class="mpos-row"><span><b>${x.type==='out'?'Çıkış':'Giriş'}</b><small>${escapeHtml(x.note||'')} · ${new Date(Number(x.at)||Date.now()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}</small></span><strong>${x.type==='out'?'-':'+'}${fmt(Math.abs(Number(x.amount)||0))}</strong></div>`).join(''):'<div class="mpos-empty">Bugün kasa hareketi yok.</div>'}</div>`;}
 function mposRenderPersonnel(c){
   if(hasPatronAccess()){
     const vals=Object.entries(employees);
