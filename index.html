@@ -660,6 +660,7 @@
   .desktop-order-cart-foot{padding:10px;border-top:1px solid #46515c;background:#202830}.desktop-order-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;color:#aeb7bf;font-size:11px}.desktop-order-total-row strong{color:#fff;font-size:20px}
   .desktop-order-pay-btn{width:100%;border:1px solid #57ad67;border-radius:7px;background:#21852d;color:#fff;padding:13px;font-size:14px;font-weight:900;cursor:pointer}.desktop-order-pay-btn:disabled{opacity:.45;cursor:not-allowed}
   .desktop-order-clear-btn{width:100%;border:1px solid #93413a;border-radius:7px;background:#75302a;color:#fff;padding:9px;margin-top:7px;font-size:11px;font-weight:800;cursor:pointer}
+  .desktop-order-print-btn{width:100%;border:1px solid #53606f;border-radius:7px;background:#2b3541;color:#fff;padding:10px;margin-top:7px;font-size:12px;font-weight:900;cursor:pointer}.desktop-order-print-btn:hover{background:#354250}.desktop-order-print-btn:disabled{opacity:.45;cursor:not-allowed}
 }
 @media(min-width:701px) and (max-width:1180px){.desktop-order-body{grid-template-columns:165px minmax(0,1fr) 300px}.desktop-product-grid{grid-template-columns:repeat(3,minmax(130px,1fr))}}
 @media(max-width:700px){.desktop-order-screen,.desktop-user-wrap,.desktop-user-menu{display:none!important}}
@@ -1368,6 +1369,7 @@
       <div class="desktop-order-cart-foot">
         <div class="desktop-order-total-row"><span>Toplam</span><strong id="desktop-order-cart-total">0₺</strong></div>
         <button class="desktop-order-pay-btn" id="desktop-order-pay-btn" type="button" onclick="desktopOrderTakePayment()">Ödeme Al: 0₺</button>
+        <button class="desktop-order-print-btn" id="desktop-order-print-btn" type="button" onclick="desktopPrintReceipt()">🖨 Fiş Yazdır</button>
         <button class="desktop-order-clear-btn" id="desktop-order-clear-btn" type="button" onclick="desktopOrderClear()">Masayı Temizle</button>
       </div>
     </aside>
@@ -1434,6 +1436,8 @@ const authRef = db.ref('ozarpa-auth');
 const usersRef = db.ref('ozarpa-users');
 const salesRef = db.ref('ozarpa-sales');
 const financeRef = db.ref('ozarpa-finance');
+const printQueueRef = db.ref('ozarpa-print-queue');
+const printerStatusRef = db.ref('ozarpa-printer-status/pos80c-main');
 const specialRef = db.ref('ozarpa-special-orders');
 const testStateRef = db.ref('ozarpa-test-state');
 const testModeRef = db.ref('ozarpa-test-mode');
@@ -1471,12 +1475,14 @@ let testSales = {};
 let presence = {};
 let testMode = false;
 let currentUser = { username:'', name:'', role:'guest' };
+let remotePrinterStatus = {online:false,at:0,printer:''};
 let testState = null;
 let sessionKey = null;
 let presenceHeartbeat = null;
 const LOGIN_SESSION_KEY = 'ozarpa-login-session';
 let selectedPaymentMethod = null;
 let currentMasa = null;
+printerStatusRef.on('value',snap=>{const v=snap.val()||{};remotePrinterStatus={online:!!v.online,at:Number(v.at||0),printer:String(v.printer||'')};});
 const paymentInFlight = new Set();
 let saveTimer = null;
 let lastLocalEdit = 0;   // bu cihazda son değişiklik yapılan an
@@ -2282,6 +2288,7 @@ function renderDesktopOrderScreen(){
     pay.disabled=total<=0;
     pay.classList.toggle('employee-save',employeeOnly);
   }
+  const printBtn=document.getElementById('desktop-order-print-btn');if(printBtn){printBtn.disabled=total<=0;printBtn.style.display=rows.length?'':'none';}
   const clear=document.getElementById('desktop-order-clear-btn');if(clear){
     clear.style.display=employeeOnly?'none':(rows.length?'':'none');
     clear.textContent=desktopAccountMode?'Cari Ürünlerini Temizle':'Masayı Temizle';
@@ -3656,34 +3663,87 @@ function mposCategoryInitials(n){return String(n||'').split(/\s+/).filter(Boolea
 function mposChangeQty(itemId,delta){if(delta>0&&mposIsProductDisabled(itemId)){showToast('Bu ürün satışa kapalı');return;}if(mposAccountMode){if(!mposAccountId)return;cariChangeQty(mposAccountId,itemId,delta);mposRenderOrder();return;}if(mposQuickMode){const n=(mposQuickCart[itemId]||0)+delta;if(n<=0)delete mposQuickCart[itemId];else mposQuickCart[itemId]=n;mposRenderOrder();return;}if(!mposOrderMasa)return;updateSharedTableItem(mposOrderMasa,itemId,delta);}
 function mposRenderCart(){const o=mposOrderData(),data=activeState(),account=mposAccountMode?cariAccountById(mposAccountId):null,list=document.getElementById('mpos-cart-list'),rows=Object.entries(o).filter(([,q])=>Number(q)>0);document.getElementById('mpos-cart-title').textContent=mposAccountMode?(account?.name||'Cari Hesap'):(mposQuickMode?'Hızlı Sipariş':mposDisplayTableLabel(mposOrderMasa));document.getElementById('mpos-cart-count').textContent=rows.length+' kalem';document.getElementById('mpos-cart-total').textContent=fmt(mposOrderTotal());list.innerHTML=rows.length?rows.map(([id,q])=>{const it=data.menu.find(m=>m.id===id),name=mposAccountMode?cariItemName(account,id):(it?.name||'Ürün'),price=mposAccountMode?cariItemPrice(account,id):(Number(it?.price)||0);return `<div class="mpos-cart-row"><div><strong>${escapeHtml(name)}</strong><small>${q} × ${fmt(price)}</small></div><div class="mpos-cart-qty"><button onclick="mposChangeQty('${id}',-1)">−</button><b>${q}</b><button onclick="mposChangeQty('${id}',1)">+</button></div></div>`}).join(''):`<div class="mpos-empty" style="padding:24px 10px"><b>Henüz sipariş yok</b>${mposAccountMode?'Ürünlere dokunarak cari hesaba ekleyin.':(mposQuickMode?'Ürünlere dokunarak hızlı siparişe ekleyin.':'Ürünlere dokunarak masaya sipariş ekleyin.')}</div>`;const btn=document.getElementById('mpos-order-primary');if(mposAccountMode)btn.textContent='Tahsilat Al';else if(mposQuickMode)btn.textContent=hasPatronAccess()?'Ödeme Al':'Siparişi Kaydet';else btn.textContent=hasPatronAccess()?'Hesabı Kapat':'Siparişi Kaydet';btn.disabled=mposOrderTotal()<=0;}
 function mposReceiptEscape(v){return escapeHtml(v==null?'':String(v));}
-function mposPrintReceipt(){
-  const root=document.getElementById('receipt-print-root');
-  if(!root)return;
-  const order=mposOrderData();
+function printerIsOnline(){return !!(remotePrinterStatus&&remotePrinterStatus.online&&(Date.now()-Number(remotePrinterStatus.at||0)<20000));}
+function receiptRowsFromOrder(order,account=null){
   const data=activeState();
-  const account=mposAccountMode?cariAccountById(mposAccountId):null;
-  const rows=Object.entries(order||{}).filter(([,q])=>Number(q)>0).map(([id,q])=>{
-    const item=(data.menu||[]).find(x=>x.id===id);
-    const qty=Number(q)||0,price=mposAccountMode?cariItemPrice(account,id):(Number(item?.price)||0),name=mposAccountMode?cariItemName(account,id):(item?.name||'Ürün');
-    if(!mposAccountMode&&!item)return null;
-    return {name,qty,price,line:qty*price};
+  return Object.entries(order||{}).filter(([,q])=>Number(q)>0).map(([id,q])=>{
+    const item=(data.menu||[]).find(x=>x.id===id),qty=Number(q)||0;
+    const price=account?cariItemPrice(account,id):(Number(item?.price)||0);
+    const name=account?cariItemName(account,id):(item?.name||'Ürün');
+    if(!account&&!item)return null;
+    return {id:String(id),name:String(name||'Ürün'),qty,price,line:qty*price};
   }).filter(Boolean);
-  if(!rows.length){showToast('Yazdırılacak sipariş yok');return;}
+}
+function buildReceiptPrintJob(opts={}){
+  const rows=receiptRowsFromOrder(opts.order||{},opts.account||null);
+  if(!rows.length)return null;
   const total=rows.reduce((a,r)=>a+r.line,0);
-  const title=mposAccountMode?(cariAccountById(mposAccountId)?.name||'Cari Hesap'):(mposQuickMode?'Hızlı Sipariş':mposDisplayTableLabel(mposOrderMasa));
-  const now=new Date();
-  root.innerHTML=`
-    <div class="r-head"><div class="r-brand">KEBAPÇI ÖZARPA</div><div class="r-sub">Adisyon / Sipariş Fişi</div></div>
-    <div class="r-meta"><b>${mposReceiptEscape(title)}</b><br>${mposReceiptEscape(now.toLocaleString('tr-TR'))}<br>Personel: ${mposReceiptEscape(currentUser.name||currentUser.username||'')}</div>
-    ${rows.map(r=>`<div class="r-row"><div><span class="r-name">${mposReceiptEscape(r.name)}</span><small>${r.qty} × ${mposReceiptEscape(fmt(r.price))}</small></div><b>${mposReceiptEscape(fmt(r.line))}</b></div>`).join('')}
-    <div class="r-total"><span>TOPLAM</span><span>${mposReceiptEscape(fmt(total))}</span></div>
-    <div class="r-foot">Afiyet olsun.<br>Kebapçı Özarpa</div>`;
-  root.setAttribute('aria-hidden','false');
-  // Tarayıcının yazdırma penceresini açar. Sistem fiş yazıcısı seçilirse 80 mm fiş basılır.
-  setTimeout(()=>{
-    window.print();
-    setTimeout(()=>{root.setAttribute('aria-hidden','true');},250);
-  },60);
+  const now=Date.now();
+  return {
+    status:'pending',
+    source:String(opts.source||'adisyon'),
+    title:String(opts.title||'Sipariş'),
+    tableId:opts.tableId==null?'':String(opts.tableId),
+    tableName:String(opts.tableName||opts.title||''),
+    accountId:opts.accountId==null?'':String(opts.accountId),
+    requestedBy:currentOrderTakerName(),
+    requestedByUsername:String(currentUser?.username||''),
+    createdAt:now,
+    serverAt:firebase.database.ServerValue.TIMESTAMP,
+    currency:'TRY',
+    paper:'80mm',
+    items:rows.map(r=>({name:r.name,qty:r.qty,price:r.price,line:r.line})),
+    total
+  };
+}
+function enqueueReceiptPrint(job){
+  if(!job){showToast('Yazdırılacak sipariş yok');return Promise.resolve(false);}
+  const node=printQueueRef.push();
+  const online=printerIsOnline();
+  showToast(online?'Fiş POS-80C yazıcıya gönderildi':'Yazıcı PC çevrimdışı; fiş kuyruğa alındı');
+  return node.set(job).then(()=>true).catch(e=>{console.error('Fiş kuyruğu hatası',e);showToast('Fiş yazıcı kuyruğuna gönderilemedi');return false;});
+}
+function mposPrintReceipt(){
+  const account=mposAccountMode?cariAccountById(mposAccountId):null;
+  const order=mposOrderData();
+  const title=mposAccountMode?(account?.name||'Cari Hesap'):(mposQuickMode?'Hızlı Sipariş':mposDisplayTableLabel(mposOrderMasa));
+  const job=buildReceiptPrintJob({
+    source:mposAccountMode?'cari':(mposQuickMode?'hizli-siparis':'masa'),
+    title,
+    tableId:(!mposAccountMode&&!mposQuickMode)?mposOrderMasa:'',
+    tableName:(!mposAccountMode&&!mposQuickMode)?mposDisplayTableLabel(mposOrderMasa):'',
+    accountId:mposAccountMode?mposAccountId:'',account,order
+  });
+  enqueueReceiptPrint(job);
+}
+function desktopPrintReceipt(){
+  if(!isDesktopOrderOpen())return;
+  const account=desktopAccountMode?cariAccountById(desktopAccountId):null;
+  const order=desktopAccountMode?(account?.items||{}):(activeState().tables[currentMasa]||{});
+  const title=desktopAccountMode?(account?.name||'Cari Hesap'):seatingTableLabel(currentMasa);
+  const job=buildReceiptPrintJob({
+    source:desktopAccountMode?'cari':'masa',title,
+    tableId:desktopAccountMode?'':currentMasa,
+    tableName:desktopAccountMode?'':seatingTableLabel(currentMasa),
+    accountId:desktopAccountMode?desktopAccountId:'',account,order
+  });
+  enqueueReceiptPrint(job);
+}
+function browserPrintCurrentReceipt(){
+  const root=document.getElementById('receipt-print-root');if(!root)return;
+  let order={},account=null,title='Sipariş';
+  if(isDesktopOrderOpen()){
+    account=desktopAccountMode?cariAccountById(desktopAccountId):null;
+    order=desktopAccountMode?(account?.items||{}):(activeState().tables[currentMasa]||{});
+    title=desktopAccountMode?(account?.name||'Cari Hesap'):seatingTableLabel(currentMasa);
+  }else{
+    account=mposAccountMode?cariAccountById(mposAccountId):null;order=mposOrderData();
+    title=mposAccountMode?(account?.name||'Cari Hesap'):(mposQuickMode?'Hızlı Sipariş':mposDisplayTableLabel(mposOrderMasa));
+  }
+  const rows=receiptRowsFromOrder(order,account);if(!rows.length){showToast('Yazdırılacak sipariş yok');return;}
+  const total=rows.reduce((a,r)=>a+r.line,0),now=new Date();
+  root.innerHTML=`<div class="r-head"><div class="r-brand">KEBAPÇI ÖZARPA</div><div class="r-sub">Adisyon / Sipariş Fişi</div></div><div class="r-meta"><b>${mposReceiptEscape(title)}</b><br>${mposReceiptEscape(now.toLocaleString('tr-TR'))}<br>Personel: ${mposReceiptEscape(currentOrderTakerName())}</div>${rows.map(r=>`<div class="r-row"><div><span class="r-name">${mposReceiptEscape(r.name)}</span><small>${r.qty} × ${mposReceiptEscape(fmt(r.price))}</small></div><b>${mposReceiptEscape(fmt(r.line))}</b></div>`).join('')}<div class="r-total"><span>TOPLAM</span><span>${mposReceiptEscape(fmt(total))}</span></div><div class="r-foot">Afiyet olsun.<br>Kebapçı Özarpa</div>`;
+  root.setAttribute('aria-hidden','false');setTimeout(()=>{window.print();setTimeout(()=>root.setAttribute('aria-hidden','true'),250);},60);
 }
 
 function mposFinishPaidTableUi(){
