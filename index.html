@@ -606,6 +606,73 @@
 }
 @media(max-width:700px){.desktop-quick-overlay{display:none!important}}
 
+
+
+/* ==========================================================
+   MOBIL POS + PATRON YONETIMI (<=700px)
+   Referans POS akisi: rol bazli mobil shell, drawer, masalar,
+   urun/kategori siparis, rapor, finans, personel ve ayarlar.
+   ========================================================== */
+#mobile-pos-shell{display:none}
+@media(max-width:700px){
+  html,body{background:#f3f5f8!important;color:#202733!important;overflow-x:hidden}
+  #login-screen{background:linear-gradient(180deg,#fff8e8 0,#f7f8fb 34%,#f1f3f6 100%)!important;padding:20px}
+  #login-screen .login-card{background:#fff!important;color:#1f2732!important;border:1px solid #e7e9ed!important;border-radius:26px!important;box-shadow:0 20px 55px rgba(34,46,58,.12)!important}
+  #login-screen input{background:#f6f7f9!important;color:#242c36!important;border-color:#e1e5ea!important}
+  #login-screen .btn-primary{background:#ff9d0a!important;color:#fff!important;border:0!important}
+  #app-screen.mobile-pos-active{display:none!important}
+  #mobile-pos-shell.open{display:flex;position:fixed;inset:0;z-index:9000;background:#f4f6f8;color:#202733;flex-direction:column;font-family:Arial,Helvetica,sans-serif}
+  .mpos-topbar{height:82px;flex:0 0 auto;background:#fff;border-bottom:1px solid #e3e6ea;display:flex;align-items:center;gap:10px;padding:13px 14px;position:relative;z-index:4}
+  .mpos-icon-btn{width:48px;height:48px;border:1px solid #e2e6eb;border-radius:16px;background:#f6f7f9;color:#465568;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800}
+  .mpos-avatar{width:48px;height:48px;border:0;border-radius:15px;background:linear-gradient(145deg,#ffb000,#ff8a00);color:#fff;font-size:22px;font-weight:900;box-shadow:0 8px 18px rgba(255,157,10,.25)}
+  .mpos-search{flex:1;min-width:0;height:48px;border:1px solid #e2e6eb;border-radius:16px;background:#f2f4f7;color:#283342;padding:0 16px;font-size:17px;outline:none}
+  .mpos-more{color:#ff9d0a;font-size:27px}
+  .mpos-tabs{height:68px;flex:0 0 auto;background:#fff;border-bottom:1px solid #e1e5e9;display:flex;align-items:center;gap:10px;padding:10px 14px;overflow-x:auto;scrollbar-width:none}
+  .mpos-tabs::-webkit-scrollbar{display:none}
+  .mpos-tab{height:48px;padding:0 18px;border:0;border-radius:14px;background:#f0f2f5;color:#283342;white-space:nowrap;font-weight:800;font-size:14px}
+  .mpos-tab.active{background:#ff9d0a;color:#fff;box-shadow:0 7px 16px rgba(255,157,10,.24)}
+  .mpos-content{flex:1;overflow:auto;padding:18px 16px 90px;background:#f4f6f8}
+  .mpos-table-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .mpos-table{position:relative;min-height:185px;border:0;border-radius:18px;background:#171c22;color:#fff;text-align:left;overflow:hidden;padding:17px 58px 16px 16px;box-shadow:0 8px 18px rgba(36,45,55,.08)}
+  .mpos-table.occupied{background:var(--mpos-table-color,#c93b31)}
+  .mpos-table-name{display:block;font-size:25px;line-height:1.05;font-weight:500;word-break:break-word}
+  .mpos-table-meta{display:inline-flex;margin-top:11px;padding:4px 9px;border-radius:14px;background:rgba(0,0,0,.15);font-size:12px;font-weight:800}
+  .mpos-table-time{position:absolute;left:16px;right:58px;bottom:48px;padding:4px 8px;background:rgba(0,0,0,.17);border-radius:11px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mpos-table-total{position:absolute;left:16px;bottom:14px;font-size:22px;font-weight:700}
+  .mpos-table-actions{position:absolute;right:0;top:0;bottom:0;width:48px;display:flex;flex-direction:column}
+  .mpos-table-actions span{flex:1;display:flex;align-items:center;justify-content:center;background:#1474ec;font-size:20px}
+  .mpos-table-actions span+span{background:#196f2d}
+  .mpos-table.empty .mpos-table-actions,.mpos-table.empty .mpos-table-time,.mpos-table.empty .mpos-table-total,.mpos-table.empty .mpos-table-meta{display:none}
+  .mpos-empty{padding:44px 20px;text-align:center;color:#7b8795}.mpos-empty b{display:block;color:#344151;font-size:18px;margin-bottom:6px}
+  .mpos-card{background:#fff;border:1px solid #e2e5e9;border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:0 8px 20px rgba(44,56,68,.05)}
+  .mpos-card h3{margin:0 0 14px;font-size:18px;color:#222b36}.mpos-card h3 span{color:#ff9d0a;margin-right:7px}
+  .mpos-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.mpos-kpi{background:#f5f7f9;border:1px solid #e4e8ec;border-radius:16px;padding:14px}.mpos-kpi span{display:block;color:#7b8794;font-size:11px;text-transform:uppercase}.mpos-kpi strong{display:block;color:#1d2834;font-size:22px;margin-top:5px}.mpos-kpi.hero{grid-column:1/-1;background:linear-gradient(135deg,#21b784,#159b73)}.mpos-kpi.hero span,.mpos-kpi.hero strong{color:#fff}
+  .mpos-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid #edf0f2}.mpos-row:last-child{border-bottom:0}.mpos-row small{color:#89939d;display:block;margin-top:3px}
+  .mpos-btn{border:0;border-radius:13px;background:#ff9d0a;color:#fff;padding:12px 16px;font-weight:800}.mpos-btn.secondary{background:#eef1f4;color:#354252}.mpos-btn.danger{background:#e64b45}.mpos-btn.green{background:#26af80}
+  .mpos-field{width:100%;box-sizing:border-box;height:48px;background:#f4f6f8;border:1px solid #dfe4e9;border-radius:13px;padding:0 13px;color:#273241;margin:6px 0}.mpos-field[type=number]{font-variant-numeric:tabular-nums}
+  .mpos-select{width:100%;height:46px;border:1px solid #dfe4e9;background:#f4f6f8;border-radius:13px;padding:0 12px;color:#273241}
+  .mpos-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f7f8fa;border:1px solid #e3e6ea;border-radius:17px;padding:14px;margin:9px 0}.mpos-switch{position:relative;width:54px;height:30px;flex:0 0 auto}.mpos-switch input{display:none}.mpos-switch span{position:absolute;inset:0;background:#d9dde3;border-radius:20px;transition:.2s}.mpos-switch span:after{content:'';position:absolute;width:24px;height:24px;border-radius:50%;background:#fff;left:3px;top:3px;box-shadow:0 2px 7px rgba(0,0,0,.18);transition:.2s}.mpos-switch input:checked+span{background:#ff9d0a}.mpos-switch input:checked+span:after{transform:translateX(24px)}
+  .mpos-drawer-backdrop{display:none;position:fixed;inset:0;z-index:9020;background:rgba(20,28,38,.35)}.mpos-drawer-backdrop.open{display:block}
+  .mpos-drawer{position:absolute;left:0;top:0;bottom:0;width:min(88vw,380px);background:#fff;box-shadow:18px 0 46px rgba(29,38,47,.16);padding:24px 16px 18px;display:flex;flex-direction:column;overflow:auto}
+  .mpos-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:3px 8px 22px;border-bottom:1px solid #eceff2}.mpos-drawer-brand{display:flex;align-items:center;gap:9px}.mpos-drawer-brand img{width:52px;height:52px;border-radius:14px;object-fit:contain}.mpos-drawer-brand strong{font-size:16px;color:#202733}.mpos-drawer-close{width:44px;height:44px;border:1px solid #e2e5e9;background:#f7f8f9;border-radius:14px;font-size:25px;color:#5c6876}
+  .mpos-drawer-label{font-size:12px;letter-spacing:2px;color:#9aa2ab;margin:24px 12px 8px;text-transform:uppercase}.mpos-drawer-nav{display:flex;flex-direction:column;gap:5px}.mpos-drawer-item{display:flex;align-items:center;gap:13px;width:100%;border:0;background:transparent;color:#596576;padding:14px 16px;border-radius:17px;text-align:left;font-size:17px;font-weight:700}.mpos-drawer-item.active{background:#fff3dc;color:#bd481b;border:1px solid #f6c66d;box-shadow:0 7px 18px rgba(247,173,43,.15)}.mpos-drawer-item .ico{width:27px;text-align:center;font-size:20px}
+  .mpos-user-foot{margin-top:auto;padding-top:18px}.mpos-user-card{display:flex;align-items:center;gap:12px;border:1px solid #e3e6ea;border-radius:18px;padding:12px}.mpos-user-card .avatar{width:45px;height:45px;border-radius:14px;background:#ff9d0a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900}.mpos-user-card button{margin-left:auto;border:0;background:#f1f3f5;border-radius:12px;padding:9px;color:#d44b45}
+  .mpos-page-title{font-size:23px;margin:0 0 14px;color:#202733}.mpos-page-sub{color:#84909c;font-size:13px;margin:-6px 0 16px}
+  .mpos-list-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e3e6ea;border-radius:16px;padding:13px;margin-bottom:9px}.mpos-list-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#edf0f3;color:#3b4858;font-weight:900}.mpos-list-main{flex:1;min-width:0}.mpos-list-main strong{display:block;color:#27323e}.mpos-list-main small{display:block;color:#89939c;font-size:11px;margin-top:3px}
+  .mpos-product-admin{display:grid;grid-template-columns:1fr 90px;gap:7px;margin-bottom:8px}.mpos-product-admin .wide{grid-column:1/-1}
+  .mpos-category-chip{display:inline-flex;align-items:center;gap:6px;margin:4px 5px 4px 0;padding:8px 10px;border-radius:13px;background:#eef1f4;color:#344252;font-size:12px}.mpos-category-chip button{border:0;background:transparent;color:#d44c45;font-weight:900}
+  .mpos-order-screen{display:none;position:fixed;inset:0;z-index:9050;background:#f4f6f8;color:#202733}.mpos-order-screen.open{display:flex;flex-direction:column}
+  .mpos-order-head{height:76px;background:#fff;border-bottom:1px solid #e2e6ea;display:flex;align-items:center;gap:10px;padding:12px}.mpos-order-head input{flex:1;height:48px;border:1px solid #e2e6ea;background:#f2f4f7;border-radius:16px;padding:0 14px;font-size:16px}
+  .mpos-order-body{flex:1;min-height:0;display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-rows:minmax(260px,48%) minmax(0,1fr);overflow:hidden}
+  .mpos-order-cats{grid-column:1;grid-row:1/3;background:#fff;border-right:1px solid #e0e4e8;overflow-y:auto;padding:9px 7px}.mpos-cat-btn{width:100%;border:1px solid #e7e8eb;background:#fff;border-radius:18px;margin-bottom:10px;padding:0;overflow:hidden;color:#202733}.mpos-cat-badge{height:78px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ffd7c1,#ffbfa8);font-size:25px;font-weight:900;color:#fff}.mpos-cat-btn:nth-child(3n+2) .mpos-cat-badge{background:linear-gradient(135deg,#ff8da6,#e9c6f1)}.mpos-cat-btn:nth-child(3n) .mpos-cat-badge{background:linear-gradient(135deg,#5a7bef,#7846bb)}.mpos-cat-name{display:block;padding:8px 4px;font-size:12px;font-weight:800;word-break:break-word}.mpos-cat-btn.active{outline:2px solid #ff9d0a}
+  .mpos-products{grid-column:2;grid-row:1;padding:12px;overflow-y:auto}.mpos-product-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.mpos-product{min-height:125px;border:0;border-radius:17px;background:linear-gradient(145deg,#475a64,#1f2d34);color:#fff;padding:12px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 14px rgba(24,32,40,.13)}.mpos-product.colored:nth-child(4n+2){background:linear-gradient(145deg,#a43c32,#c9654f)}.mpos-product.colored:nth-child(4n+3){background:linear-gradient(145deg,#394f91,#586fc8)}.mpos-product.colored:nth-child(4n){background:linear-gradient(145deg,#05899e,#18b9b5)}.mpos-product strong{font-size:15px;line-height:1.12}.mpos-product span{font-size:15px;font-weight:900}.mpos-product.disabled{opacity:.38;filter:grayscale(1)}
+  .mpos-cart{grid-column:2;grid-row:2;background:#fff;border-top:1px solid #e1e5e9;display:flex;flex-direction:column;min-height:0}.mpos-cart-head{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-bottom:1px solid #eef0f2}.mpos-cart-list{flex:1;overflow:auto;padding:8px 12px}.mpos-cart-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 0;border-bottom:1px solid #eef0f2}.mpos-cart-row strong{display:block;font-size:13px}.mpos-cart-row small{color:#89939c}.mpos-cart-qty{display:flex;align-items:center;gap:7px}.mpos-cart-qty button{width:30px;height:30px;border:0;border-radius:9px;background:#eef1f4;font-weight:900}.mpos-cart-foot{padding:10px 12px;border-top:1px solid #e8ebee;background:#fff}.mpos-cart-total{display:flex;justify-content:space-between;font-size:18px;font-weight:900;margin-bottom:8px}.mpos-order-actions{display:grid;grid-template-columns:1fr auto auto;gap:8px}.mpos-order-actions button{height:48px;border:0;border-radius:13px;font-weight:900}.mpos-order-primary{background:#69cdb0;color:#fff}.mpos-order-other{background:#2f67e8;color:#fff}.mpos-order-print{background:#fff;border:1px solid #dce1e6!important;color:#25313f}
+  .mpos-payment-backdrop,.mpos-quick-backdrop{display:none;position:fixed;inset:0;z-index:9080;background:rgba(16,23,31,.55);align-items:flex-end}.mpos-payment-backdrop.open,.mpos-quick-backdrop.open{display:flex}.mpos-sheet{width:100%;background:#fff;border-radius:24px 24px 0 0;padding:19px 17px 24px;box-shadow:0 -18px 46px rgba(0,0,0,.16)}.mpos-sheet h3{margin:0 0 5px}.mpos-sheet p{margin:0 0 16px;color:#7e8994}.mpos-sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mpos-sheet-actions button{height:56px;border:0;border-radius:15px;color:#fff;font-weight:900;font-size:16px}.mpos-sheet-actions .cash{background:#3557be}.mpos-sheet-actions .card{background:#c52929}.mpos-sheet-actions .cancel{grid-column:1/-1;background:#eef1f4;color:#4a5766}
+  .mpos-dark{background:#232a31!important;color:#f5f7f8!important}.mpos-dark .mpos-content{background:#2d343b}.mpos-dark .mpos-topbar,.mpos-dark .mpos-tabs,.mpos-dark .mpos-card,.mpos-dark .mpos-cart,.mpos-dark .mpos-order-cats,.mpos-dark .mpos-order-head{background:#252c33;color:#fff;border-color:#424b54}.mpos-dark .mpos-search,.mpos-dark .mpos-order-head input,.mpos-dark .mpos-field,.mpos-dark .mpos-select,.mpos-dark .mpos-toggle-row,.mpos-dark .mpos-kpi{background:#303840;color:#fff;border-color:#46515c}.mpos-dark .mpos-page-title,.mpos-dark .mpos-card h3,.mpos-dark .mpos-kpi strong,.mpos-dark .mpos-list-main strong{color:#fff}
+}
+
+.desktop-product-disabled{opacity:.38!important;filter:grayscale(1);cursor:not-allowed!important}
+@media(max-width:700px){#mobile-pos-shell.no-animations *,#mobile-pos-shell.no-animations *:before,#mobile-pos-shell.no-animations *:after{transition:none!important;animation:none!important}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -836,6 +903,75 @@
   <div class="save-hint">1934'den beri</div>
 </div>
 
+
+
+
+<!-- MOBIL PATRON / GARSON POS SHELL -->
+<div id="mobile-pos-shell" aria-hidden="true">
+  <div class="mpos-topbar">
+    <button class="mpos-icon-btn" type="button" onclick="mposToggleDrawer()">☰</button>
+    <button class="mpos-avatar" id="mpos-avatar" type="button" onclick="mposOpenAccount()">Ö</button>
+    <input class="mpos-search" id="mpos-global-search" placeholder="Ara" oninput="mposSetSearch(this.value)">
+    <button class="mpos-icon-btn mpos-more" id="mpos-more-btn" type="button" onclick="mposOpenQuickMenu()">⋮</button>
+  </div>
+  <div class="mpos-tabs" id="mpos-tabs"></div>
+  <div class="mpos-content" id="mpos-content"></div>
+
+  <div class="mpos-drawer-backdrop" id="mpos-drawer-backdrop" onclick="if(event.target===this)mposToggleDrawer(false)">
+    <aside class="mpos-drawer">
+      <div class="mpos-drawer-head">
+        <div class="mpos-drawer-brand"><img id="mpos-brand-logo" alt="Kebapçı Özarpa"><div><strong>Kebapçı Özarpa</strong><div style="font-size:11px;color:#949da7">POS · Adisyon</div></div></div>
+        <button class="mpos-drawer-close" onclick="mposToggleDrawer(false)">×</button>
+      </div>
+      <div id="mpos-drawer-nav"></div>
+      <div class="mpos-user-foot">
+        <div class="mpos-user-card"><div class="avatar" id="mpos-foot-avatar">Ö</div><div><strong id="mpos-foot-name">Kullanıcı</strong><small id="mpos-foot-role" style="display:block;color:#929ba4;margin-top:3px">Rol</small></div><button onclick="logout()">Çıkış</button></div>
+        <div style="text-align:center;color:#a4aab1;font-size:11px;margin-top:15px">Kebapçı Özarpa · POS</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<section class="mpos-order-screen" id="mpos-order-screen" aria-hidden="true">
+  <div class="mpos-order-head">
+    <button class="mpos-icon-btn" type="button" onclick="mposCloseOrder()">←</button>
+    <button class="mpos-avatar" id="mpos-order-avatar" type="button">Ö</button>
+    <input id="mpos-order-search" placeholder="Ürün ara" oninput="mposSetProductSearch(this.value)">
+    <button class="mpos-icon-btn" type="button" onclick="mposCycleCategory()">☷</button>
+  </div>
+  <div class="mpos-order-body">
+    <aside class="mpos-order-cats" id="mpos-order-cats"></aside>
+    <div class="mpos-products"><div class="mpos-product-grid" id="mpos-products"></div></div>
+    <section class="mpos-cart">
+      <div class="mpos-cart-head"><strong id="mpos-cart-title">Sipariş</strong><small id="mpos-cart-count">0 kalem</small></div>
+      <div class="mpos-cart-list" id="mpos-cart-list"></div>
+      <div class="mpos-cart-foot">
+        <div class="mpos-cart-total"><span>Toplam</span><span id="mpos-cart-total">0₺</span></div>
+        <div class="mpos-order-actions">
+          <button class="mpos-order-primary" id="mpos-order-primary" onclick="mposPrimaryOrderAction()">Hesabı Kapat</button>
+          <button class="mpos-order-other" onclick="mposOpenQuickMenu()">•••</button>
+          <button class="mpos-order-print" onclick="window.print()">🖨</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<div class="mpos-payment-backdrop" id="mpos-payment-backdrop" onclick="if(event.target===this)mposClosePayment()">
+  <div class="mpos-sheet">
+    <h3 id="mpos-payment-title">Ödeme Al</h3><p id="mpos-payment-total">0₺</p>
+    <div class="mpos-sheet-actions"><button class="cash" onclick="mposCompletePayment('nakit')">Nakit</button><button class="card" onclick="mposCompletePayment('kart')">Kredi Kartı</button><button class="cancel" onclick="mposClosePayment()">İptal</button></div>
+  </div>
+</div>
+
+<div class="mpos-quick-backdrop" id="mpos-quick-backdrop" onclick="if(event.target===this)mposCloseQuickMenu()">
+  <div class="mpos-sheet"><h3>Hızlı İşlemler</h3><p>Patron yönetimi</p><div id="mpos-quick-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div><button class="mpos-btn secondary" style="width:100%;margin-top:12px" onclick="mposCloseQuickMenu()">Kapat</button></div>
+</div>
+
+<!-- PC patron hızlı yönetim aracı -->
+<div id="patron-tool-overlay" style="display:none;position:fixed;inset:0;z-index:10080;background:rgba(5,9,13,.72);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px" onclick="if(event.target===this)closePatronTool()">
+  <div id="patron-tool-panel" style="width:min(920px,94vw);max-height:88vh;overflow:auto;background:#2e353c;color:#fff;border:1px solid #4c5660;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.45);padding:22px"></div>
+</div>
 
 <!-- PC PATRON PAYMENT DRAWER -->
 <div class="desktop-payment-overlay" id="desktop-payment-overlay" onclick="desktopPaymentBackdrop(event)">
@@ -1527,21 +1663,8 @@ function toggleDesktopQuickMenu(){
 function closeDesktopQuickMenu(){document.getElementById('desktop-quick-overlay')?.classList.remove('open');}
 function desktopQuickAction(action){
   closeDesktopQuickMenu();
-  // Şimdilik hızlı menü ilgili mevcut yönetim alanına götürür; ayrıntılı ekranlar sonraki adımlarda bağlanabilir.
-  if(action==='disabled-products'){
-    desktopNavigate('settings');
-    setTimeout(()=>desktopSettingsSection('products'),0);
-    return;
-  }
-  if(action==='table-colors'){
-    desktopNavigate('settings');
-    setTimeout(()=>desktopSettingsSection('general'),0);
-    return;
-  }
-  if(action==='cash-open' || action==='cash-flow'){
-    desktopNavigate('reports');
-    return;
-  }
+  if(!isDesktopPatron())return;
+  openPatronTool(action);
 }
 
 // ---------- PC patron: kullanıcı açılır menüsü ----------
@@ -1621,7 +1744,7 @@ function renderDesktopOrderScreen(){
     return catOk&&searchOk;
   });
   const products=document.getElementById('desktop-order-products');
-  if(products)products.innerHTML=items.length?items.map(item=>`<button class="desktop-product-card" type="button" onclick="desktopOrderChangeQty('${item.id}',1)"><span class="desktop-product-name">${escapeHtml(item.name)}</span><span class="desktop-product-price">${fmt(Number(item.price)||0)}</span></button>`).join(''):'<div class="desktop-products-empty">Bu bölümde ürün bulunamadı.</div>';
+  if(products)products.innerHTML=items.length?items.map(item=>`<button class="desktop-product-card ${mposIsProductDisabled(item.id)?'desktop-product-disabled':''}" type="button" onclick="desktopOrderChangeQty('${item.id}',1)"><span class="desktop-product-name">${escapeHtml(item.name)}</span><span class="desktop-product-price">${mposIsProductDisabled(item.id)?'SATIŞA KAPALI':fmt(Number(item.price)||0)}</span></button>`).join(''):'<div class="desktop-products-empty">Bu bölümde ürün bulunamadı.</div>';
   const rows=[];
   Object.entries(order).forEach(([itemId,qty])=>{const item=(data.menu||[]).find(m=>m.id===itemId);if(item&&qty>0)rows.push({item,qty:Number(qty)||0});});
   const cart=document.getElementById('desktop-order-cart-list');
@@ -1644,7 +1767,7 @@ function desktopOrderChangeQty(itemId,delta){
 function desktopOrderClear(){
   if(!currentMasa||!activeState().tables[currentMasa])return;
   if(!confirm('Bu masadaki tüm siparişler temizlensin mi?'))return;
-  delete activeState().tables[currentMasa];queueSave();renderDesktopOrderScreen();renderMasaGrid();showToast('Masa temizlendi');
+  delete activeState().tables[currentMasa];mposClearTableActivity(currentMasa);queueSave();renderDesktopOrderScreen();renderMasaGrid();showToast('Masa temizlendi');
 }
 function desktopOrderTakePayment(){if(currentMasa&&tableTotal(currentMasa)>0)openDesktopPaymentPanel(currentMasa);}
 
@@ -1709,7 +1832,7 @@ function desktopSearchTables(q){
     tile.style.display=filterOk&&searchOk?'':'none';
   });
 }
-window.addEventListener('resize',()=>{syncDesktopPatronShell();if(isDesktopPatron())desktopFilterTables(desktopTableFilter);else{closeDesktopPaymentPanel();closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();}});
+window.addEventListener('resize',()=>{syncDesktopPatronShell();syncMobilePosShell();if(isDesktopPatron())desktopFilterTables(desktopTableFilter);else{closeDesktopPaymentPanel();closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();}if(isMobilePos())mposRender();});
 
 function tryLogin(){
   const u=document.getElementById('login-user').value.trim(); const p=document.getElementById('login-pass').value.trim(); const err=document.getElementById('login-error');
@@ -1742,6 +1865,7 @@ function updateRoleUI(){
   document.getElementById('role-badge').textContent=admin?'Patron / Admin':'Çalışan';
   if(!admin){switchTab('masa');} else updateTestUI();
   syncDesktopPatronShell();
+  syncMobilePosShell();
 }
 function toggleTestMode(){
   if(currentUser.role!=='admin')return;
@@ -1771,6 +1895,7 @@ function logout(){
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('login-user').value='';
   document.getElementById('login-pass').value='';
+  mposShutdown();
   // Çıkış ekranında Arpa Asistan tamamen gizlenir; ses ve sohbet de temizlenir.
   arpaSetVisibility();
 }
@@ -1876,13 +2001,15 @@ function changeQty(itemId, delta){
   const newQty = (order[itemId] || 0) + delta;
   if(newQty <= 0){ delete order[itemId]; }
   else{ order[itemId] = newQty; }
-  if(Object.keys(order).length === 0) delete data.tables[currentMasa];
+  if(Object.keys(order).length === 0){ delete data.tables[currentMasa]; mposClearTableActivity(currentMasa); }
+  else mposTouchTable(currentMasa);
   renderModalMenu();
   queueSave();
 }
 function clearOrder(){
   if(!currentMasa) return;
   delete activeState().tables[currentMasa];
+  mposClearTableActivity(currentMasa);
   renderModalMenu();
   queueSave();
   showToast('Masa temizlendi');
@@ -1915,7 +2042,8 @@ function completeOrderPayment(method,amountOverride=null,meta={}){
     amount:total,
     at:Date.now(),
     by:currentUser.name||currentUser.username,
-    paymentMethod:method==='kart'?'kart':'nakit'
+    paymentMethod:method==='kart'?'kart':'nakit',
+    masaId:masaId
   };
   if(meta.description)sale.description=meta.description;
   if(Number(meta.originalAmount)>total)sale.originalAmount=Number(meta.originalAmount);
@@ -1929,6 +2057,7 @@ function completeOrderPayment(method,amountOverride=null,meta={}){
   if(testMode)testSales[saleId]=sale; else sales[saleId]=sale;
 
   delete data.tables[masaId];
+  if(data.posAdmin&&data.posAdmin.tableActivity)delete data.posAdmin.tableActivity[masaId];
   queueSave();
   renderEarnings();
 
@@ -2171,13 +2300,16 @@ function renderAdmin(){
 
 function renderAll(){
   arpaSetVisibility();
+  syncMobilePosShell();
   renderMasaGrid();
   if(isDesktopOrderOpen())renderDesktopOrderScreen();
   renderDesktopUserMenu();
   renderActiveEmployees();
   renderSpecialSummary();
   if(document.getElementById('view-admin').style.display !== 'none') renderAdmin();
+  if(isMobilePos())mposRender();
 }
+
 
 // ---------- employees / earnings / special orders ----------
 function createEmployee(){const name=document.getElementById('emp-name').value.trim(),username=document.getElementById('emp-username').value.trim(),password=document.getElementById('emp-password').value.trim();if(!name||!username||!password){showToast('Personel adı, kullanıcı adı ve şifre gerekli');return;}if(username.toLowerCase()===(credentials.username||'').toLowerCase()||Object.values(employees).some(e=>(e.username||'').toLowerCase()===username.toLowerCase())){showToast('Bu kullanıcı adı zaten kullanılıyor');return;}usersRef.push({name,username,password,createdAt:Date.now()}).then(()=>{document.getElementById('emp-name').value='';document.getElementById('emp-username').value='';document.getElementById('emp-password').value='';showToast(name+' oluşturuldu');});}
@@ -2302,6 +2434,187 @@ scheduleEarningsMidnightRefresh();
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible' && currentUser && currentUser.role==='admin')renderEarnings();
 });
+
+
+
+// ==========================================================
+// ORTAK POS YONETIM VERISI + MOBIL PATRON/GARSON
+// ==========================================================
+function ensurePosAdmin(){
+  const d=activeState();
+  if(!d.posAdmin||typeof d.posAdmin!=='object')d.posAdmin={};
+  const p=d.posAdmin;
+  if(!p.ui)p.ui={darkMode:false,coloredProducts:true,animations:true,fontScale:100,autoReturnTables:true,quickAskPeople:true,autoCloseAfterPay:true};
+  if(!p.tableActivity)p.tableActivity={};
+  if(!Array.isArray(p.tableTimeRules))p.tableTimeRules=[{minutes:45,color:'#c93b31'},{minutes:30,color:'#f39c12'}];
+  if(!p.disabledProducts)p.disabledProducts={};
+  if(!Array.isArray(p.cashMovements))p.cashMovements=[];
+  if(!Number.isFinite(Number(p.cashOpening)))p.cashOpening=0;
+  return p;
+}
+function mposTouchTable(id){if(!id)return;ensurePosAdmin().tableActivity[String(id)]=Date.now();}
+function mposClearTableActivity(id){const p=ensurePosAdmin();delete p.tableActivity[String(id)];}
+function mposTableActivity(id){return Number(ensurePosAdmin().tableActivity[String(id)]||0);}
+function mposElapsedMinutes(id){const t=mposTableActivity(id);return t?Math.max(0,Math.floor((Date.now()-t)/60000)):0;}
+function mposTableColor(id){
+  const p=ensurePosAdmin(), mins=mposElapsedMinutes(id);
+  const rules=(p.tableTimeRules||[]).filter(r=>Number.isFinite(Number(r.minutes))&&r.color).sort((a,b)=>Number(b.minutes)-Number(a.minutes));
+  for(const r of rules)if(mins>=Number(r.minutes))return r.color;
+  return '#1f7134';
+}
+function mposEnsureActivityForOpenTables(){
+  const d=activeState(),p=ensurePosAdmin();let changed=false;
+  Object.keys(d.tables||{}).forEach(id=>{if(tableTotal(id)>0&&!p.tableActivity[id]){p.tableActivity[id]=Date.now();changed=true;}});
+  if(changed)queueSave();
+}
+function mposIsProductDisabled(id){return !!ensurePosAdmin().disabledProducts[String(id)];}
+function mposSetProductDisabled(id,on){const p=ensurePosAdmin();if(on)p.disabledProducts[String(id)]=true;else delete p.disabledProducts[String(id)];queueSave();renderAll();}
+
+// Masa grid renklerini PC tarafinda da uygula.
+const _baseRenderMasaGrid=renderMasaGrid;
+renderMasaGrid=function(){
+  mposEnsureActivityForOpenTables();
+  _baseRenderMasaGrid();
+  if(isDesktopPatron()){
+    document.querySelectorAll('#masa-grid .masa-tile.occupied').forEach(tile=>{
+      const num=tile.querySelector('.num')?.textContent?.trim();
+      if(num)tile.style.background=mposTableColor(num);
+    });
+  }
+  if(isMobilePos())mposRenderTables();
+};
+
+// Desktop urun ekraninda satis kapali urunleri pasiflestir.
+const _baseDesktopOrderChangeQty=desktopOrderChangeQty;
+desktopOrderChangeQty=function(itemId,delta){if(delta>0&&mposIsProductDisabled(itemId)){showToast('Bu ürün satışa kapalı');return;}_baseDesktopOrderChangeQty(itemId,delta);if(currentMasa&&tableTotal(currentMasa)>0)mposTouchTable(currentMasa);};
+
+// ---------------- PATRON QUICK MANAGEMENT ----------------
+function closePatronTool(){const o=document.getElementById('patron-tool-overlay');if(o)o.style.display='none';}
+function patronToolFrame(title,subtitle,body){
+  const panel=document.getElementById('patron-tool-panel');if(!panel)return;
+  panel.innerHTML=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px"><div><h2 style="margin:0;font-size:24px">${escapeHtml(title)}</h2><div style="color:#a9b2bb;margin-top:5px;font-size:12px">${escapeHtml(subtitle||'Patron yönetimi')}</div></div><button onclick="closePatronTool()" style="width:42px;height:42px;border:0;border-radius:10px;background:#424b54;color:#fff;font-size:24px">×</button></div>${body}`;
+  document.getElementById('patron-tool-overlay').style.display='flex';
+}
+function openPatronTool(action){
+  if(!currentUser||currentUser.role!=='admin')return;
+  const p=ensurePosAdmin();
+  if(action==='cash-open'){
+    patronToolFrame('Kasa Açılış','Gün başlangıç kasası',`<div style="background:#252c33;border:1px solid #46515c;border-radius:14px;padding:18px"><label style="font-size:12px;color:#aeb6be">Açılış Tutarı</label><input id="pt-cash-open" type="number" step="0.01" value="${Number(p.cashOpening)||0}" style="width:100%;box-sizing:border-box;margin:8px 0 14px;height:48px;border:1px solid #55616d;background:#1f252b;color:#fff;border-radius:10px;padding:0 12px"><button class="btn btn-primary" style="width:100%" onclick="savePatronCashOpening()">Kaydet</button></div>`);return;
+  }
+  if(action==='cash-flow'){
+    const rows=(p.cashMovements||[]).slice().reverse().slice(0,20).map(x=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #414a53"><div><b>${x.type==='out'?'Kasa Çıkış':'Kasa Giriş'}</b><small style="display:block;color:#9fa8b1">${escapeHtml(x.note||'')} · ${new Date(x.at).toLocaleString('tr-TR')}</small></div><strong style="color:${x.type==='out'?'#ff746c':'#70d29f'}">${x.type==='out'?'-':'+'}${fmt(Number(x.amount)||0)}</strong></div>`).join('')||'<div style="color:#9fa8b1">Henüz kasa hareketi yok.</div>';
+    patronToolFrame('Kasa Giriş Çıkış','Nakit kasa hareketleri',`<div style="display:grid;grid-template-columns:130px 1fr 1fr auto;gap:8px;margin-bottom:18px"><select id="pt-flow-type" style="background:#20272e;color:#fff;border:1px solid #505c67;border-radius:9px;padding:0 9px"><option value="in">Giriş</option><option value="out">Çıkış</option></select><input id="pt-flow-amount" type="number" step="0.01" placeholder="Tutar" style="background:#20272e;color:#fff;border:1px solid #505c67;border-radius:9px;padding:10px"><input id="pt-flow-note" placeholder="Açıklama" style="background:#20272e;color:#fff;border:1px solid #505c67;border-radius:9px;padding:10px"><button class="btn btn-primary" onclick="addPatronCashMovement()">Ekle</button></div><div>${rows}</div>`);return;
+  }
+  if(action==='disabled-products'){
+    const list=(activeState().menu||[]).map(item=>`<label style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-bottom:1px solid #414a53"><span><b>${escapeHtml(item.name)}</b><small style="display:block;color:#a5adb5;margin-top:3px">${fmt(Number(item.price)||0)}</small></span><input type="checkbox" ${mposIsProductDisabled(item.id)?'checked':''} onchange="mposSetProductDisabled('${item.id}',this.checked)"></label>`).join('')||'<div style="color:#a5adb5">Ürün bulunmuyor.</div>';
+    patronToolFrame('Satışa Kapalı Ürünler','Sipariş ekranında eklenmesini engeller',`<div style="background:#252c33;border:1px solid #414b55;border-radius:12px;overflow:hidden">${list}</div>`);return;
+  }
+  if(action==='table-colors'){
+    const palette=['#ef3b35','#e91e63','#9c27b0','#673ab7','#3f51b5','#2196f3','#03a9f4','#00bcd4','#009688','#4caf50','#8bc34a','#d4e52c','#ffeb3b','#ffc107','#ff9800','#ff5722','#795548','#607d8b'];
+    const rules=[...(p.tableTimeRules||[])];while(rules.length<3)rules.push({minutes:'',color:'#607d8b'});
+    const cards=rules.slice(0,3).map((r,i)=>`<div style="background:#252c33;border:1px solid #414b55;border-radius:12px;padding:16px;margin-bottom:10px"><div style="font-size:11px;color:#9fa8b1;margin-bottom:8px">Son Siparişten Beri Geçen Dakika <span id="pt-color-preview-${i}" style="display:inline-block;width:24px;height:24px;vertical-align:middle;margin-left:8px;background:${r.color};border-radius:3px"></span></div><input id="pt-rule-min-${i}" type="number" min="0" value="${r.minutes}" placeholder="Dakika" style="width:100%;box-sizing:border-box;background:#1e252c;color:#fff;border:1px solid #59646f;border-radius:9px;padding:11px;margin-bottom:10px"><input id="pt-rule-color-${i}" type="hidden" value="${r.color}"><div style="display:flex;flex-wrap:wrap;gap:9px">${palette.map(c=>`<button type="button" onclick="setPatronRuleColor(${i},'${c}')" style="width:25px;height:25px;border:0;border-radius:50%;background:${c}"></button>`).join('')}</div></div>`).join('');
+    patronToolFrame('Masa Zaman Renkleri','Son siparişten geçen süreye göre masa rengi',`<button onclick="resetPatronTableColors()" style="width:100%;height:42px;border:0;border-radius:8px;background:#ffb612;color:#202020;font-weight:900;margin-bottom:14px">Sıfırla</button>${cards}<button class="btn btn-primary" style="width:100%;margin-top:5px" onclick="savePatronTableColors()">Kaydet</button>`);return;
+  }
+}
+function savePatronCashOpening(){ensurePosAdmin().cashOpening=Math.max(0,Number(document.getElementById('pt-cash-open')?.value)||0);queueSave();showToast('Kasa açılış tutarı kaydedildi');closePatronTool();}
+function addPatronCashMovement(){const type=document.getElementById('pt-flow-type')?.value==='out'?'out':'in',amount=Math.max(0,Number(document.getElementById('pt-flow-amount')?.value)||0),note=(document.getElementById('pt-flow-note')?.value||'').trim();if(!amount){showToast('Geçerli tutar girin');return;}ensurePosAdmin().cashMovements.push({type,amount,note,at:Date.now(),by:currentUser.name||currentUser.username});queueSave();showToast('Kasa hareketi eklendi');openPatronTool('cash-flow');}
+function setPatronRuleColor(i,c){const inp=document.getElementById('pt-rule-color-'+i),pre=document.getElementById('pt-color-preview-'+i);if(inp)inp.value=c;if(pre)pre.style.background=c;}
+function savePatronTableColors(){const rules=[];for(let i=0;i<3;i++){const raw=document.getElementById('pt-rule-min-'+i)?.value,color=document.getElementById('pt-rule-color-'+i)?.value;if(raw!==''&&Number.isFinite(Number(raw)))rules.push({minutes:Math.max(0,Number(raw)),color:color||'#607d8b'});}ensurePosAdmin().tableTimeRules=rules.sort((a,b)=>b.minutes-a.minutes);queueSave();renderMasaGrid();showToast('Masa zaman renkleri kaydedildi');closePatronTool();}
+function resetPatronTableColors(){ensurePosAdmin().tableTimeRules=[{minutes:45,color:'#c93b31'},{minutes:30,color:'#f39c12'}];queueSave();openPatronTool('table-colors');renderMasaGrid();}
+
+// ---------------- MOBILE POS SHELL ----------------
+let mposPage='tables',mposTableFilter='open',mposSearch='',mposOrderMasa=null,mposOrderCategory='all',mposProductSearch='',mposQuickCart={},mposQuickMode=false;
+function isMobilePos(){return !!(currentUser&&currentUser.username&&window.innerWidth<=700);}
+function mposInitial(){return ((currentUser.name||currentUser.username||'Ö').trim().charAt(0)||'Ö').toLocaleUpperCase('tr-TR');}
+function syncMobilePosShell(){
+  const shell=document.getElementById('mobile-pos-shell'),app=document.getElementById('app-screen');if(!shell||!app)return;
+  const on=isMobilePos()&&app.style.display!=='none';
+  if(on&&currentUser.role!=='admin'&&!['tables','prepare','personnel','settings'].includes(mposPage))mposPage='tables';
+  app.classList.toggle('mobile-pos-active',on);shell.classList.toggle('open',on);shell.setAttribute('aria-hidden',on?'false':'true');
+  if(!on){mposCloseOrder();mposToggleDrawer(false);return;}
+  const initial=mposInitial();document.getElementById('mpos-avatar').textContent=initial;document.getElementById('mpos-order-avatar').textContent=initial;document.getElementById('mpos-foot-avatar').textContent=initial;document.getElementById('mpos-foot-name').textContent=currentUser.name||currentUser.username;document.getElementById('mpos-foot-role').textContent=currentUser.role==='admin'?'Patron / Admin':'Garson / Çalışan';
+  const logo=document.querySelector('#app-screen header .brand .logo-mark img')?.src||'';if(logo)document.getElementById('mpos-brand-logo').src=logo;
+  document.getElementById('mpos-more-btn').style.display=currentUser.role==='admin'?'flex':'none';
+  mposApplyUiSettings();mposRenderDrawer();mposRender();
+}
+function mposShutdown(){mposPage='tables';mposTableFilter='open';mposSearch='';mposOrderMasa=null;mposQuickCart={};mposQuickMode=false;const shell=document.getElementById('mobile-pos-shell');shell?.classList.remove('open');document.getElementById('app-screen')?.classList.remove('mobile-pos-active');mposToggleDrawer(false);mposCloseOrder();mposClosePayment();mposCloseQuickMenu();}
+function mposApplyUiSettings(){const shell=document.getElementById('mobile-pos-shell'),p=ensurePosAdmin(),ui=p.ui||{};shell?.classList.toggle('mpos-dark',!!ui.darkMode);if(shell)shell.style.fontSize=(Number(ui.fontScale)||100)+'%';shell?.classList.toggle('no-animations',ui.animations===false);}
+function mposToggleDrawer(force){const b=document.getElementById('mpos-drawer-backdrop');if(!b)return;const open=force===undefined?!b.classList.contains('open'):!!force;b.classList.toggle('open',open);if(open)mposRenderDrawer();}
+function mposRenderDrawer(){
+  const admin=currentUser.role==='admin',nav=document.getElementById('mpos-drawer-nav');if(!nav)return;
+  const adminItems=[['reports','▥','Raporlar'],['tables','▦','Masalar'],['quick','🛒','Hızlı Sipariş'],['prepare','◉','Hazırlanacaklar'],['deliver','🚚','Teslim Edilecekler'],['calls','☎','Aramalar'],['accounts','▣','Cari Hesaplar'],['finance','💵','Finans'],['personnel','👥','Personel Yönetimi'],['closed','▤','Kapanan Masalar'],['logs','☷','Logs'],['settings','⚙','Ayarlar']];
+  const empItems=[['tables','▦','Masalar'],['prepare','◉','Hazırlanacaklar'],['personnel','👥','Personel Yönetimi'],['settings','⚙','Ayarlar']];
+  const items=admin?adminItems:empItems;
+  nav.innerHTML='<div class="mpos-drawer-label">Genel</div><div class="mpos-drawer-nav">'+items.map(([id,ic,n])=>`<button class="mpos-drawer-item ${mposPage===id?'active':''}" onclick="mposNavigate('${id}')"><span class="ico">${ic}</span>${n}</button>`).join('')+'</div>';
+}
+function mposNavigate(page){if(currentUser.role!=='admin'&&!['tables','prepare','personnel','settings'].includes(page))page='tables';mposPage=page;mposToggleDrawer(false);mposSearch='';const s=document.getElementById('mpos-global-search');if(s)s.value='';mposRender();}
+function mposOpenAccount(){mposToggleDrawer(true);}
+function mposSetSearch(v){mposSearch=(v||'').toLocaleLowerCase('tr-TR');mposRender();}
+function mposRender(){if(!isMobilePos())return;mposRenderDrawer();mposRenderTabs();const c=document.getElementById('mpos-content');if(!c)return;switch(mposPage){case'reports':mposRenderReports(c);break;case'finance':mposRenderFinance(c);break;case'personnel':mposRenderPersonnel(c);break;case'settings':mposRenderSettings(c);break;case'quick':mposRenderQuickOrderPage(c);break;case'prepare':mposRenderPrepare(c);break;case'deliver':mposRenderDeliver(c);break;case'closed':mposRenderClosed(c);break;case'logs':mposRenderLogs(c);break;case'calls':case'accounts':mposRenderEmptyModule(c,mposPage==='calls'?'Aramalar':'Cari Hesaplar');break;default:mposRenderTables();}}
+function mposRenderTabs(){const tabs=document.getElementById('mpos-tabs');if(!tabs)return;if(mposPage!=='tables'){tabs.style.display='none';return;}tabs.style.display='flex';const openCount=Object.keys(activeState().tables||{}).filter(id=>tableTotal(id)>0).length;const defs=[['open','Açık Masalar ('+openCount+')'],['bahce','BAHÇE'],['yukari','Yukarı Salon'],['salon','Salon']];tabs.innerHTML=defs.map(([id,n])=>`<button class="mpos-tab ${mposTableFilter===id?'active':''}" onclick="mposFilter('${id}')">${n}</button>`).join('');}
+function mposFilter(f){mposTableFilter=f;mposRenderTables();mposRenderTabs();}
+function mposAreaForTable(n,count){const third=Math.ceil(count/3);return n<=third?'bahce':n<=third*2?'yukari':'salon';}
+function mposRenderTables(){if(!isMobilePos()||mposPage!=='tables')return;const c=document.getElementById('mpos-content');if(!c)return;mposEnsureActivityForOpenTables();const d=activeState(),arr=[];for(let i=1;i<=d.masaCount;i++){const id=String(i),total=tableTotal(id),occ=total>0,area=mposAreaForTable(i,d.masaCount);if(mposTableFilter==='open'&&!occ)continue;if(mposTableFilter!=='open'&&area!==mposTableFilter)continue;const hay=('masa '+id+' '+fmt(total)).toLocaleLowerCase('tr-TR');if(mposSearch&&!hay.includes(mposSearch))continue;arr.push({id,total,occ});}c.innerHTML=arr.length?'<div class="mpos-table-grid">'+arr.map(x=>mposTableHtml(x)).join('')+'</div>':'<div class="mpos-empty"><b>Masa bulunamadı</b>Seçili bölümde gösterilecek masa yok.</div>';}
+function mposTableHtml(x){const mins=mposElapsedMinutes(x.id),time=x.occ?(mins<1?'az önce':mins+' dk önce'):'';return `<button class="mpos-table ${x.occ?'occupied':'empty'}" style="${x.occ?'--mpos-table-color:'+mposTableColor(x.id):''}" onclick="mposOpenOrder('${x.id}')"><span class="mpos-table-name">Masa ${x.id}</span>${x.occ?`<span class="mpos-table-meta">#${x.id}</span><span class="mpos-table-time">◷ ${time}</span><span class="mpos-table-total">${fmt(x.total)}</span><span class="mpos-table-actions"><span>▣</span><span>▤</span></span>`:''}</button>`;}
+
+function mposOpenOrder(id){mposQuickMode=false;mposOrderMasa=String(id);currentMasa=String(id);mposOrderCategory='all';mposProductSearch='';document.getElementById('mpos-order-search').value='';document.getElementById('mpos-order-screen').classList.add('open');document.getElementById('mpos-order-screen').setAttribute('aria-hidden','false');mposRenderOrder();}
+function mposCloseOrder(){const s=document.getElementById('mpos-order-screen');s?.classList.remove('open');s?.setAttribute('aria-hidden','true');if(!mposQuickMode){mposOrderMasa=null;currentMasa=null;}mposQuickMode=false;if(isMobilePos())mposRender();}
+function mposOrderData(){return mposQuickMode?mposQuickCart:(activeState().tables[mposOrderMasa]||{});}
+function mposOrderTotal(){if(!mposQuickMode)return mposOrderMasa?tableTotal(mposOrderMasa):0;let t=0;Object.entries(mposQuickCart).forEach(([id,q])=>{const it=activeState().menu.find(m=>m.id===id);if(it)t+=Number(it.price||0)*Number(q||0)});return t;}
+function mposSetProductSearch(v){mposProductSearch=(v||'').toLocaleLowerCase('tr-TR');mposRenderOrder();}
+function mposCycleCategory(){const cats=['all',...(activeState().categories||[]).map(c=>c.id)];let i=cats.indexOf(mposOrderCategory);mposOrderCategory=cats[(i+1)%cats.length]||'all';mposRenderOrder();}
+function mposRenderOrder(){
+  const data=activeState(),cats=[{id:'all',name:'Tümü'},...(data.categories||[])],disabled=ensurePosAdmin().disabledProducts||{},colored=ensurePosAdmin().ui.coloredProducts!==false;
+  const catEl=document.getElementById('mpos-order-cats'),prodEl=document.getElementById('mpos-products');if(!catEl||!prodEl)return;
+  catEl.innerHTML=cats.map(c=>`<button class="mpos-cat-btn ${mposOrderCategory===c.id?'active':''}" onclick="mposOrderCategory='${c.id}';mposRenderOrder()"><span class="mpos-cat-badge">${escapeHtml(mposCategoryInitials(c.name))}</span><span class="mpos-cat-name">${escapeHtml(c.name)}</span></button>`).join('');
+  const items=(data.menu||[]).filter(it=>(mposOrderCategory==='all'||String(it.categoryId||'')===String(mposOrderCategory))&&(!mposProductSearch||(it.name||'').toLocaleLowerCase('tr-TR').includes(mposProductSearch)));
+  prodEl.innerHTML=items.length?items.map(it=>`<button class="mpos-product ${colored?'colored':''} ${disabled[it.id]?'disabled':''}" onclick="mposChangeQty('${it.id}',1)"><strong>${escapeHtml(it.name)}</strong><span>${fmt(Number(it.price)||0)}</span></button>`).join(''):'<div class="mpos-empty"><b>Ürün yok</b>Bu kategoride ürün bulunamadı.</div>';
+  mposRenderCart();
+}
+function mposCategoryInitials(n){return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toLocaleUpperCase('tr-TR')||'ÜR';}
+function mposChangeQty(itemId,delta){if(delta>0&&mposIsProductDisabled(itemId)){showToast('Bu ürün satışa kapalı');return;}if(mposQuickMode){const n=(mposQuickCart[itemId]||0)+delta;if(n<=0)delete mposQuickCart[itemId];else mposQuickCart[itemId]=n;mposRenderOrder();return;}if(!mposOrderMasa)return;const d=activeState();if(!d.tables[mposOrderMasa])d.tables[mposOrderMasa]={};const o=d.tables[mposOrderMasa],n=(o[itemId]||0)+delta;if(n<=0)delete o[itemId];else o[itemId]=n;if(Object.keys(o).length===0){delete d.tables[mposOrderMasa];mposClearTableActivity(mposOrderMasa);}else mposTouchTable(mposOrderMasa);queueSave();mposRenderOrder();renderMasaGrid();}
+function mposRenderCart(){const o=mposOrderData(),data=activeState(),list=document.getElementById('mpos-cart-list');const rows=Object.entries(o).filter(([,q])=>Number(q)>0);document.getElementById('mpos-cart-title').textContent=mposQuickMode?'Hızlı Sipariş':('Masa '+mposOrderMasa);document.getElementById('mpos-cart-count').textContent=rows.length+' kalem';document.getElementById('mpos-cart-total').textContent=fmt(mposOrderTotal());list.innerHTML=rows.length?rows.map(([id,q])=>{const it=data.menu.find(m=>m.id===id);if(!it)return'';return `<div class="mpos-cart-row"><div><strong>${escapeHtml(it.name)}</strong><small>${q} × ${fmt(Number(it.price)||0)}</small></div><div class="mpos-cart-qty"><button onclick="mposChangeQty('${id}',-1)">−</button><b>${q}</b><button onclick="mposChangeQty('${id}',1)">+</button></div></div>`}).join(''):'<div class="mpos-empty" style="padding:24px 10px"><b>Henüz sipariş yok</b>Ürünlere dokunarak sipariş ekleyin.</div>';const btn=document.getElementById('mpos-order-primary');if(mposQuickMode)btn.textContent=currentUser.role==='admin'?'Ödeme Al':'Siparişi Kaydet';else btn.textContent=currentUser.role==='admin'?'Hesabı Kapat':'Siparişi Kaydet';btn.disabled=mposOrderTotal()<=0;}
+function mposPrimaryOrderAction(){if(mposOrderTotal()<=0)return;if(currentUser.role!=='admin'){showToast('Sipariş kaydedildi');mposCloseOrder();return;}mposOpenPayment();}
+function mposOpenPayment(){const total=mposOrderTotal();if(total<=0)return;document.getElementById('mpos-payment-title').textContent=mposQuickMode?'Hızlı Sipariş Ödemesi':'Masa '+mposOrderMasa+' Ödeme';document.getElementById('mpos-payment-total').textContent=fmt(total);document.getElementById('mpos-payment-backdrop').classList.add('open');}
+function mposClosePayment(){document.getElementById('mpos-payment-backdrop')?.classList.remove('open');}
+function mposCompletePayment(method){if(currentUser.role!=='admin')return;if(mposQuickMode){mposCompleteQuickSale(method);return;}const id=mposOrderMasa;if(!id)return;mposClosePayment();completeOrderPayment(method,null,{masaId:id,desktop:false});mposOrderMasa=null;document.getElementById('mpos-order-screen')?.classList.remove('open');mposRender();}
+
+function mposOpenQuickMenu(){if(currentUser.role!=='admin'){return;}const box=document.getElementById('mpos-quick-actions');box.innerHTML=`<button class="mpos-btn" onclick="mposQuickTool('cash-open')">Kasa Açılış</button><button class="mpos-btn" onclick="mposQuickTool('cash-flow')">Kasa Giriş Çıkış</button><button class="mpos-btn" onclick="mposQuickTool('disabled-products')">Satışa Kapalı Ürünler</button><button class="mpos-btn" onclick="mposQuickTool('table-colors')">Masa Zaman Renkleri</button>`;document.getElementById('mpos-quick-backdrop').classList.add('open');}
+function mposCloseQuickMenu(){document.getElementById('mpos-quick-backdrop')?.classList.remove('open');}
+function mposQuickTool(action){mposCloseQuickMenu();if(window.innerWidth>700)openPatronTool(action);else{ // mobilde ayni paneli ekran genisligine uyarla
+  openPatronTool(action);const p=document.getElementById('patron-tool-panel');if(p){p.style.width='94vw';p.style.maxHeight='84vh';} }
+}
+
+function mposRenderReports(c){const m=mposMetrics();c.innerHTML=`<h2 class="mpos-page-title">Raporlar</h2><div class="mpos-page-sub">Finansal özet ve satış görünümü</div><div class="mpos-kpis"><div class="mpos-kpi hero"><span>Bugünkü Kazanç</span><strong>${fmt(m.day)}</strong></div><div class="mpos-kpi"><span>Nakit</span><strong>${fmt(m.cash)}</strong></div><div class="mpos-kpi"><span>Kart</span><strong>${fmt(m.card)}</strong></div><div class="mpos-kpi"><span>Bu Hafta</span><strong>${fmt(m.week)}</strong></div><div class="mpos-kpi"><span>Bu Ay</span><strong>${fmt(m.month)}</strong></div><div class="mpos-kpi"><span>Bu Yıl</span><strong>${fmt(m.year)}</strong></div></div>`;}
+function mposMetrics(){const now=new Date(),day=startOfDay(now),ws=new Date(now.getFullYear(),now.getMonth(),now.getDate()),dow=ws.getDay()||7;ws.setDate(ws.getDate()-dow+1);const month=new Date(now.getFullYear(),now.getMonth(),1).getTime(),year=new Date(now.getFullYear(),0,1).getTime();let dayT=0,cash=0,card=0,week=0,mon=0,yr=0;Object.values(activeSales()).forEach(s=>{const t=Number(s.at)||0,a=Number(s.amount)||0;if(t>=day){dayT+=a;if(s.paymentMethod==='kart')card+=a;else cash+=a}if(t>=ws.getTime())week+=a;if(t>=month)mon+=a;if(t>=year)yr+=a});return{day:dayT,cash,card,week,month:mon,year:yr};}
+function mposRenderFinance(c){const p=ensurePosAdmin(),m=mposMetrics(),mov=(p.cashMovements||[]).reduce((a,x)=>a+(x.type==='out'?-Number(x.amount||0):Number(x.amount||0)),0);c.innerHTML=`<h2 class="mpos-page-title">Finans</h2><div class="mpos-card"><h3><span>💵</span>Kasa</h3><div class="mpos-kpis"><div class="mpos-kpi"><span>Kasa Açılış</span><strong>${fmt(Number(p.cashOpening)||0)}</strong></div><div class="mpos-kpi"><span>Giriş / Çıkış Net</span><strong>${fmt(mov)}</strong></div><div class="mpos-kpi hero"><span>Bugünkü Tahsilat</span><strong>${fmt(m.day)}</strong></div></div></div><div class="mpos-card"><h3><span>▦</span>Ödeme Dağılımı</h3><div class="mpos-row"><span>Nakit</span><b>${fmt(m.cash)}</b></div><div class="mpos-row"><span>Kart</span><b>${fmt(m.card)}</b></div></div>`;}
+function mposRenderPersonnel(c){if(currentUser.role==='admin'){const vals=Object.entries(employees);c.innerHTML=`<h2 class="mpos-page-title">Personel Yönetimi</h2><div class="mpos-card"><h3><span>＋</span>Yeni Çalışan</h3><input id="mpos-emp-name" class="mpos-field" placeholder="Çalışan adı"><input id="mpos-emp-user" class="mpos-field" placeholder="Kullanıcı adı"><input id="mpos-emp-pass" class="mpos-field" type="password" placeholder="Şifre"><button class="mpos-btn" style="width:100%;margin-top:7px" onclick="mposCreateEmployee()">Kaydet</button></div><div class="mpos-card"><h3><span>👥</span>Çalışanlar</h3>${vals.length?vals.map(([id,e])=>`<div class="mpos-list-item"><div class="mpos-list-avatar">${escapeHtml((e.name||e.username||'?')[0].toUpperCase())}</div><div class="mpos-list-main"><strong>${escapeHtml(e.name||e.username)}</strong><small>@${escapeHtml(e.username||'')}</small></div><button class="mpos-btn danger" onclick="mposFireEmployee('${id}')">Kov</button></div>`).join(''):'<div class="mpos-empty">Çalışan yok.</div>'}</div>`;}else{const now=Date.now(),fresh=Object.values(presence||{}).filter(e=>now-Number(e.lastSeen||e.at||0)<45000);c.innerHTML=`<h2 class="mpos-page-title">Personel</h2><div class="mpos-card"><h3><span>●</span>Aktif Çalışanlar</h3>${fresh.length?fresh.map(e=>`<div class="mpos-list-item"><div class="mpos-list-avatar">${escapeHtml((e.name||e.username||'?')[0].toUpperCase())}</div><div class="mpos-list-main"><strong>${escapeHtml(e.name||e.username)}</strong><small>Çevrimiçi</small></div></div>`).join(''):'<div class="mpos-empty">Aktif çalışan yok.</div>'}</div>`;}}
+function mposCreateEmployee(){const name=document.getElementById('mpos-emp-name')?.value.trim(),username=document.getElementById('mpos-emp-user')?.value.trim(),password=document.getElementById('mpos-emp-pass')?.value.trim();if(!name||!username||!password){showToast('Tüm alanları doldurun');return;}if(username.toLowerCase()===(credentials.username||'').toLowerCase()||Object.values(employees).some(e=>(e.username||'').toLowerCase()===username.toLowerCase())){showToast('Kullanıcı adı kullanılıyor');return;}usersRef.push({name,username,password,createdAt:Date.now()}).then(()=>{showToast('Çalışan oluşturuldu');mposRender();});}
+function mposFireEmployee(id){if(!confirm('Bu çalışan silinsin mi?'))return;usersRef.child(id).remove().then(()=>{showToast('Çalışan silindi');mposRender();});}
+
+function mposRenderSettings(c){const p=ensurePosAdmin(),u=p.ui||{},admin=currentUser.role==='admin';c.innerHTML=`<h2 class="mpos-page-title">Genel Ayarlar</h2><div class="mpos-card"><h3><span>🎨</span>Görünüm</h3>${mposToggleHtml('Karanlık Mod','darkMode',!!u.darkMode)}${mposToggleHtml('Renkli Ürünler','coloredProducts',u.coloredProducts!==false)}${mposToggleHtml('Animasyonlar','animations',u.animations!==false)}<div class="mpos-row"><span>Yazı Boyutu</span><select class="mpos-select" style="width:125px" onchange="mposUpdateUi('fontScale',Number(this.value))"><option value="90" ${u.fontScale==90?'selected':''}>%90</option><option value="100" ${!u.fontScale||u.fontScale==100?'selected':''}>%100</option><option value="110" ${u.fontScale==110?'selected':''}>%110</option><option value="120" ${u.fontScale==120?'selected':''}>%120</option></select></div></div><div class="mpos-card"><h3><span>🛒</span>Sipariş Ayarları</h3>${mposToggleHtml('Sipariş sonrası masalara geri dön','autoReturnTables',u.autoReturnTables!==false)}${mposToggleHtml('Hızlı Siparişte Kişi Sayısı Sor','quickAskPeople',u.quickAskPeople!==false)}${mposToggleHtml('Masaları Ödemeden Sonra Otomatik Kapat','autoCloseAfterPay',u.autoCloseAfterPay!==false)}</div>${admin?mposAdminSettingsHtml():''}`;}
+function mposToggleHtml(label,key,on){return `<div class="mpos-toggle-row"><span>${escapeHtml(label)}</span><label class="mpos-switch"><input type="checkbox" ${on?'checked':''} onchange="mposUpdateUi('${key}',this.checked)"><span></span></label></div>`;}
+function mposUpdateUi(key,val){ensurePosAdmin().ui[key]=val;queueSave();mposApplyUiSettings();showToast('Ayar kaydedildi');}
+function mposAdminSettingsHtml(){const d=activeState(),cats=d.categories||[];return `<div class="mpos-card"><h3><span>▦</span>İşletme & Masalar</h3><div class="mpos-row"><span>Masa Sayısı</span><div><button class="mpos-btn secondary" onclick="changeMasaCount(-1);mposRender()">−</button> <b style="padding:0 10px">${d.masaCount}</b> <button class="mpos-btn secondary" onclick="changeMasaCount(1);mposRender()">+</button></div></div><button class="mpos-btn secondary" style="width:100%;margin-top:8px" onclick="mposQuickTool('table-colors')">Masa Zaman Renkleri</button></div><div class="mpos-card"><h3><span>▣</span>Kategoriler</h3><div style="display:flex;gap:7px"><input id="mpos-new-cat" class="mpos-field" placeholder="Yeni kategori"><button class="mpos-btn" onclick="mposAddCategory()">Ekle</button></div><div>${cats.map(x=>`<span class="mpos-category-chip">${escapeHtml(x.name)} <button onclick="mposRemoveCategory('${x.id}')">×</button></span>`).join('')}</div></div><div class="mpos-card"><h3><span>🍽</span>Ürün Yönetimi</h3><input id="mpos-new-product" class="mpos-field" placeholder="Ürün adı"><input id="mpos-new-price" class="mpos-field" type="number" placeholder="Fiyat"><select id="mpos-new-prod-cat" class="mpos-select"><option value="">Kategori seç</option>${cats.map(x=>`<option value="${x.id}">${escapeHtml(x.name)}</option>`).join('')}</select><button class="mpos-btn" style="width:100%;margin:9px 0 14px" onclick="mposAddProduct()">Yeni Ürün Ekle</button>${(d.menu||[]).map(it=>`<div class="mpos-product-admin"><input class="mpos-field" value="${escapeHtml(it.name)}" onchange="mposEditProduct('${it.id}','name',this.value)"><input class="mpos-field" type="number" value="${Number(it.price)||0}" onchange="mposEditProduct('${it.id}','price',this.value)"><select class="mpos-select wide" onchange="mposEditProduct('${it.id}','categoryId',this.value)"><option value="">Kategori yok</option>${cats.map(x=>`<option value="${x.id}" ${String(it.categoryId||'')===String(x.id)?'selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select><button class="mpos-btn danger wide" onclick="mposRemoveProduct('${it.id}')">Ürünü Sil</button></div>`).join('')}</div><div class="mpos-card"><h3><span>•••</span>Diğer</h3><button class="mpos-btn secondary" style="width:100%;margin-bottom:8px" onclick="location.reload()">Force Update</button><button class="mpos-btn secondary" style="width:100%" onclick="location.reload()">ReConnect</button></div>`;}
+function mposAddCategory(){const inp=document.getElementById('mpos-new-cat'),name=inp?.value.trim();if(!name)return;const d=activeState();if(!d.categories)d.categories=[];if(d.categories.some(c=>(c.name||'').toLocaleLowerCase('tr-TR')===name.toLocaleLowerCase('tr-TR'))){showToast('Kategori zaten var');return;}d.categories.push({id:'c'+Date.now(),name});queueSave();mposRender();}
+function mposRemoveCategory(id){if(!confirm('Kategori silinsin mi? Ürünler silinmez.'))return;const d=activeState();d.categories=(d.categories||[]).filter(c=>c.id!==id);d.menu.forEach(x=>{if(x.categoryId===id)x.categoryId=''});queueSave();mposRender();}
+function mposAddProduct(){const name=document.getElementById('mpos-new-product')?.value.trim(),price=Number(document.getElementById('mpos-new-price')?.value),categoryId=document.getElementById('mpos-new-prod-cat')?.value||'';if(!name||!Number.isFinite(price)||price<0){showToast('Ürün adı ve fiyat gerekli');return;}activeState().menu.push({id:'m'+Date.now(),name,price,categoryId});queueSave();mposRender();}
+function mposEditProduct(id,field,val){const it=activeState().menu.find(x=>x.id===id);if(!it)return;if(field==='price'){const n=Number(val);if(!Number.isFinite(n)||n<0)return;it.price=n}else it[field]=val;queueSave();}
+function mposRemoveProduct(id){if(!confirm('Ürün silinsin mi?'))return;const d=activeState();d.menu=d.menu.filter(x=>x.id!==id);Object.values(d.tables||{}).forEach(o=>delete o[id]);delete ensurePosAdmin().disabledProducts[id];queueSave();mposRender();}
+
+function mposRenderPrepare(c){const d=activeState(),rows=[];Object.entries(d.tables||{}).forEach(([mid,o])=>Object.entries(o||{}).forEach(([id,q])=>{const it=d.menu.find(x=>x.id===id);if(it&&q>0)rows.push({mid,name:it.name,q})}));c.innerHTML=`<h2 class="mpos-page-title">Hazırlanacaklar</h2><div class="mpos-page-sub">Açık masa siparişlerinden canlı oluşturulur.</div><div class="mpos-card">${rows.length?rows.map(r=>`<div class="mpos-row"><span><b>${escapeHtml(r.name)}</b><small>Masa ${r.mid}</small></span><strong>${r.q} adet</strong></div>`).join(''):'<div class="mpos-empty">Hazırlanacak sipariş yok.</div>'}</div>`;}
+function mposRenderDeliver(c){const vals=Object.values(activeSpecialOrders());c.innerHTML=`<h2 class="mpos-page-title">Teslim Edilecekler</h2><div class="mpos-card">${vals.length?vals.map(o=>`<div class="mpos-row"><span><b>${escapeHtml(o.name)}</b><small>${escapeHtml(o.date||'')} · ${escapeHtml(o.note||'')}</small></span><strong>${fmt(Number(o.amount)||0)}</strong></div>`).join(''):'<div class="mpos-empty">Teslim edilecek özel sipariş yok.</div>'}</div>`;}
+function mposRenderClosed(c){const vals=Object.entries(activeSales()).sort((a,b)=>Number(b[1].at)-Number(a[1].at)).slice(0,40);c.innerHTML=`<h2 class="mpos-page-title">Kapanan Masalar</h2><div class="mpos-card">${vals.length?vals.map(([,x])=>`<div class="mpos-row"><span><b>${x.masaId?'Masa '+escapeHtml(x.masaId):escapeHtml(x.source||'Satış')}</b><small>${new Date(x.at).toLocaleString('tr-TR')} · ${x.paymentMethod==='kart'?'Kart':'Nakit'} · ${escapeHtml(x.by||'')}</small></span><strong>${fmt(Number(x.amount)||0)}</strong></div>`).join(''):'<div class="mpos-empty">Kapanan masa kaydı yok.</div>'}</div>`;}
+function mposRenderLogs(c){const vals=Object.values(activeSales()).sort((a,b)=>Number(b.at)-Number(a.at)).slice(0,50);c.innerHTML=`<h2 class="mpos-page-title">Logs</h2><div class="mpos-card">${vals.length?vals.map(x=>`<div class="mpos-row"><span><b>Ödeme · ${x.paymentMethod==='kart'?'Kart':'Nakit'}</b><small>${new Date(x.at).toLocaleString('tr-TR')} · ${escapeHtml(x.by||'')}</small></span><strong>${fmt(Number(x.amount)||0)}</strong></div>`).join(''):'<div class="mpos-empty">Log yok.</div>'}</div>`;}
+function mposRenderEmptyModule(c,title){c.innerHTML=`<h2 class="mpos-page-title">${escapeHtml(title)}</h2><div class="mpos-card"><div class="mpos-empty"><b>Henüz kayıt yok</b>Mevcut Özarpa veri yapısında bu modül için kayıt bulunmuyor.</div></div>`;}
+
+function mposRenderQuickOrderPage(c){c.innerHTML=`<h2 class="mpos-page-title">Hızlı Sipariş</h2><div class="mpos-page-sub">Masaya bağlı olmadan hızlı satış oluştur.</div><div class="mpos-card"><button class="mpos-btn" style="width:100%;height:54px" onclick="mposStartQuickOrder()">Yeni Hızlı Sipariş Başlat</button></div><div class="mpos-card"><h3><span>🛒</span>Sepet</h3><div class="mpos-row"><span>Toplam</span><strong>${fmt(mposOrderTotal())}</strong></div></div>`;}
+function mposStartQuickOrder(){mposQuickMode=true;mposQuickCart={};mposOrderMasa=null;mposOrderCategory='all';mposProductSearch='';document.getElementById('mpos-order-search').value='';document.getElementById('mpos-order-screen').classList.add('open');mposRenderOrder();}
+function mposCompleteQuickSale(method){const total=mposOrderTotal();if(total<=0)return;const sale={amount:total,at:Date.now(),by:currentUser.name||currentUser.username,paymentMethod:method==='kart'?'kart':'nakit',source:'hizli-siparis'};const ref=testMode?testSalesRef:salesRef,node=ref.push(),id=node.key;if(testMode)testSales[id]=sale;else sales[id]=sale;node.set(sale).catch(()=>showToast('Hızlı sipariş ödemesi kaydedilemedi'));mposQuickCart={};mposClosePayment();document.getElementById('mpos-order-screen').classList.remove('open');mposQuickMode=false;renderEarnings();showToast('Hızlı sipariş ödendi: '+fmt(total));mposNavigate('tables');}
+
+// Mobilde yeni gün/uzak veri degisimlerinde de ekran canli kalsin.
+setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();else if(['reports','finance','closed','logs','prepare','deliver'].includes(mposPage))mposRender();}},30000);
+
 
 // ---------- init ----------
 // Firebase dinleyicileri (stateRef.on / authRef.on) yukarıda zaten kuruldu;
