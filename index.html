@@ -852,9 +852,10 @@
 
 
 
-/* ---------- PC ÇALIŞAN: bağımsız modern shell (legacy ekranı tamamen örter) ---------- */
-#pc-employee-shell{display:none}
-@media(min-width:701px){body.pc-employee-modern #app-screen{visibility:hidden!important;pointer-events:none!important}body.pc-employee-modern #pc-employee-shell{visibility:visible!important}}
+/* ---------- PC ÇALIŞAN: yeni ana PC POS kabuğunu kullanır ---------- */
+/* Ayrı legacy/overlay çalışan paneli kapalı; çalışan da patronla aynı güncel PC shell'de, yalnızca yetkileri dar. */
+#pc-employee-shell{display:none!important}
+@media(min-width:701px){body.pc-employee-modern #app-screen{visibility:visible!important;pointer-events:auto!important}}
 @media(min-width:701px){
   #pc-employee-shell.open{display:block;position:fixed;inset:0;z-index:9000;background:#2f343a;color:#fff;overflow:auto;font-family:var(--font-body)}
   #pc-employee-shell .pce-sidebar{position:fixed;left:0;top:0;bottom:0;width:236px;background:#222a33;border-right:1px solid #46515d;padding:18px 14px 16px;box-sizing:border-box;display:flex;flex-direction:column}
@@ -1235,7 +1236,7 @@
       <div class="mpos-cart-foot">
         <div class="mpos-cart-total"><span>Toplam</span><span id="mpos-cart-total">0₺</span></div>
         <div class="mpos-order-actions">
-          <button class="mpos-order-primary" id="mpos-order-primary" onclick="mposPrimaryOrderAction()">Hesabı Kapat</button>
+          <button type="button" class="mpos-order-primary" id="mpos-order-primary" onclick="mposPrimaryOrderAction()">Hesabı Kapat</button>
           <button class="mpos-order-other" onclick="mposOpenQuickMenu()">•••</button>
           <button class="mpos-order-print" onclick="mposPrintReceipt()" title="Fiş Yazdır">🖨</button>
         </div>
@@ -1439,6 +1440,8 @@ let selectedPaymentMethod = null;
 let currentMasa = null;
 let saveTimer = null;
 let lastLocalEdit = 0;   // bu cihazda son değişiklik yapılan an
+let lastRemoteState = null;      // Son doğrulanmış ana Firebase state anlık görüntüsü
+let lastRemoteTestState = null;  // Son doğrulanmış test state anlık görüntüsü
 let firstStateLoad = true;
 let authLoaded = false;
 let usersLoaded = false;
@@ -1456,19 +1459,77 @@ function hasPatronAccess(){ return !!(currentUser && (currentUser.role==='admin'
 function isStaffAccount(){ return !!(currentUser && (currentUser.role==='employee' || currentUser.role==='manager')); }
 function roleDisplayName(){ return currentUser.role==='admin'?'Patron / Admin':(currentUser.role==='manager'?'Yönetici':'Çalışan'); }
 function isUserTyping(){ const el=document.activeElement; return el && (el.tagName==='INPUT'||el.tagName==='TEXTAREA'); }
+function cloneStateValue(v){
+  return v==null?v:JSON.parse(JSON.stringify(v));
+}
+function stateValuesEqual(a,b){
+  if(a===b)return true;
+  if(a==null||b==null)return a===b;
+  if(typeof a!==typeof b)return false;
+  if(typeof a!=='object')return false;
+  try{return JSON.stringify(a)===JSON.stringify(b);}catch(e){return false;}
+}
+function buildStatePatch(base,next,prefix='',out={}){
+  if(Array.isArray(base)||Array.isArray(next)){
+    if(!stateValuesEqual(base,next) && prefix)out[prefix]=cloneStateValue(next);
+    return out;
+  }
+  const baseObj=base&&typeof base==='object'?base:{};
+  const nextObj=next&&typeof next==='object'?next:{};
+  const keys=new Set([...Object.keys(baseObj),...Object.keys(nextObj)]);
+  keys.forEach(key=>{
+    const path=prefix?prefix+'/'+key:key;
+    const hasNext=Object.prototype.hasOwnProperty.call(nextObj,key);
+    if(!hasNext){out[path]=null;return;}
+    const bv=baseObj[key],nv=nextObj[key];
+    if(nv&&typeof nv==='object'&&!Array.isArray(nv) && bv&&typeof bv==='object'&&!Array.isArray(bv)){
+      buildStatePatch(bv,nv,path,out);
+    }else if(!stateValuesEqual(bv,nv)){
+      out[path]=cloneStateValue(nv);
+    }
+  });
+  return out;
+}
+function applyVerifiedRemoteState(val,isTest=false){
+  if(!val)return;
+  const cloned=cloneStateValue(val);
+  if(isTest){
+    lastRemoteTestState=cloned;
+    testState=Object.assign({masaCount:20,menu:[],categories:[],tables:{}},cloned);
+    if(!testState.tables)testState.tables={};if(!testState.menu)testState.menu=[];if(!testState.categories)testState.categories=[];
+  }else{
+    lastRemoteState=cloned;
+    applyRemoteState(cloned);
+  }
+}
+function refreshStateFromFirebase(ref,isTest=false){
+  return ref.once('value').then(snap=>{
+    if(lastLocalEdit)return;
+    const val=snap.val();
+    if(val)applyVerifiedRemoteState(val,isTest);
+  }).catch(e=>console.error('Firebase yeniden eşitleme hatası',e));
+}
 function queueSave(){
   lastLocalEdit=Date.now();
   clearTimeout(saveTimer);
   saveTimer=setTimeout(saveState,350);
 }
 function saveState(){
-  const data=JSON.parse(JSON.stringify(activeState()));
+  const data=cloneStateValue(activeState());
   try{
     localStorage.setItem(testMode?'ozarpa-test-state-local':'ozarpa-state-local',JSON.stringify(data));
   }catch(e){}
   const ref=testMode ? testStateRef : stateRef;
-  ref.set(data)
-    .then(()=>{ lastLocalEdit=0; })
+  const base=testMode?lastRemoteTestState:lastRemoteState;
+  const patch=buildStatePatch(base||{},data);
+  if(!Object.keys(patch).length){lastLocalEdit=0;return;}
+  ref.update(patch)
+    .then(()=>{
+      if(testMode)lastRemoteTestState=cloneStateValue(data);else lastRemoteState=cloneStateValue(data);
+      lastLocalEdit=0;
+      // Aynı anda başka cihaz farklı masa/ayar güncellediyse en son birleşik Firebase durumunu tekrar al.
+      setTimeout(()=>refreshStateFromFirebase(ref,testMode),80);
+    })
     .catch(e=>{
       console.error('Kaydetme hatası',e);
       showToast('Firebase kaydetme başarısız — cihaz yedeği tutuldu');
@@ -1501,10 +1562,21 @@ restoreLocalState();
 stateRef.on('value',snap=>{
   const val=snap.val();
   if(!val){ stateRef.set(state).catch(e=>console.error('İlk veri kaydı hatası',e)); return; }
+  // Yerel düzenleme sürerken gelen kendi yankımızı/başka cihaz güncellemesini ezmeyelim.
+  // saveState sonrasında Firebase'in birleşik halini yeniden okuyacağız.
   if(lastLocalEdit && Date.now()-lastLocalEdit<2500)return;
+  lastRemoteState=cloneStateValue(val);
   applyRemoteState(val);
 });
-testStateRef.on('value',snap=>{ const val=snap.val(); if(val){testState=Object.assign({masaCount:20,menu:[],categories:[],tables:{}},val);if(testState.tables===null)testState.tables={};if(testState.menu===null)testState.menu=[];if(!testState.categories)testState.categories=[];} if(testMode&&document.getElementById('app-screen').style.display!=='none')renderAll(); });
+testStateRef.on('value',snap=>{
+  const val=snap.val();
+  if(val){
+    lastRemoteTestState=cloneStateValue(val);
+    testState=Object.assign({masaCount:20,menu:[],categories:[],tables:{}},val);
+    if(testState.tables===null)testState.tables={};if(testState.menu===null)testState.menu=[];if(!testState.categories)testState.categories=[];
+  }
+  if(testMode&&document.getElementById('app-screen').style.display!=='none')renderAll();
+});
 authRef.on('value',snap=>{
   const val=snap.val();
   if(!val){authRef.set(credentials);return;}
@@ -1540,8 +1612,13 @@ usersRef.on('value',snap=>{
   if(hasPatronAccess()){renderEmployees();renderDesktopUserMenu();}
   restoreLoginSession();
 });
-salesRef.on('value',snap=>{sales=snap.val()||{};if(hasPatronAccess())renderEarnings();});
-testSalesRef.on('value',snap=>{testSales=snap.val()||{};if(testMode&&hasPatronAccess())renderEarnings();});
+function refreshSalesViews(){
+  if(hasPatronAccess())renderEarnings();
+  if(isMobilePos()&&['reports','finance','closed','logs'].includes(mposPage))mposRender();
+  if(isDesktopPos()&&hasPatronAccess()&&desktopCurrentPage==='reports')renderEarnings();
+}
+salesRef.on('value',snap=>{sales=snap.val()||{};refreshSalesViews();});
+testSalesRef.on('value',snap=>{testSales=snap.val()||{};if(testMode)refreshSalesViews();});
 specialRef.on('value',snap=>{specialOrders=snap.val()||{};if(hasPatronAccess()){renderSpecialOrders();renderSpecialSummary();}});
 testSpecialRef.on('value',snap=>{testSpecialOrders=snap.val()||{};if(testMode&&hasPatronAccess()){renderSpecialOrders();renderSpecialSummary();}});
 presenceRef.on('value',snap=>{
@@ -2291,6 +2368,10 @@ function forcePcEmployeeModernShell(){
   }
   app.classList.add('desktop-patron','desktop-employee');
   app.classList.remove('mobile-pos-active');
+  app.style.removeProperty('visibility');app.style.removeProperty('pointer-events');
+  document.body.classList.remove('pc-employee-modern');
+  const legacyEmployeeShell=document.getElementById('pc-employee-shell');
+  if(legacyEmployeeShell){legacyEmployeeShell.classList.remove('open');legacyEmployeeShell.style.setProperty('display','none','important');}
   desktopCurrentPage='masa';
   const sidebar=document.getElementById('desktop-sidebar');if(sidebar)sidebar.style.setProperty('display','flex','important');
   const legacyTabs=app.querySelector('header nav.tabs');if(legacyTabs)legacyTabs.style.setProperty('display','none','important');
@@ -2385,14 +2466,19 @@ function pcEmployeeSetSearch(v){pcEmployeeSearch=String(v||'').toLocaleLowerCase
 function pcEmployeeSetFilter(v){pcEmployeeFilter=String(v||'open');renderPcEmployeeShell();}
 function pcEmployeeOpenOrder(id){openDesktopOrderScreen(String(id));}
 function syncPcEmployeeShell(){
-  const shell=document.getElementById('pc-employee-shell');if(!shell)return;
-  const on=pcEmployeeShouldShow();
-  document.body.classList.toggle('pc-employee-modern',on);
-  shell.classList.toggle('open',on);shell.setAttribute('aria-hidden',on?'false':'true');
-  if(!on)return;
-  const src=document.querySelector('.desktop-brand-logo')?.src||document.querySelector('#app-screen header .brand .logo-mark img')?.src||document.querySelector('#login-screen .logo-mark img')?.src||'';
-  const logo=document.getElementById('pce-logo');if(logo&&src)logo.src=src;
-  renderPcEmployeeShell();
+  const shell=document.getElementById('pc-employee-shell'),app=document.getElementById('app-screen');
+  // Çalışan artık ayrı overlay kullanmıyor; doğrudan güncel ana PC POS kabuğunu kullanıyor.
+  document.body.classList.remove('pc-employee-modern');
+  if(shell){
+    shell.classList.remove('open');
+    shell.setAttribute('aria-hidden','true');
+    shell.style.setProperty('display','none','important');
+  }
+  if(app){
+    app.style.removeProperty('visibility');
+    app.style.removeProperty('pointer-events');
+  }
+  if(isDesktopEmployee())forcePcEmployeeModernShell();
 }
 function renderPcEmployeeShell(){
   if(!pcEmployeeShouldShow())return;
@@ -2425,6 +2511,7 @@ function tryLogin(){
   else { for(const id in employees){const e=employees[id];if((e.username||'').toLowerCase()===u.toLowerCase()&&e.password===p){user={username:e.username,name:e.name||e.username,role:e.manager?'manager':'employee',id};break;}} }
   if(!user){err.textContent='Kullanıcı adı veya şifre hatalı.';return;}
   currentUser=user;
+  if(window.innerWidth>700&&!hasPatronAccess())document.body.classList.add('pc-employee-modern');
   desktopShellInitialized=false;
   syncDesktopPatronShell();
   forcePcEmployeeModernShell();
@@ -3037,10 +3124,7 @@ function updateEarningsResetWarnings(now){
   setResetWarning('earn-month-reset',monthDays);
   setResetWarning('earn-year-reset',yearDays);
 }
-function renderEarnings(){
-  if(!document.getElementById('earn-day')||!hasPatronAccess())return;
-
-  const now=new Date();
+function calculateSalesMetrics(now=new Date()){
   const day=startOfDay(now);
   const weekStart=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   const dow=weekStart.getDay()||7;
@@ -3048,40 +3132,39 @@ function renderEarnings(){
   const weekStartTs=weekStart.getTime();
   const monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
   const yearStart=new Date(now.getFullYear(),0,1).getTime();
-
-  let d=0,w=0,m=0,y=0;
-  let dayCash=0,dayCard=0,dayCount=0;
-
+  let dayTotal=0,week=0,month=0,year=0,cash=0,card=0,count=0;
   Object.values(activeSales()).forEach(s=>{
-    const t=Number(s.at)||0;
-    const a=Number(s.amount)||0;
+    const t=Number(s&&s.at)||0;
+    const a=Number(s&&s.amount)||0;
+    if(!Number.isFinite(a)||a<0)return;
     if(t>=day){
-      d+=a;
-      dayCount++;
-      if((s.paymentMethod||'nakit')==='kart')dayCard+=a;
-      else dayCash+=a;
+      dayTotal+=a;count++;
+      if((s.paymentMethod||'nakit')==='kart')card+=a;else cash+=a;
     }
-    if(t>=weekStartTs)w+=a;
-    if(t>=monthStart)m+=a;
-    if(t>=yearStart)y+=a;
+    if(t>=weekStartTs)week+=a;
+    if(t>=monthStart)month+=a;
+    if(t>=yearStart)year+=a;
   });
+  return{day:dayTotal,week,month,year,cash,card,count};
+}
+function renderEarnings(){
+  if(!document.getElementById('earn-day')||!hasPatronAccess())return;
+  const now=new Date(),m=calculateSalesMetrics(now);
 
-  document.getElementById('earn-day').textContent=fmt(d);
-  document.getElementById('earn-week').textContent=fmt(w);
-  document.getElementById('earn-month').textContent=fmt(m);
-  document.getElementById('earn-year').textContent=fmt(y);
+  document.getElementById('earn-day').textContent=fmt(m.day);
+  document.getElementById('earn-week').textContent=fmt(m.week);
+  document.getElementById('earn-month').textContent=fmt(m.month);
+  document.getElementById('earn-year').textContent=fmt(m.year);
 
   const cashEl=document.getElementById('earn-day-cash');
   const cardEl=document.getElementById('earn-day-card');
   const countEl=document.getElementById('earn-day-count');
 
-  if(cashEl)cashEl.textContent=fmt(dayCash);
-  if(cardEl)cardEl.textContent=fmt(dayCard);
-  if(countEl)countEl.textContent=dayCount+' ödeme';
+  if(cashEl)cashEl.textContent=fmt(m.cash);
+  if(cardEl)cardEl.textContent=fmt(m.card);
+  if(countEl)countEl.textContent=m.count+' ödeme';
   updateEarningsResetWarnings(now);
 
-  // Gün değişimini takip et. Saat 00:00 sonrası günlük gösterge yeni gün için 0₺'dan başlar;
-  // satış geçmişi silinmediği için hafta / ay / yıl toplamları devam eder.
   lastEarningsDayKey=now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
 }
 
@@ -3483,11 +3566,38 @@ function mposRenderTables(){
   const source=mposTableFilter==='open'?ids.filter(id=>tableTotal(id)>0):(layout?(layout.tableIds||[]).map(String):ids);
   const arr=[];source.forEach(id=>{const total=tableTotal(id),occ=total>0;const hay=(seatingTableLabel(id)+' masa '+id+' '+fmt(total)).toLocaleLowerCase('tr-TR');if(mposSearch&&!hay.includes(mposSearch))return;arr.push({id,total,occ});});
   c.innerHTML=arr.length?'<div class="mpos-table-grid">'+arr.map(x=>mposTableHtml(x)).join('')+'</div>':'<div class="mpos-empty"><b>Masa bulunamadı</b>Seçili bölümde gösterilecek masa yok.</div>';
+  mposStripLegacyTableNumbers();
 }
-function mposDisplayTableLabel(id){let label=String(seatingTableLabel(id)||'');label=label.replace(/\s*#\s*(\d+)\b/g,' $1').replace(/\s+/g,' ').trim();return label||('Masa '+String(id));}
-function mposTableHtml(x){const mins=mposElapsedMinutes(x.id),time=x.occ?(mins<1?'az önce':mins+' dk önce'):'';return `<button class="mpos-table ${x.occ?'occupied':'empty'}" style="${x.occ?'--mpos-table-color:'+mposTableColor(x.id):''}" onclick="mposOpenOrder('${x.id}')"><span class="mpos-table-name">${escapeHtml(mposDisplayTableLabel(x.id))}</span>${x.occ?`<span class="mpos-table-time">◷ ${time}</span><span class="mpos-table-total">${fmt(x.total)}</span><span class="mpos-table-actions"><span>▣</span><span>▤</span></span>`:''}</button>`;}
+function mposDisplayTableLabel(id){
+  let label=String(seatingTableLabel(id)||'');
+  // Mobilde eski sürümden kalan “BAHÇE #1” gibi gösterimleri kesin temizle.
+  label=label.replace(/[#＃]+\s*(\d+)/g,' $1').replace(/[#＃]+/g,' ');
+  label=label.replace(/\s+/g,' ').trim();
+  label=label.replace(/\b(\d+)\s+\1$/,'$1').trim();
+  return label||('Masa '+String(id));
+}
+function mposStripLegacyTableNumbers(){
+  const root=document.getElementById('mpos-content');if(!root)return;
+  root.querySelectorAll('.mpos-table').forEach(tile=>{
+    tile.querySelectorAll('.mpos-table-meta,.mpos-table-number,.mpos-table-no,.mpos-table-index,[data-table-number]').forEach(el=>el.remove());
+    tile.querySelectorAll('*').forEach(el=>{
+      if(el.classList.contains('mpos-table-name')||el.classList.contains('mpos-table-time')||el.classList.contains('mpos-table-total')||el.classList.contains('mpos-table-actions'))return;
+      const t=String(el.textContent||'').trim();
+      if(/^#\s*\d+$/.test(t))el.remove();
+    });
+    const name=tile.querySelector('.mpos-table-name');
+    if(name)name.textContent=String(name.textContent||'').replace(/[#＃]+\s*(\d+)/g,' $1').replace(/[#＃]+/g,' ').replace(/\s+/g,' ').trim();
+  });
+}
+function mposTableHtml(x){const mins=mposElapsedMinutes(x.id),time=x.occ?(mins<1?'az önce':mins+' dk önce'):'';return `<button type="button" class="mpos-table ${x.occ?'occupied':'empty'}" style="${x.occ?'--mpos-table-color:'+mposTableColor(x.id):''}" onclick="mposOpenOrder('${x.id}')"><span class="mpos-table-name">${escapeHtml(mposDisplayTableLabel(x.id))}</span>${x.occ?`<span class="mpos-table-time">◷ ${time}</span><span class="mpos-table-total">${fmt(x.total)}</span><span class="mpos-table-actions"><span>▣</span><span>▤</span></span>`:''}</button>`;}
 
-function mposOpenOrder(id){mposQuickMode=false;mposAccountMode=false;mposAccountId=null;mposOrderReturnFilter=mposTableFilter||'open';mposOrderMasa=String(id);currentMasa=String(id);mposOrderCategory='all';mposProductSearch='';document.getElementById('mpos-order-search').value='';document.getElementById('mpos-order-screen').classList.add('open');document.getElementById('mpos-order-screen').setAttribute('aria-hidden','false');mposRenderOrder();}
+function mposOpenOrder(id){
+  mposQuickMode=false;mposAccountMode=false;mposAccountId=null;mposOrderReturnFilter=mposTableFilter||'open';mposOrderMasa=String(id);currentMasa=String(id);mposOrderCategory='all';mposProductSearch='';
+  const search=document.getElementById('mpos-order-search');if(search)search.value='';
+  const screen=document.getElementById('mpos-order-screen');
+  if(screen){screen.style.removeProperty('display');screen.classList.add('open');screen.setAttribute('aria-hidden','false');}
+  mposRenderOrder();
+}
 function mposCloseOrder(){const s=document.getElementById('mpos-order-screen');s?.classList.remove('open');s?.setAttribute('aria-hidden','true');if(!mposQuickMode){mposOrderMasa=null;currentMasa=null;}mposQuickMode=false;mposAccountMode=false;mposAccountId=null;if(isMobilePos())mposRender();}
 function mposOrderData(){if(mposAccountMode){return cariAccountById(mposAccountId)?.items||{};}return mposQuickMode?mposQuickCart:(activeState().tables[mposOrderMasa]||{});}
 function mposOrderTotal(){if(mposAccountMode)return cariAccountTotal(cariAccountById(mposAccountId));if(!mposQuickMode)return mposOrderMasa?tableTotal(mposOrderMasa):0;let t=0;Object.entries(mposQuickCart).forEach(([id,q])=>{const it=activeState().menu.find(m=>m.id===id);if(it)t+=Number(it.price||0)*Number(q||0)});return t;}
@@ -3503,7 +3613,7 @@ function mposRenderOrder(){
 }
 function mposCategoryInitials(n){return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toLocaleUpperCase('tr-TR')||'ÜR';}
 function mposChangeQty(itemId,delta){if(delta>0&&mposIsProductDisabled(itemId)){showToast('Bu ürün satışa kapalı');return;}if(mposAccountMode){if(!mposAccountId)return;cariChangeQty(mposAccountId,itemId,delta);mposRenderOrder();return;}if(mposQuickMode){const n=(mposQuickCart[itemId]||0)+delta;if(n<=0)delete mposQuickCart[itemId];else mposQuickCart[itemId]=n;mposRenderOrder();return;}if(!mposOrderMasa)return;const d=activeState();if(!d.tables[mposOrderMasa])d.tables[mposOrderMasa]={};const o=d.tables[mposOrderMasa],n=(o[itemId]||0)+delta;if(n<=0)delete o[itemId];else o[itemId]=n;if(Object.keys(o).length===0){delete d.tables[mposOrderMasa];mposClearTableActivity(mposOrderMasa);}else mposTouchTable(mposOrderMasa);queueSave();mposRenderOrder();renderMasaGrid();}
-function mposRenderCart(){const o=mposOrderData(),data=activeState(),account=mposAccountMode?cariAccountById(mposAccountId):null,list=document.getElementById('mpos-cart-list'),rows=Object.entries(o).filter(([,q])=>Number(q)>0);document.getElementById('mpos-cart-title').textContent=mposAccountMode?(account?.name||'Cari Hesap'):(mposQuickMode?'Hızlı Sipariş':seatingTableLabel(mposOrderMasa));document.getElementById('mpos-cart-count').textContent=rows.length+' kalem';document.getElementById('mpos-cart-total').textContent=fmt(mposOrderTotal());list.innerHTML=rows.length?rows.map(([id,q])=>{const it=data.menu.find(m=>m.id===id),name=mposAccountMode?cariItemName(account,id):(it?.name||'Ürün'),price=mposAccountMode?cariItemPrice(account,id):(Number(it?.price)||0);return `<div class="mpos-cart-row"><div><strong>${escapeHtml(name)}</strong><small>${q} × ${fmt(price)}</small></div><div class="mpos-cart-qty"><button onclick="mposChangeQty('${id}',-1)">−</button><b>${q}</b><button onclick="mposChangeQty('${id}',1)">+</button></div></div>`}).join(''):`<div class="mpos-empty" style="padding:24px 10px"><b>Henüz sipariş yok</b>${mposAccountMode?'Ürünlere dokunarak cari hesaba ekleyin.':(mposQuickMode?'Ürünlere dokunarak hızlı siparişe ekleyin.':'Ürünlere dokunarak masaya sipariş ekleyin.')}</div>`;const btn=document.getElementById('mpos-order-primary');if(mposAccountMode)btn.textContent='Tahsilat Al';else if(mposQuickMode)btn.textContent=hasPatronAccess()?'Ödeme Al':'Siparişi Kaydet';else btn.textContent=hasPatronAccess()?'Hesabı Kapat':'Siparişi Kaydet';btn.disabled=mposOrderTotal()<=0;}
+function mposRenderCart(){const o=mposOrderData(),data=activeState(),account=mposAccountMode?cariAccountById(mposAccountId):null,list=document.getElementById('mpos-cart-list'),rows=Object.entries(o).filter(([,q])=>Number(q)>0);document.getElementById('mpos-cart-title').textContent=mposAccountMode?(account?.name||'Cari Hesap'):(mposQuickMode?'Hızlı Sipariş':mposDisplayTableLabel(mposOrderMasa));document.getElementById('mpos-cart-count').textContent=rows.length+' kalem';document.getElementById('mpos-cart-total').textContent=fmt(mposOrderTotal());list.innerHTML=rows.length?rows.map(([id,q])=>{const it=data.menu.find(m=>m.id===id),name=mposAccountMode?cariItemName(account,id):(it?.name||'Ürün'),price=mposAccountMode?cariItemPrice(account,id):(Number(it?.price)||0);return `<div class="mpos-cart-row"><div><strong>${escapeHtml(name)}</strong><small>${q} × ${fmt(price)}</small></div><div class="mpos-cart-qty"><button onclick="mposChangeQty('${id}',-1)">−</button><b>${q}</b><button onclick="mposChangeQty('${id}',1)">+</button></div></div>`}).join(''):`<div class="mpos-empty" style="padding:24px 10px"><b>Henüz sipariş yok</b>${mposAccountMode?'Ürünlere dokunarak cari hesaba ekleyin.':(mposQuickMode?'Ürünlere dokunarak hızlı siparişe ekleyin.':'Ürünlere dokunarak masaya sipariş ekleyin.')}</div>`;const btn=document.getElementById('mpos-order-primary');if(mposAccountMode)btn.textContent='Tahsilat Al';else if(mposQuickMode)btn.textContent=hasPatronAccess()?'Ödeme Al':'Siparişi Kaydet';else btn.textContent=hasPatronAccess()?'Hesabı Kapat':'Siparişi Kaydet';btn.disabled=mposOrderTotal()<=0;}
 function mposReceiptEscape(v){return escapeHtml(v==null?'':String(v));}
 function mposPrintReceipt(){
   const root=document.getElementById('receipt-print-root');
@@ -3519,7 +3629,7 @@ function mposPrintReceipt(){
   }).filter(Boolean);
   if(!rows.length){showToast('Yazdırılacak sipariş yok');return;}
   const total=rows.reduce((a,r)=>a+r.line,0);
-  const title=mposAccountMode?(cariAccountById(mposAccountId)?.name||'Cari Hesap'):(mposQuickMode?'Hızlı Sipariş':seatingTableLabel(mposOrderMasa));
+  const title=mposAccountMode?(cariAccountById(mposAccountId)?.name||'Cari Hesap'):(mposQuickMode?'Hızlı Sipariş':mposDisplayTableLabel(mposOrderMasa));
   const now=new Date();
   root.innerHTML=`
     <div class="r-head"><div class="r-brand">KEBAPÇI ÖZARPA</div><div class="r-sub">Adisyon / Sipariş Fişi</div></div>
@@ -3559,50 +3669,62 @@ function mposFinishPaidTableUi(){
   });
 }
 
+function mposReturnStaffToTables(returnFilter){
+  const screen=document.getElementById('mpos-order-screen');
+  if(screen){
+    screen.classList.remove('open');
+    screen.setAttribute('aria-hidden','true');
+    // Çalışanda Kaydet sonrası ekranın aynı frame'de geri açılmasını kesin engelle.
+    screen.style.setProperty('display','none','important');
+  }
+  document.getElementById('mpos-payment-backdrop')?.classList.remove('open');
+  document.getElementById('mpos-quick-backdrop')?.classList.remove('open');
+  mposToggleDrawer(false);
+  mposOrderMasa=null;currentMasa=null;mposQuickMode=false;mposAccountMode=false;mposAccountId=null;
+  mposPage='tables';mposTableFilter=returnFilter||'open';mposProductSearch='';mposSearch='';
+  const orderSearch=document.getElementById('mpos-order-search');if(orderSearch)orderSearch.value='';
+  const globalSearch=document.getElementById('mpos-global-search');if(globalSearch)globalSearch.value='';
+  if(isMobilePos())mposRender();
+  try{window.scrollTo(0,0);}catch(e){}
+  // Yeni masa açılana kadar inline display:none korunur; mposOpenOrder bunu kaldırır.
+}
 function mposSaveStaffOrder(){
   if(hasPatronAccess()||mposQuickMode||mposAccountMode)return;
   const masa=String(mposOrderMasa||'');
-  if(!masa||mposOrderTotal()<=0){showToast('Kaydedilecek sipariş yok');return;}
-
+  const total=mposOrderTotal();
+  if(!masa||total<=0){showToast('Kaydedilecek sipariş yok');return;}
   const d=activeState();
-  const order=JSON.parse(JSON.stringify(d.tables[masa]||{}));
+  const order=cloneStateValue(d.tables[masa]||{});
   if(!Object.keys(order).length){showToast('Kaydedilecek sipariş yok');return;}
+  const returnFilter=mposOrderReturnFilter||mposTableFilter||'open';
 
+  // Kullanıcı beklemez: önce Masalar ekranına dön.
+  mposReturnStaffToTables(returnFilter);
+
+  // Ardından yalnızca bu masayı Firebase'e yaz; diğer masaları/ayarları ezme.
   clearTimeout(saveTimer);saveTimer=null;
   const now=Date.now();
-  mposTouchTable(masa);
+  const padmin=ensurePosAdmin();
+  if(!padmin.tableActivity)padmin.tableActivity={};
+  padmin.tableActivity[masa]=now;
   lastLocalEdit=now;
   try{localStorage.setItem(testMode?'ozarpa-test-state-local':'ozarpa-state-local',JSON.stringify(d));}catch(e){}
-
   const ref=testMode?testStateRef:stateRef;
   const updates={};
   updates['tables/'+masa]=order;
   updates['posAdmin/tableActivity/'+masa]=now;
-
-  // Çalışan için butona basıldığı anda sipariş ekranını kapat ve Masalar'a dön.
-  // Firebase kaydı arka planda yalnızca seçili masaya yapılır.
-  const returnFilter=mposOrderReturnFilter||mposTableFilter||'open';
-  const screen=document.getElementById('mpos-order-screen');
-  if(screen){screen.classList.remove('open');screen.setAttribute('aria-hidden','true');}
-  mposOrderMasa=null;currentMasa=null;mposQuickMode=false;mposAccountMode=false;mposAccountId=null;
-  mposPage='tables';mposTableFilter=returnFilter;mposProductSearch='';
-  const search=document.getElementById('mpos-order-search');if(search)search.value='';
-  mposToggleDrawer(false);mposClosePayment();mposCloseQuickMenu();
-  if(isMobilePos())mposRender();
-  try{window.scrollTo({top:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}
-
-  ref.update(updates).then(()=>{
-    setTimeout(()=>{lastLocalEdit=0;},800);
+  Promise.resolve(ref.update(updates)).then(()=>{
+    lastLocalEdit=0;
     showToast('Sipariş kaydedildi');
-    if(isMobilePos()&&mposPage==='tables'){mposRenderTabs();mposRenderTables();}
+    setTimeout(()=>refreshStateFromFirebase(ref,testMode),80);
   }).catch(e=>{
+    lastLocalEdit=0;
     console.error('Çalışan sipariş kaydı hatası',e);
-    // Sipariş yerel tabloda duruyor; kullanıcı masayı yeniden açıp tekrar kaydedebilir.
     showToast('Sipariş kaydedilemedi — masa içeriği cihazda duruyor');
   });
 }
 function mposPrimaryOrderAction(){if(mposOrderTotal()<=0)return;if(!hasPatronAccess()){mposSaveStaffOrder();return;}mposOpenPayment();}
-function mposOpenPayment(){const total=mposOrderTotal();if(total<=0)return;const a=mposAccountMode?cariAccountById(mposAccountId):null;document.getElementById('mpos-payment-title').textContent=mposAccountMode?((a?.name||'Cari')+' Tahsilat'):(mposQuickMode?'Hızlı Sipariş Ödemesi':seatingTableLabel(mposOrderMasa)+' Ödeme');document.getElementById('mpos-payment-total').textContent=fmt(total);document.getElementById('mpos-payment-backdrop').classList.add('open');}
+function mposOpenPayment(){const total=mposOrderTotal();if(total<=0)return;const a=mposAccountMode?cariAccountById(mposAccountId):null;document.getElementById('mpos-payment-title').textContent=mposAccountMode?((a?.name||'Cari')+' Tahsilat'):(mposQuickMode?'Hızlı Sipariş Ödemesi':mposDisplayTableLabel(mposOrderMasa)+' Ödeme');document.getElementById('mpos-payment-total').textContent=fmt(total);document.getElementById('mpos-payment-backdrop').classList.add('open');}
 function mposClosePayment(){document.getElementById('mpos-payment-backdrop')?.classList.remove('open');}
 function mposCompletePayment(method){
   if(!hasPatronAccess())return;
@@ -3621,7 +3743,7 @@ function mposQuickTool(action){mposCloseQuickMenu();if(window.innerWidth>700)ope
 }
 
 function mposRenderReports(c){const m=mposMetrics();c.innerHTML=`<h2 class="mpos-page-title">Raporlar</h2><div class="mpos-page-sub">Finansal özet ve satış görünümü</div><div class="mpos-kpis"><div class="mpos-kpi hero"><span>Bugünkü Kazanç</span><strong>${fmt(m.day)}</strong><div class="mpos-kpi-payments"><div class="mpos-kpi-payment"><span>Nakit</span><strong>${fmt(m.cash)}</strong></div><div class="mpos-kpi-payment"><span>Kart</span><strong>${fmt(m.card)}</strong></div></div></div><div class="mpos-kpi"><span>Bu Hafta</span><strong>${fmt(m.week)}</strong></div><div class="mpos-kpi"><span>Bu Ay</span><strong>${fmt(m.month)}</strong></div><div class="mpos-kpi"><span>Bu Yıl</span><strong>${fmt(m.year)}</strong></div></div>`;}
-function mposMetrics(){const now=new Date(),day=startOfDay(now),ws=new Date(now.getFullYear(),now.getMonth(),now.getDate()),dow=ws.getDay()||7;ws.setDate(ws.getDate()-dow+1);const month=new Date(now.getFullYear(),now.getMonth(),1).getTime(),year=new Date(now.getFullYear(),0,1).getTime();let dayT=0,cash=0,card=0,week=0,mon=0,yr=0;Object.values(activeSales()).forEach(s=>{const t=Number(s.at)||0,a=Number(s.amount)||0;if(t>=day){dayT+=a;if(s.paymentMethod==='kart')card+=a;else cash+=a}if(t>=ws.getTime())week+=a;if(t>=month)mon+=a;if(t>=year)yr+=a});return{day:dayT,cash,card,week,month:mon,year:yr};}
+function mposMetrics(){return calculateSalesMetrics(new Date());}
 function mposRenderFinance(c){const p=ensurePosAdmin(),m=mposMetrics(),mov=(p.cashMovements||[]).reduce((a,x)=>a+(x.type==='out'?-Number(x.amount||0):Number(x.amount||0)),0);c.innerHTML=`<h2 class="mpos-page-title">Finans</h2><div class="mpos-card"><h3><span>💵</span>Kasa</h3><div class="mpos-kpis"><div class="mpos-kpi"><span>Kasa Açılış</span><strong>${fmt(Number(p.cashOpening)||0)}</strong></div><div class="mpos-kpi"><span>Giriş / Çıkış Net</span><strong>${fmt(mov)}</strong></div><div class="mpos-kpi hero"><span>Bugünkü Tahsilat</span><strong>${fmt(m.day)}</strong></div></div></div><div class="mpos-card"><h3><span>▦</span>Ödeme Dağılımı</h3><div class="mpos-row"><span>Nakit</span><b>${fmt(m.cash)}</b></div><div class="mpos-row"><span>Kart</span><b>${fmt(m.card)}</b></div></div>`;}
 function mposRenderPersonnel(c){
   if(hasPatronAccess()){
@@ -3725,7 +3847,7 @@ setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();els
 // ---------- PWA: service worker kaydı ----------
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    const UI_BUILD='20260818-pos-v8';
+    const UI_BUILD='20260818-pos-v10';
     let needsRefresh=false;
     try{
       needsRefresh=localStorage.getItem('ozarpa-ui-build')!==UI_BUILD;
