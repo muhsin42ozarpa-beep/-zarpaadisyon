@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ozarpa-cache-v6';
+const CACHE_NAME = 'ozarpa-cache-v8';
 
 const FILES_TO_CACHE = [
   './index.html',
@@ -29,10 +29,8 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Firebase isteklerine kesinlikle müdahale etme.
-// Site dosyalarında önce güncel dosyayı internetten getir.
-// İnternet yoksa önbellekteki son sürümü kullan.
 self.addEventListener('fetch', (event) => {
+  // Firebase verilerine müdahale etme
   if (
     event.request.url.includes('firebaseio.com') ||
     event.request.url.includes('googleapis.com')
@@ -40,6 +38,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Önce güncel dosyayı internetten al.
+  // İnternet yoksa cache'deki sürümü kullan.
   event.respondWith(
     fetch(
       event.request,
@@ -48,10 +48,10 @@ self.addEventListener('fetch', (event) => {
         : undefined
     )
       .then((response) => {
-        const responseClone = response.clone();
+        const copy = response.clone();
 
         caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseClone);
+          cache.put(event.request, copy);
         });
 
         return response;
