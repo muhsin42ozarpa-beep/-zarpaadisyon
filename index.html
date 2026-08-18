@@ -384,8 +384,8 @@
 
 
 /* ARPA ASİSTAN */
-.arpa-launcher{position:fixed;right:18px;left:auto;bottom:18px;width:48px;height:48px;border:1px solid var(--ember);border-radius:50%;background:var(--bg-panel2);color:var(--cream);display:none;align-items:center;justify-content:center;font-size:25px;cursor:pointer;z-index:9998;box-shadow:0 8px 25px rgba(0,0,0,.35),0 0 0 2px rgba(227,91,42,.12);user-select:none;-webkit-user-select:none;touch-action:none}
-.arpa-panel{position:fixed;right:18px;left:auto;bottom:78px;width:min(390px,calc(100vw - 36px));height:52vh;min-height:320px;background:var(--bg-panel);border:1px solid var(--line);border-radius:16px;z-index:9999;box-shadow:0 15px 50px rgba(0,0,0,.45);display:none;flex-direction:column;overflow:hidden}
+.arpa-launcher{display:none!important;position:fixed;right:18px;left:auto;bottom:18px;width:48px;height:48px;border:1px solid var(--ember);border-radius:50%;background:var(--bg-panel2);color:var(--cream);display:none;align-items:center;justify-content:center;font-size:25px;cursor:pointer;z-index:9998;box-shadow:0 8px 25px rgba(0,0,0,.35),0 0 0 2px rgba(227,91,42,.12);user-select:none;-webkit-user-select:none;touch-action:none}
+.arpa-panel{display:none!important;position:fixed;right:18px;left:auto;bottom:78px;width:min(390px,calc(100vw - 36px));height:52vh;min-height:320px;background:var(--bg-panel);border:1px solid var(--line);border-radius:16px;z-index:9999;box-shadow:0 15px 50px rgba(0,0,0,.45);display:none;flex-direction:column;overflow:hidden}
 .arpa-panel.open{display:flex}.arpa-panel-head{padding:12px 14px;background:var(--bg-panel2);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.arpa-panel-head:active{cursor:grabbing}.arpa-panel-head strong{font-size:15px}.arpa-close{background:none;border:0;color:var(--cream-dim);font-size:22px;cursor:pointer}.arpa-chat{padding:12px;background:var(--bg-panel);display:flex;flex-direction:column;gap:8px;overflow:auto;flex:1}.arpa-msg{padding:9px 11px;border-radius:11px;line-height:1.4;font-size:13px;max-width:88%}.arpa-msg.bot{background:var(--bg);border:1px solid var(--line)}.arpa-msg.user{background:var(--ember);color:#1c1815;align-self:flex-end}.arpa-input-row{display:flex;gap:7px;padding:10px;background:var(--bg-panel2);border-top:1px solid var(--line)}.arpa-input-row input{flex:1}
 @media(max-width:700px){.arpa-launcher{position:fixed;left:14px;right:auto;bottom:76px;width:44px;height:44px;margin:0;background:var(--bg-panel2);z-index:10000;touch-action:none}.arpa-panel{right:8px;left:8px;bottom:126px;width:auto;height:48vh}}
 
@@ -420,8 +420,6 @@
   .desktop-sidebar-nav button:hover{background:#303944}
   .desktop-sidebar-nav button.active{background:#ff9d0a;color:#fff;box-shadow:0 7px 20px rgba(255,157,10,.22)}
   .desktop-sidebar-nav .nav-ico{width:22px;text-align:center;font-size:16px}
-  .desktop-sidebar-bottom{margin-top:auto;border-top:1px solid #36414c;padding-top:12px}
-  .desktop-sidebar-bottom button{width:100%;background:transparent;border:1px solid #46515d;color:#cbd3da;padding:10px;border-radius:8px;cursor:pointer}
 
   #app-screen.desktop-patron > header{
     margin-left:250px;margin-right:14px;margin-top:14px;width:auto;min-height:66px;padding:10px 14px;
@@ -446,16 +444,17 @@
   .desktop-page-head h2{margin:0;font-size:19px;color:#fff}
   .desktop-page-head small{color:#9ca7b1}
 
-  #app-screen.desktop-patron .desktop-masa-controls{display:flex;gap:8px;align-items:center;background:#262d33;padding:10px;border-radius:10px;margin-bottom:12px}
+  #app-screen.desktop-patron .desktop-masa-controls{display:flex;gap:8px;align-items:center;background:#262d33;padding:10px;border-radius:10px;margin-bottom:12px;overflow-x:auto;scrollbar-width:thin}
+  #app-screen.desktop-patron .desktop-masa-controls button{flex:0 0 auto;white-space:nowrap}
   .desktop-masa-controls button{border:0;background:#343b43;color:#fff;padding:11px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:800}
   .desktop-masa-controls button.active{background:linear-gradient(135deg,#ff7438,#ff9d0a);box-shadow:0 5px 14px rgba(255,126,32,.25)}
   #app-screen.desktop-patron #view-masa > .section-title{display:none}
   #app-screen.desktop-patron #admin-special-strip{display:none!important}
 
-  #app-screen.desktop-patron .masa-grid{grid-template-columns:repeat(4,minmax(190px,1fr));gap:14px}
+  #app-screen.desktop-patron .masa-grid{grid-template-columns:repeat(5,minmax(180px,1fr));gap:12px}
   #app-screen.desktop-patron .masa-tile{aspect-ratio:auto;min-height:145px;border-radius:9px;align-items:flex-start;justify-content:flex-start;padding:17px 60px 16px 15px;overflow:hidden;border-color:#505962;background:#343b43;box-shadow:0 8px 18px rgba(0,0,0,.08)}
   #app-screen.desktop-patron .masa-tile .num{font-family:var(--font-body);font-size:19px;color:#fff;font-weight:900}
-  #app-screen.desktop-patron .masa-tile .num::before{content:'MASA ';font-size:12px;color:#c9d0d5;font-weight:700}
+  #app-screen.desktop-patron .masa-tile .num::before{content:none}
   #app-screen.desktop-patron .masa-tile .sub{margin-top:auto;font-size:16px;color:#fff;font-weight:900}
   #app-screen.desktop-patron .masa-tile .dot{top:14px;right:14px}
   #app-screen.desktop-patron .masa-tile.occupied{background:#c93b31;border-color:#d9584f}
@@ -507,7 +506,10 @@
 }
 
 @media (min-width:1180px) and (max-width:1450px){
-  #app-screen.desktop-patron .masa-grid{grid-template-columns:repeat(3,minmax(190px,1fr))}
+  #app-screen.desktop-patron .masa-grid{grid-template-columns:repeat(4,minmax(180px,1fr))}
+}
+@media (min-width:701px) and (max-width:1179px){
+  #app-screen.desktop-patron .masa-grid{grid-template-columns:repeat(3,minmax(170px,1fr))}
 }
 
 
@@ -650,6 +652,7 @@
   #login-screen .login-card{background:#fff!important;color:#1f2732!important;border:1px solid #e7e9ed!important;border-radius:26px!important;box-shadow:0 20px 55px rgba(34,46,58,.12)!important}
   #login-screen input{background:#f6f7f9!important;color:#242c36!important;border-color:#e1e5ea!important}
   #login-screen .btn-primary{background:#ff9d0a!important;color:#fff!important;border:0!important}
+  #login-screen .logo h1{color:#111!important}
   #app-screen.mobile-pos-active{display:none!important}
   #mobile-pos-shell.open{display:flex;position:fixed;inset:0;z-index:9000;background:#f4f6f8;color:#202733;flex-direction:column;font-family:Arial,Helvetica,sans-serif}
   .mpos-topbar{height:82px;flex:0 0 auto;background:#fff;border-bottom:1px solid #e3e6ea;display:flex;align-items:center;gap:10px;padding:13px 14px;position:relative;z-index:4}
@@ -665,10 +668,11 @@
   .mpos-table-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
   .mpos-table{position:relative;min-height:185px;border:0;border-radius:18px;background:#171c22;color:#fff;text-align:left;overflow:hidden;padding:17px 58px 16px 16px;box-shadow:0 8px 18px rgba(36,45,55,.08)}
   .mpos-table.occupied{background:var(--mpos-table-color,#c93b31)}
-  .mpos-table-name{display:block;font-size:25px;line-height:1.05;font-weight:500;word-break:break-word}
-  .mpos-table-meta{display:inline-flex;margin-top:11px;padding:4px 9px;border-radius:14px;background:rgba(0,0,0,.15);font-size:12px;font-weight:800}
-  .mpos-table-time{position:absolute;left:16px;right:58px;bottom:48px;padding:4px 8px;background:rgba(0,0,0,.17);border-radius:11px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mpos-table-total{position:absolute;left:16px;bottom:14px;font-size:22px;font-weight:700}
+  .mpos-table-name{display:block;font-size:25px;line-height:1.05;font-weight:500;word-break:break-word;max-height:82px;overflow:hidden;padding-right:2px}
+  /* Masa no, siparis zamani ve toplam birbirine girmesin: sabit 3 satirlik alt bilgi. */
+  .mpos-table-meta{position:absolute;left:16px;right:58px;bottom:78px;display:flex;align-items:center;width:max-content;max-width:calc(100% - 74px);padding:4px 9px;border-radius:14px;background:rgba(0,0,0,.15);font-size:12px;font-weight:800;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mpos-table-time{position:absolute;left:16px;right:58px;bottom:48px;display:block;padding:4px 8px;background:rgba(0,0,0,.17);border-radius:11px;font-size:11px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mpos-table-total{position:absolute;left:16px;right:58px;bottom:14px;font-size:22px;line-height:26px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mpos-table-actions{position:absolute;right:0;top:0;bottom:0;width:48px;display:flex;flex-direction:column}
   .mpos-table-actions span{flex:1;display:flex;align-items:center;justify-content:center;background:#1474ec;font-size:20px}
   .mpos-table-actions span+span{background:#196f2d}
@@ -858,7 +862,6 @@
       <button id="desktop-nav-accounts" onclick="desktopNavigate('accounts')"><span class="nav-ico">▣</span>Cari Hesaplar</button>
       <button id="desktop-nav-settings" onclick="desktopNavigate('settings')"><span class="nav-ico">⚙</span>Ayarlar</button>
     </div>
-    <div class="desktop-sidebar-bottom"><button onclick="logout()">Çıkış Yap</button></div>
   </aside>
 
   <header>
@@ -905,10 +908,7 @@
     <!-- MASA VIEW -->
     <div id="view-masa">
       <div class="desktop-page-head"><div><h2>Masalar</h2><small>Salon masa ve adisyon yönetimi</small></div></div>
-      <div class="desktop-masa-controls">
-        <button id="desktop-filter-open" class="active" onclick="desktopFilterTables('open')">▦ Açık Masalar (<span id="desktop-open-count">0</span>)</button>
-        <button id="desktop-filter-all" onclick="desktopFilterTables('all')">Tüm Masalar</button>
-      </div>
+      <div class="desktop-masa-controls" id="desktop-masa-controls"></div>
       <div id="admin-special-strip" class="admin-block" style="display:none;margin-bottom:16px"><div class="special-title"><h3>Aktif Özel Siparişler</h3><button class="btn" onclick="switchTab('special')">Yönet</button></div><div id="special-summary-list"></div></div>
       <div class="section-title">Masalar</div>
       <div class="masa-grid" id="masa-grid"></div>
@@ -1251,19 +1251,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-
-<div id="arpa-launcher" class="arpa-launcher" title="Arpa Asistan" onclick="arpaLauncherClick(event)">🤖</div>
-<div id="arpa-panel" class="arpa-panel">
-  <div class="arpa-panel-head">
-    <strong>🤖 Arpa Asistan</strong>
-    <button class="arpa-close" onclick="event.stopPropagation();toggleArpaAssistant()">×</button>
-  </div>
-  <div id="arpa-chat" class="arpa-chat"></div>
-  <div class="arpa-input-row">
-    <input id="arpa-input" placeholder="Arpa Asistan'a sor..." onkeydown="if(event.key==='Enter')arpaAsk()">
-    <button class="btn btn-primary" onclick="arpaAsk()">Gönder</button>
-  </div>
-</div>
 
 
 <script>
@@ -1673,21 +1660,11 @@ function arpaEndDrag(){
 }
 
 function arpaSetVisibility(){
-  const launcher=document.getElementById('arpa-launcher');
-  const panel=document.getElementById('arpa-panel');
-  if(!launcher || !panel)return;
-  // Arpa Asistan yalnızca Patron/Admin giriş animasyonu tamamen bittikten sonra görünür.
-  const appVisible=document.getElementById('app-screen')?.style.display!=='none';
-  const welcomeActive=document.getElementById('welcome-screen')?.classList.contains('show');
-  const isPatron=!!(hasPatronAccess() && currentUser.username);
-  const isMobile=window.matchMedia('(max-width:700px)').matches;
-  const canShow=isPatron && !isMobile && arpaAppReady && appVisible && !welcomeActive;
-  launcher.style.display=canShow?'flex':'none';
-  if(!canShow){
-    panel.classList.remove('open');
-    arpaDragState=null;
-    arpaResetConversation();
-  }
+  const launcher=document.getElementById('arpa-launcher'),panel=document.getElementById('arpa-panel');
+  if(launcher)launcher.style.display='none';
+  if(panel)panel.classList.remove('open');
+  arpaDragState=null;
+  if('speechSynthesis' in window)speechSynthesis.cancel();
 }
 
 window.addEventListener('resize', arpaSetVisibility);
@@ -1750,6 +1727,7 @@ function arpaAsk(){
 let desktopAdminMode='reports';
 let desktopSettingsMode='products';
 let desktopTableFilter='open';
+let desktopTableSearch='';
 let desktopCurrentPage='masa';
 let desktopCariSearch='';
 let desktopCariFilter='all';
@@ -2103,7 +2081,7 @@ function renderDesktopCariAccounts(){
   }).join(''):'<div class="desktop-cari-empty">Aramanıza veya seçtiğiniz filtreye uygun cari hesap bulunamadı.</div>';
 }
 function desktopTopSearch(q){if(desktopCurrentPage==='accounts'){desktopCariSearch=q||'';renderDesktopCariAccounts();}else desktopSearchTables(q);}
-function desktopUpdateTopSearchUi(){const s=document.getElementById('desktop-table-search');if(!s)return;if(desktopCurrentPage==='accounts'){s.placeholder='Cari ara (isim, telefon, kategori)';s.value=desktopCariSearch||'';}else{s.placeholder='Masa ara';if(desktopCurrentPage==='masa')s.value='';}}
+function desktopUpdateTopSearchUi(){const s=document.getElementById('desktop-table-search');if(!s)return;if(desktopCurrentPage==='accounts'){s.placeholder='Cari ara (isim, telefon, kategori)';s.value=desktopCariSearch||'';}else{s.placeholder='Masa ara';s.value=desktopCurrentPage==='masa'?(desktopTableSearch||''):'';}}
 
 function isDesktopPatron(){return !!(hasPatronAccess()&&window.innerWidth>700);}
 function syncDesktopBrandLogo(){
@@ -2120,7 +2098,7 @@ function syncDesktopPatronShell(){
 }
 function desktopNavigate(page,silent=false){
   if(!isDesktopPatron())return;closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();closeDesktopPaymentPanel();desktopCurrentPage=page;
-  if(page==='masa'){switchTab('masa');desktopFilterTables(desktopTableFilter||'open');}
+  if(page==='masa'){switchTab('masa');renderDesktopTableFilters();desktopFilterTables(desktopTableFilter||'open');}
   else if(page==='accounts'){switchTab('accounts');renderDesktopCariAccounts();}
   else{desktopAdminMode=page==='settings'?'settings':'reports';switchTab('admin');const view=document.getElementById('view-admin');view.classList.toggle('desktop-mode-settings',desktopAdminMode==='settings');view.classList.toggle('desktop-mode-reports',desktopAdminMode==='reports');if(desktopAdminMode==='settings')desktopSettingsSection(desktopSettingsMode||'products');const title=document.getElementById('desktop-admin-title'),sub=document.getElementById('desktop-admin-subtitle');if(title)title.textContent=desktopAdminMode==='settings'?'Ayarlar':'Raporlar';if(sub)sub.textContent=desktopAdminMode==='settings'?'Ürün, çalışan ve işletme yönetimi':'Finansal özet ve kasa görünümü';}
   syncDesktopNav(page);desktopUpdateTopSearchUi();if(!silent)window.scrollTo({top:0,behavior:'smooth'});
@@ -2135,21 +2113,37 @@ function desktopSettingsSection(section){
   if(section==='products'){renderCategoryAdmin();renderMenuAdmin();}
   if(section==='employees')renderEmployees();
 }
-function desktopFilterTables(mode){
-  desktopTableFilter=mode;
-  const grid=document.getElementById('masa-grid');if(!grid)return;
-  grid.querySelectorAll('.masa-tile').forEach(tile=>{tile.style.display=(mode==='open'&&!tile.classList.contains('occupied'))?'none':'';});
-  document.getElementById('desktop-filter-open')?.classList.toggle('active',mode==='open');
-  document.getElementById('desktop-filter-all')?.classList.toggle('active',mode==='all');
+function desktopTableFilterDefinitions(){
+  const openCount=seatingAllTableIds().filter(id=>tableTotal(id)>0).length;
+  return [['open','▦ Açık Masalar ('+openCount+')'],...seatingLayouts().map(l=>['layout:'+String(l.id),String(l.name||'Bölüm')])];
 }
-function desktopSearchTables(q){
-  q=(q||'').trim().toLocaleLowerCase('tr-TR');
+function renderDesktopTableFilters(){
+  const box=document.getElementById('desktop-masa-controls');if(!box)return;
+  const defs=desktopTableFilterDefinitions();
+  if(!defs.some(([id])=>id===desktopTableFilter))desktopTableFilter=defs[0]?.[0]||'open';
+  box.innerHTML=defs.map(([id,label])=>`<button class="${desktopTableFilter===id?'active':''}" onclick="desktopFilterTables('${id.replace(/'/g,"\'")}')">${escapeHtml(label)}</button>`).join('');
+}
+function desktopApplyTableFilters(){
   const grid=document.getElementById('masa-grid');if(!grid)return;
+  const q=String(desktopTableSearch||'').trim().toLocaleLowerCase('tr-TR');
+  const layoutId=String(desktopTableFilter||'').startsWith('layout:')?String(desktopTableFilter).slice(7):'';
+  const layout=layoutId?seatingLayoutById(layoutId):null;
+  const allowed=layout?new Set((layout.tableIds||[]).map(String)):null;
   grid.querySelectorAll('.masa-tile').forEach(tile=>{
-    const filterOk=desktopTableFilter!=='open'||tile.classList.contains('occupied');
+    const id=String(tile.dataset.tableId||'');
+    const filterOk=desktopTableFilter==='open'?tile.classList.contains('occupied'):(allowed?allowed.has(id):true);
     const searchOk=!q||tile.textContent.toLocaleLowerCase('tr-TR').includes(q);
     tile.style.display=filterOk&&searchOk?'':'none';
   });
+}
+function desktopFilterTables(mode){
+  desktopTableFilter=String(mode||'open');
+  renderDesktopTableFilters();
+  desktopApplyTableFilters();
+}
+function desktopSearchTables(q){
+  desktopTableSearch=String(q||'');
+  desktopApplyTableFilters();
 }
 window.addEventListener('resize',()=>{syncDesktopPatronShell();syncMobilePosShell();if(isDesktopPatron())desktopFilterTables(desktopTableFilter);else{closeDesktopPaymentPanel();closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();}if(isMobilePos())mposRender();});
 
@@ -2280,7 +2274,7 @@ function switchTab(tab){
   // Çalışanlar sekmesi hem patron hem çalışan tarafından kullanılabilir.
   if(!admin && !['masa','active-employees'].includes(tab))tab='masa';
   document.getElementById('tab-masa').classList.toggle('active',tab==='masa');document.getElementById('tab-active-employees').classList.toggle('active',tab==='active-employees');document.getElementById('tab-admin').classList.toggle('active',tab==='admin');document.getElementById('tab-special').classList.toggle('active',tab==='special');
-  document.getElementById('view-masa').style.display=tab==='masa'?'':'none';document.getElementById('view-accounts').style.display=tab==='accounts'?'':'none';document.getElementById('view-active-employees').style.display=tab==='active-employees'?'':'none';document.getElementById('view-admin').style.display=tab==='admin'?'':'none';document.getElementById('view-special').style.display=tab==='special'?'':'none';
+  document.getElementById('view-masa').style.display=tab==='masa'?'block':'none';document.getElementById('view-accounts').style.display=tab==='accounts'?'block':'none';document.getElementById('view-active-employees').style.display=tab==='active-employees'?'block':'none';document.getElementById('view-admin').style.display=tab==='admin'?'block':'none';document.getElementById('view-special').style.display=tab==='special'?'block':'none';
   if(tab==='admin')renderAdmin();if(tab==='special')renderSpecialOrders();if(tab==='masa')renderMasaGrid();if(tab==='accounts')renderDesktopCariAccounts();if(tab==='active-employees')renderActiveEmployees();
   if(isDesktopPatron()){
     if(tab==='masa')syncDesktopNav('masa');
@@ -3072,22 +3066,40 @@ function mposEnsureActivityForOpenTables(){
 function mposIsProductDisabled(id){return !!ensurePosAdmin().disabledProducts[String(id)];}
 function mposSetProductDisabled(id,on){const p=ensurePosAdmin();if(on)p.disabledProducts[String(id)]=true;else delete p.disabledProducts[String(id)];queueSave();renderAll();}
 
-// Masa grid renklerini PC tarafinda da uygula.
+// Masa grid renklerini ve Oturma Düzeni verisini PC tarafina da uygula.
+// PC Patron, mobildeki Oturma Düzeni ile AYNI masa kimliklerini kullanır.
 const _baseRenderMasaGrid=renderMasaGrid;
 renderMasaGrid=function(){
   mposEnsureActivityForOpenTables();
-  _baseRenderMasaGrid();
-  const active=new Set(seatingAllTableIds().map(String));
-  document.querySelectorAll('#masa-grid .masa-tile').forEach(tile=>{
-    const numEl=tile.querySelector('.num'),raw=numEl?.textContent?.trim();
-    if(!raw)return;
-    tile.dataset.tableId=raw;
-    if(ensurePosAdmin().seatingEnabled&&!active.has(raw)){tile.remove();return;}
-    if(numEl)numEl.textContent=seatingTableLabel(raw);
-    if(isDesktopPatron()&&tile.classList.contains('occupied'))tile.style.background=mposTableColor(raw);
-  });
-  const openEl=document.getElementById('desktop-open-count');if(openEl)openEl.textContent=document.querySelectorAll('#masa-grid .masa-tile.occupied').length;
-  if(isDesktopPatron())desktopFilterTables(desktopTableFilter||'open');
+  if(isDesktopPatron()){
+    const grid=document.getElementById('masa-grid');if(!grid)return;
+    grid.innerHTML='';
+    const ids=seatingAllTableIds().map(String);
+    ids.forEach(id=>{
+      const total=tableTotal(id),occupied=total>0,layout=seatingLayoutForTable(id),label=seatingTableLabel(id);
+      const tile=document.createElement('div');
+      tile.className='masa-tile '+(occupied?'occupied':'empty');
+      tile.dataset.tableId=id;
+      tile.dataset.layoutId=layout?String(layout.id):'';
+      tile.title=(layout?String(layout.name)+' · ':'')+label;
+      tile.onclick=()=>openDesktopOrderScreen(id);
+      if(occupied)tile.style.background=mposTableColor(id);
+      tile.innerHTML=`<div class="dot"></div><div class="num">${escapeHtml(label)}</div><div class="sub">${occupied?fmt(total):'boş'}</div>${occupied?`<div class="desktop-table-actions"><button type="button" title="Ödeme Al" onclick="event.stopPropagation();openDesktopPaymentPanel('${id}')">▣</button><button type="button" title="Adisyonu Aç" onclick="event.stopPropagation();openDesktopOrderScreen('${id}')">▤</button></div>`:''}`;
+      grid.appendChild(tile);
+    });
+    if(!ids.length)grid.innerHTML='<div class="empty-note">Oturma Düzeni içinde masa bulunamadı. Ayarlar → Oturma Düzeni bölümünden masa ekleyin.</div>';
+    renderDesktopTableFilters();
+    desktopApplyTableFilters();
+  }else{
+    _baseRenderMasaGrid();
+    const active=new Set(seatingAllTableIds().map(String));
+    document.querySelectorAll('#masa-grid .masa-tile').forEach(tile=>{
+      const numEl=tile.querySelector('.num'),raw=numEl?.textContent?.trim();if(!raw)return;
+      tile.dataset.tableId=raw;
+      if(ensurePosAdmin().seatingEnabled&&!active.has(raw)){tile.remove();return;}
+      if(numEl)numEl.textContent=seatingTableLabel(raw);
+    });
+  }
   if(isMobilePos())mposRenderTables();
 };
 
@@ -3250,7 +3262,32 @@ function mposFinishPaidTableUi(){
   });
 }
 
-function mposPrimaryOrderAction(){if(mposOrderTotal()<=0)return;if(!hasPatronAccess()){showToast('Sipariş kaydedildi');mposCloseOrder();return;}mposOpenPayment();}
+function mposSaveStaffOrder(){
+  if(hasPatronAccess()||mposQuickMode||mposAccountMode)return;
+  const masa=String(mposOrderMasa||'');
+  if(!masa||mposOrderTotal()<=0){showToast('Kaydedilecek sipariş yok');return;}
+  // Ürün eklerken debounce ile kayıt zaten sıraya giriyor; Kaydet butonunda bunu
+  // bekletmeden o anki masa durumunu localStorage + Firebase'e gönder.
+  clearTimeout(saveTimer);
+  saveTimer=null;
+  mposTouchTable(masa);
+  saveState();
+  const returnFilter=mposOrderReturnFilter||mposTableFilter||'open';
+  showToast('Sipariş kaydedildi');
+  const screen=document.getElementById('mpos-order-screen');
+  if(screen){screen.classList.remove('open');screen.setAttribute('aria-hidden','true');}
+  mposOrderMasa=null;
+  currentMasa=null;
+  mposQuickMode=false;
+  mposAccountMode=false;
+  mposAccountId=null;
+  mposPage='tables';
+  mposTableFilter=returnFilter;
+  mposProductSearch='';
+  const search=document.getElementById('mpos-order-search');if(search)search.value='';
+  if(isMobilePos()){mposRenderTabs();mposRenderTables();}
+}
+function mposPrimaryOrderAction(){if(mposOrderTotal()<=0)return;if(!hasPatronAccess()){mposSaveStaffOrder();return;}mposOpenPayment();}
 function mposOpenPayment(){const total=mposOrderTotal();if(total<=0)return;const a=mposAccountMode?cariAccountById(mposAccountId):null;document.getElementById('mpos-payment-title').textContent=mposAccountMode?((a?.name||'Cari')+' Tahsilat'):(mposQuickMode?'Hızlı Sipariş Ödemesi':'Masa '+mposOrderMasa+' Ödeme');document.getElementById('mpos-payment-total').textContent=fmt(total);document.getElementById('mpos-payment-backdrop').classList.add('open');}
 function mposClosePayment(){document.getElementById('mpos-payment-backdrop')?.classList.remove('open');}
 function mposCompletePayment(method){
