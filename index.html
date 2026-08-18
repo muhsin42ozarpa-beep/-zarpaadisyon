@@ -456,6 +456,7 @@
   #app-screen.desktop-patron > main{margin-left:250px;max-width:none;width:auto;padding:14px 14px 30px 0}
   #app-screen.desktop-patron .save-hint{
     margin-left:250px;padding:20px 18px 26px;text-align:center;
+    transform:translateX(-18px);
     color:#c7a56b;font-family:Georgia,'Times New Roman',serif;font-size:18px;
     font-style:italic;font-weight:700;letter-spacing:3.5px;line-height:1;
     text-shadow:0 2px 12px rgba(0,0,0,.28);opacity:.96
@@ -845,6 +846,21 @@
   #app-screen.desktop-patron .desktop-order-screen.cari-mode .desktop-order-cart-head{background:#29313a}
   #app-screen.desktop-patron .desktop-order-screen.cari-mode .desktop-order-pay-btn{background:#16824e;border-color:#27a96a}
 }
+
+/* ---------- PC ÇALIŞAN: yeni masa/sipariş arayüzü ---------- */
+@media(min-width:701px){
+  #app-screen.desktop-patron.desktop-employee #desktop-nav-reports,
+  #app-screen.desktop-patron.desktop-employee #desktop-nav-accounts,
+  #app-screen.desktop-patron.desktop-employee #desktop-nav-settings,
+  #app-screen.desktop-patron.desktop-employee .desktop-top-search .menu-square,
+  #app-screen.desktop-patron.desktop-employee .desktop-user-wrap{display:none!important}
+  #app-screen.desktop-patron.desktop-employee #desktop-nav-masa{display:flex!important}
+  #app-screen.desktop-patron.desktop-employee .desktop-sidebar-nav{padding-top:10px}
+  #app-screen.desktop-patron.desktop-employee #role-badge{background:#2563eb;color:#fff}
+  #app-screen.desktop-patron.desktop-employee .desktop-table-actions .employee-no-pay{display:none!important}
+  #app-screen.desktop-patron.desktop-employee .desktop-table-actions button.employee-order-open{height:100%;flex:1;background:#277c31}
+}
+
 @media(min-width:701px) and (max-width:1350px){#app-screen.desktop-patron .desktop-cari-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(min-width:701px) and (max-width:1050px){#app-screen.desktop-patron .desktop-cari-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
@@ -1783,7 +1799,7 @@ function desktopPaymentFinalTotal(){
   return Math.max(0,base-(base*pct/100)-fixed);
 }
 function openDesktopPaymentPanel(masaId){
-  if(!isDesktopPatron())return openOrder(masaId);
+  if(!isDesktopPatron()){showToast('Ödeme yetkisi patron veya yöneticide');return;}
   const total=tableTotal(masaId);
   if(total<=0){showToast('Bu masada açık hesap yok');return;}
   desktopPaymentMasa=String(masaId);
@@ -2016,7 +2032,7 @@ function desktopCategoryInitials(name){
   return (parts.length>1?(parts[0][0]+parts[1][0]):String(name||'??').slice(0,2)).toLocaleUpperCase('tr-TR');
 }
 function openDesktopOrderScreen(masaId){
-  if(!isDesktopPatron()){openOrder(masaId);return;}
+  if(!isDesktopPos()){openOrder(masaId);return;}
   desktopAccountMode=false;desktopAccountId=null;
   currentMasa=String(masaId);
   desktopOrderCategory='all';desktopOrderSearch='';
@@ -2044,7 +2060,7 @@ function closeDesktopOrderScreen(resetMasa=true){
 function renderDesktopOrderScreen(){
   if(!isDesktopOrderOpen()||(!currentMasa&&!desktopAccountMode))return;
   const data=activeState(),account=desktopAccountMode?cariAccountById(desktopAccountId):null,order=desktopAccountMode?(account?.items||{}):(data.tables[currentMasa]||{}),total=desktopAccountMode?cariAccountTotal(account):tableTotal(currentMasa);
-  const title=document.getElementById('desktop-order-table-name');if(title)title.textContent=desktopAccountMode?String(account?.name||'CARİ'):('MASA '+currentMasa);
+  const title=document.getElementById('desktop-order-table-name');if(title)title.textContent=desktopAccountMode?String(account?.name||'CARİ'):seatingTableLabel(currentMasa);
   const sub=document.getElementById('desktop-order-table-sub');if(sub)sub.textContent=desktopAccountMode?('Cari Hesap · '+(account?.phone||account?.category||'Müşteri')+' · Borç '+fmt(total)):(Object.keys(order).length?'Açık adisyon':'Yeni adisyon');
   const cartTitle=document.getElementById('desktop-order-cart-title');if(cartTitle)cartTitle.textContent=desktopAccountMode?'Cari Hesap / Eklenenler':'Siparişler';
   const cats=document.getElementById('desktop-order-categories');const hasUncategorized=(data.menu||[]).some(m=>!m.categoryId);const categories=[{id:'all',name:'Tümü'},...(data.categories||[])];if(hasUncategorized)categories.push({id:'uncategorized',name:'Kategorisiz'});
@@ -2054,8 +2070,16 @@ function renderDesktopOrderScreen(){
   const rows=[];Object.entries(order).forEach(([itemId,qty])=>{const menuItem=(data.menu||[]).find(m=>m.id===itemId);const name=desktopAccountMode?cariItemName(account,itemId):(menuItem?.name||'Ürün'),price=desktopAccountMode?cariItemPrice(account,itemId):(Number(menuItem?.price)||0);if(qty>0)rows.push({id:itemId,name,price,qty:Number(qty)||0});});
   const cart=document.getElementById('desktop-order-cart-list');if(cart)cart.innerHTML=rows.length?rows.map(r=>`<div class="desktop-cart-row"><div class="desktop-cart-row-top"><span class="desktop-cart-qty">${r.qty}x</span><span class="desktop-cart-name">${escapeHtml(r.name)}</span><span class="desktop-cart-sum">${fmt(r.price*r.qty)}</span></div><div class="desktop-cart-row-actions"><button class="minus" type="button" onclick="desktopOrderChangeQty('${r.id}',-1)">−</button><button class="plus" type="button" onclick="desktopOrderChangeQty('${r.id}',1)">+</button></div></div>`).join(''):'<div class="desktop-cart-empty">Henüz ürün eklenmedi.</div>';
   const count=document.getElementById('desktop-order-cart-count');if(count)count.textContent=rows.reduce((n,r)=>n+r.qty,0)+' ürün';const totalEl=document.getElementById('desktop-order-cart-total');if(totalEl)totalEl.textContent=fmt(total);
-  const pay=document.getElementById('desktop-order-pay-btn');if(pay){pay.textContent=(desktopAccountMode?'Tahsilat Al: ':'Ödeme Al: ')+fmt(total);pay.disabled=total<=0;}
-  const clear=document.getElementById('desktop-order-clear-btn');if(clear){clear.style.display=rows.length?'':'none';clear.textContent=desktopAccountMode?'Cari Ürünlerini Temizle':'Masayı Temizle';}
+  const employeeOnly=currentUser.role==='employee'&&!desktopAccountMode;
+  const pay=document.getElementById('desktop-order-pay-btn');if(pay){
+    pay.textContent=employeeOnly?'Siparişi Kaydet':((desktopAccountMode?'Tahsilat Al: ':'Ödeme Al: ')+fmt(total));
+    pay.disabled=total<=0;
+    pay.classList.toggle('employee-save',employeeOnly);
+  }
+  const clear=document.getElementById('desktop-order-clear-btn');if(clear){
+    clear.style.display=employeeOnly?'none':(rows.length?'':'none');
+    clear.textContent=desktopAccountMode?'Cari Ürünlerini Temizle':'Masayı Temizle';
+  }
 }
 function desktopSelectCategory(id){desktopOrderCategory=id;renderDesktopOrderScreen();}
 function desktopSearchProducts(q){desktopOrderSearch=q||'';renderDesktopOrderScreen();}
@@ -2065,10 +2089,18 @@ function desktopOrderChangeQty(itemId,delta){
   if(!currentMasa)return;const data=activeState();if(!data.tables[currentMasa])data.tables[currentMasa]={};const order=data.tables[currentMasa],next=(Number(order[itemId])||0)+delta;if(next<=0)delete order[itemId];else order[itemId]=next;if(!Object.keys(order).length)delete data.tables[currentMasa];queueSave();renderDesktopOrderScreen();renderMasaGrid();
 }
 function desktopOrderClear(){
+  if(currentUser.role==='employee'&&!desktopAccountMode){showToast('Çalışan masayı topluca temizleyemez');return;}
   if(desktopAccountMode){if(desktopAccountId)cariClearDebt(desktopAccountId);renderDesktopOrderScreen();return;}
   if(!currentMasa||!activeState().tables[currentMasa])return;if(!confirm('Bu masadaki tüm siparişler temizlensin mi?'))return;delete activeState().tables[currentMasa];mposClearTableActivity(currentMasa);queueSave();renderDesktopOrderScreen();renderMasaGrid();showToast('Masa temizlendi');
 }
-function desktopOrderTakePayment(){if(desktopAccountMode){if(desktopAccountId&&cariAccountTotal(cariAccountById(desktopAccountId))>0)openDesktopCariPayment(desktopAccountId);return;}if(currentMasa&&tableTotal(currentMasa)>0)openDesktopPaymentPanel(currentMasa);}
+function desktopOrderTakePayment(){
+  if(desktopAccountMode){if(desktopAccountId&&cariAccountTotal(cariAccountById(desktopAccountId))>0)openDesktopCariPayment(desktopAccountId);return;}
+  if(currentUser.role==='employee'){
+    if(!currentMasa||tableTotal(currentMasa)<=0)return;
+    mposTouchTable(currentMasa);queueSave();renderMasaGrid();showToast('Sipariş kaydedildi');closeDesktopOrderScreen();return;
+  }
+  if(currentMasa&&tableTotal(currentMasa)>0)openDesktopPaymentPanel(currentMasa);
+}
 
 function desktopCariVisibleList(){
   let list=cariSortedList(desktopCariSearch);
@@ -2112,6 +2144,7 @@ function desktopTopSearch(q){if(desktopCurrentPage==='accounts'){desktopCariSear
 function desktopUpdateTopSearchUi(){const s=document.getElementById('desktop-table-search');if(!s)return;if(desktopCurrentPage==='accounts'){s.placeholder='Cari ara (isim, telefon, kategori)';s.value=desktopCariSearch||'';}else{s.placeholder='Masa ara';s.value=desktopCurrentPage==='masa'?(desktopTableSearch||''):'';}}
 
 function isDesktopPatron(){return !!(hasPatronAccess()&&window.innerWidth>700);}
+function isDesktopPos(){return !!(currentUser&&['admin','manager','employee'].includes(currentUser.role)&&window.innerWidth>700);}
 function syncDesktopBrandLogo(){
   const source=document.querySelector('#app-screen header .brand .logo-mark img')||document.querySelector('#login-screen .logo-mark img');
   const target=document.querySelector('.desktop-brand-logo');
@@ -2119,13 +2152,28 @@ function syncDesktopBrandLogo(){
 }
 function syncDesktopPatronShell(){
   const app=document.getElementById('app-screen');if(!app)return;
-  const enabled=isDesktopPatron();
+  const enabled=isDesktopPos();
+  const employeeOnly=enabled&&currentUser.role==='employee';
   app.classList.toggle('desktop-patron',enabled);
-  if(enabled){syncDesktopBrandLogo();if(!desktopShellInitialized){desktopShellInitialized=true;desktopNavigate('masa',true);}}
-  else if(window.innerWidth<=700){desktopShellInitialized=false;}
+  app.classList.toggle('desktop-employee',employeeOnly);
+  ['reports','accounts','settings'].forEach(x=>{const b=document.getElementById('desktop-nav-'+x);if(b)b.style.display=employeeOnly?'none':'';});
+  const masaBtn=document.getElementById('desktop-nav-masa');if(masaBtn)masaBtn.style.display=enabled?'':'none';
+  const quick=document.querySelector('#app-screen .desktop-top-search .menu-square');if(quick)quick.style.display=employeeOnly?'none':'';
+  const users=document.getElementById('desktop-user-wrap');if(users)users.style.display=employeeOnly?'none':'';
+  if(enabled){
+    syncDesktopBrandLogo();
+    const head=document.querySelector('#view-masa .desktop-page-head small');if(head)head.textContent=employeeOnly?'Masa ve sipariş yönetimi':'Salon masa ve adisyon yönetimi';
+    if(employeeOnly&&desktopCurrentPage!=='masa')desktopCurrentPage='masa';
+    if(!desktopShellInitialized){desktopShellInitialized=true;desktopNavigate('masa',true);}
+  }else{
+    desktopShellInitialized=false;
+    app.classList.remove('desktop-employee');
+  }
 }
 function desktopNavigate(page,silent=false){
-  if(!isDesktopPatron())return;closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();closeDesktopPaymentPanel();desktopCurrentPage=page;
+  if(!isDesktopPos())return;
+  if(!hasPatronAccess())page='masa';
+  closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();closeDesktopPaymentPanel();desktopCurrentPage=page;
   if(page==='masa'){switchTab('masa');renderDesktopTableFilters();desktopFilterTables(desktopTableFilter||'open');}
   else if(page==='accounts'){switchTab('accounts');renderDesktopCariAccounts();}
   else{desktopAdminMode=page==='settings'?'settings':'reports';switchTab('admin');const view=document.getElementById('view-admin');view.classList.toggle('desktop-mode-settings',desktopAdminMode==='settings');view.classList.toggle('desktop-mode-reports',desktopAdminMode==='reports');if(desktopAdminMode==='settings')desktopSettingsSection(desktopSettingsMode||'products');const title=document.getElementById('desktop-admin-title'),sub=document.getElementById('desktop-admin-subtitle');if(title)title.textContent=desktopAdminMode==='settings'?'Ayarlar':'Raporlar';if(sub)sub.textContent=desktopAdminMode==='settings'?'Ürün, çalışan ve işletme yönetimi':'Finansal özet ve kasa görünümü';}
@@ -2173,7 +2221,7 @@ function desktopSearchTables(q){
   desktopTableSearch=String(q||'');
   desktopApplyTableFilters();
 }
-window.addEventListener('resize',()=>{syncDesktopPatronShell();syncMobilePosShell();if(isDesktopPatron())desktopFilterTables(desktopTableFilter);else{closeDesktopPaymentPanel();closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();}if(isMobilePos())mposRender();});
+window.addEventListener('resize',()=>{syncDesktopPatronShell();syncMobilePosShell();if(isDesktopPos())desktopFilterTables(desktopTableFilter);else{closeDesktopPaymentPanel();closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();}if(isMobilePos())mposRender();});
 
 function tryLogin(){
   const u=document.getElementById('login-user').value.trim(); const p=document.getElementById('login-pass').value.trim(); const err=document.getElementById('login-error');
@@ -2301,15 +2349,16 @@ function logout(){
 // ---------- tabs ----------
 function switchTab(tab){
   const admin=hasPatronAccess();
-  // Çalışanlar sekmesi hem patron hem çalışan tarafından kullanılabilir.
-  if(!admin && !['masa','active-employees'].includes(tab))tab='masa';
+  // PC çalışan yeni arayüzde yalnızca masa/sipariş akışını kullanır; eski sekmelere düşmez.
+  if(isDesktopPos()&&currentUser.role==='employee')tab='masa';
+  else if(!admin && !['masa','active-employees'].includes(tab))tab='masa';
   document.getElementById('tab-masa').classList.toggle('active',tab==='masa');document.getElementById('tab-active-employees').classList.toggle('active',tab==='active-employees');document.getElementById('tab-admin').classList.toggle('active',tab==='admin');document.getElementById('tab-special').classList.toggle('active',tab==='special');
   document.getElementById('view-masa').style.display=tab==='masa'?'block':'none';document.getElementById('view-accounts').style.display=tab==='accounts'?'block':'none';document.getElementById('view-active-employees').style.display=tab==='active-employees'?'block':'none';document.getElementById('view-admin').style.display=tab==='admin'?'block':'none';document.getElementById('view-special').style.display=tab==='special'?'block':'none';
   if(tab==='admin')renderAdmin();if(tab==='special')renderSpecialOrders();if(tab==='masa')renderMasaGrid();if(tab==='accounts')renderDesktopCariAccounts();if(tab==='active-employees')renderActiveEmployees();
-  if(isDesktopPatron()){
+  if(isDesktopPos()){
     if(tab==='masa')syncDesktopNav('masa');
-    else if(tab==='accounts')syncDesktopNav('accounts');
-    else if(tab==='admin'){const v=document.getElementById('view-admin');v.classList.toggle('desktop-mode-settings',desktopAdminMode==='settings');v.classList.toggle('desktop-mode-reports',desktopAdminMode==='reports');syncDesktopNav(desktopAdminMode==='settings'?'settings':'reports');if(desktopAdminMode==='settings')desktopSettingsSection(desktopSettingsMode);}
+    else if(isDesktopPatron()&&tab==='accounts')syncDesktopNav('accounts');
+    else if(isDesktopPatron()&&tab==='admin'){const v=document.getElementById('view-admin');v.classList.toggle('desktop-mode-settings',desktopAdminMode==='settings');v.classList.toggle('desktop-mode-reports',desktopAdminMode==='reports');syncDesktopNav(desktopAdminMode==='settings'?'settings':'reports');if(desktopAdminMode==='settings')desktopSettingsSection(desktopSettingsMode);}
   }
 }
 
@@ -2338,7 +2387,7 @@ function renderMasaGrid(){
     const occupied = total > 0;
     const tile = document.createElement('div');
     tile.className = 'masa-tile ' + (occupied ? 'occupied' : 'empty');
-    tile.onclick = ()=> isDesktopPatron()?openDesktopOrderScreen(id):openOrder(id);
+    tile.onclick = ()=> isDesktopPos()?openDesktopOrderScreen(id):openOrder(id);
     tile.innerHTML = `
       <div class="dot"></div>
       <div class="num">${i}</div>
@@ -2349,7 +2398,7 @@ function renderMasaGrid(){
   }
   const openCount=[...grid.querySelectorAll('.masa-tile.occupied')].length;
   const openEl=document.getElementById('desktop-open-count');if(openEl)openEl.textContent=openCount;
-  if(isDesktopPatron())desktopFilterTables(desktopTableFilter||'open');
+  if(isDesktopPos())desktopFilterTables(desktopTableFilter||'open');
 }
 
 // ---------- order modal ----------
@@ -3101,7 +3150,7 @@ function mposSetProductDisabled(id,on){const p=ensurePosAdmin();if(on)p.disabled
 const _baseRenderMasaGrid=renderMasaGrid;
 renderMasaGrid=function(){
   mposEnsureActivityForOpenTables();
-  if(isDesktopPatron()){
+  if(isDesktopPos()){
     const grid=document.getElementById('masa-grid');if(!grid)return;
     grid.innerHTML='';
     const ids=seatingAllTableIds().map(String);
@@ -3114,7 +3163,8 @@ renderMasaGrid=function(){
       tile.title=(layout?String(layout.name)+' · ':'')+label;
       tile.onclick=()=>openDesktopOrderScreen(id);
       if(occupied)tile.style.background=mposTableColor(id);
-      tile.innerHTML=`<div class="dot"></div><div class="num">${escapeHtml(label)}</div><div class="sub">${occupied?fmt(total):'boş'}</div>${occupied?`<div class="desktop-table-actions"><button type="button" title="Ödeme Al" onclick="event.stopPropagation();openDesktopPaymentPanel('${id}')">▣</button><button type="button" title="Adisyonu Aç" onclick="event.stopPropagation();openDesktopOrderScreen('${id}')">▤</button></div>`:''}`;
+      const actions=occupied?`<div class="desktop-table-actions">${hasPatronAccess()?`<button class="employee-no-pay" type="button" title="Ödeme Al" onclick="event.stopPropagation();openDesktopPaymentPanel('${id}')">▣</button>`:''}<button class="employee-order-open" type="button" title="Adisyonu Aç" onclick="event.stopPropagation();openDesktopOrderScreen('${id}')">▤</button></div>`:'';
+      tile.innerHTML=`<div class="dot"></div><div class="num">${escapeHtml(label)}</div><div class="sub">${occupied?fmt(total):'boş'}</div>${actions}`;
       grid.appendChild(tile);
     });
     if(!ids.length)grid.innerHTML='<div class="empty-note">Oturma Düzeni içinde masa bulunamadı. Ayarlar → Oturma Düzeni bölümünden masa ekleyin.</div>';
