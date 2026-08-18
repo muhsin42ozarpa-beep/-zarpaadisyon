@@ -702,10 +702,10 @@
   .mpos-table-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
   .mpos-table{position:relative;min-height:185px;border:0;border-radius:18px;background:#171c22;color:#fff;text-align:left;overflow:hidden;padding:17px 58px 16px 16px;box-shadow:0 8px 18px rgba(36,45,55,.08)}
   .mpos-table.occupied{background:var(--mpos-table-color,#c93b31)}
-  .mpos-table-name{display:block;font-size:25px;line-height:1.05;font-weight:500;word-break:break-word;max-height:82px;overflow:hidden;padding-right:2px}
-  /* Masa no, siparis zamani ve toplam birbirine girmesin: sabit 3 satirlik alt bilgi. */
-  .mpos-table-meta{position:absolute;left:16px;right:58px;bottom:78px;display:flex;align-items:center;width:max-content;max-width:calc(100% - 74px);padding:4px 9px;border-radius:14px;background:rgba(0,0,0,.15);font-size:12px;font-weight:800;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mpos-table-time{position:absolute;left:16px;right:58px;bottom:48px;display:block;padding:4px 8px;background:rgba(0,0,0,.17);border-radius:11px;font-size:11px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mpos-table-name{display:block;font-size:25px;line-height:1.05;font-weight:500;word-break:break-word;max-height:92px;overflow:hidden;padding-right:2px}
+  /* Mobil masa kartında masa adı zaten numarayı içeriyor. Tekrar #no yazmayarak çakışmayı önle. */
+  .mpos-table-meta{display:none!important}
+  .mpos-table-time{position:absolute;left:16px;right:58px;bottom:49px;display:block;width:max-content;max-width:calc(100% - 78px);padding:4px 9px;background:rgba(0,0,0,.17);border-radius:12px;font-size:11px;font-weight:700;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mpos-table-total{position:absolute;left:16px;right:58px;bottom:14px;font-size:22px;line-height:26px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mpos-table-actions{position:absolute;right:0;top:0;bottom:0;width:48px;display:flex;flex-direction:column}
   .mpos-table-actions span{flex:1;display:flex;align-items:center;justify-content:center;background:#1474ec;font-size:20px}
@@ -849,6 +849,42 @@
   #app-screen.desktop-patron .desktop-order-screen.cari-mode .desktop-order-cart-head{background:#29313a}
   #app-screen.desktop-patron .desktop-order-screen.cari-mode .desktop-order-pay-btn{background:#16824e;border-color:#27a96a}
 }
+
+
+
+/* ---------- PC ÇALIŞAN: bağımsız modern shell (legacy ekranı tamamen örter) ---------- */
+#pc-employee-shell{display:none}
+@media(min-width:701px){
+  #pc-employee-shell.open{display:block;position:fixed;inset:0;z-index:9000;background:#2f343a;color:#fff;overflow:auto;font-family:var(--font-body)}
+  #pc-employee-shell .pce-sidebar{position:fixed;left:0;top:0;bottom:0;width:236px;background:#222a33;border-right:1px solid #46515d;padding:18px 14px 16px;box-sizing:border-box;display:flex;flex-direction:column}
+  #pc-employee-shell .pce-brand{display:flex;align-items:center;gap:11px;padding:8px 10px 22px;border-bottom:1px solid #36414c;margin-bottom:14px}
+  #pc-employee-shell .pce-brand img{width:48px;height:48px;object-fit:contain;border-radius:12px;background:#fff}
+  #pc-employee-shell .pce-brand strong{display:block;font-size:15px;line-height:1.15}.pce-brand small{display:block;color:#9aa5af;font-size:10px;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+  #pc-employee-shell .pce-nav{display:flex;flex-direction:column;gap:7px}.pce-nav button{width:100%;border:0;border-radius:8px;background:#ff9d0a;color:#fff;padding:12px 13px;text-align:left;font-weight:800;font-size:13px}
+  #pc-employee-shell .pce-sidebar-foot{margin-top:auto;color:#87929c;font-size:11px;padding:10px;text-align:center}
+  #pc-employee-shell .pce-top{position:sticky;top:10px;z-index:2;margin:14px 14px 0 250px;min-height:66px;border:1px solid #6b747d;border-radius:11px;background:#252d36;display:flex;align-items:center;gap:10px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+  #pc-employee-shell .pce-menu{width:38px;height:38px;border:0;border-radius:8px;background:#1e2630;color:#fff;font-size:20px}
+  #pc-employee-shell .pce-search{flex:1;background:#202730;border:1px solid #65717d;color:#fff;border-radius:8px;padding:11px 14px;font-size:13px;outline:none}
+  #pc-employee-shell .pce-role{padding:10px 13px;border-radius:8px;background:#2563eb;color:#fff;font-size:11px;font-weight:800}
+  #pc-employee-shell .pce-logout{border:0;border-radius:8px;background:#ff9d0a;color:#fff;padding:11px 17px;font-weight:800;cursor:pointer}
+  #pc-employee-shell .pce-main{margin-left:250px;padding:18px 14px 48px 0}
+  #pc-employee-shell .pce-head h2{margin:0;font-size:20px}.pce-head small{display:block;color:#9ca7b1;margin-top:4px}
+  #pc-employee-shell .pce-filters{display:flex;gap:8px;align-items:center;background:#262d33;padding:10px;border-radius:10px;margin:14px 0 12px;overflow-x:auto}
+  #pc-employee-shell .pce-filters button{flex:0 0 auto;border:0;border-radius:8px;background:#343b43;color:#fff;padding:11px 16px;font-size:12px;font-weight:800;cursor:pointer}
+  #pc-employee-shell .pce-filters button.active{background:linear-gradient(135deg,#ff7438,#ff9d0a);box-shadow:0 5px 14px rgba(255,126,32,.25)}
+  #pc-employee-shell .pce-grid{display:grid;grid-template-columns:repeat(5,minmax(180px,1fr));gap:12px}
+  #pc-employee-shell .pce-table{position:relative;min-height:145px;border:1px solid #505962;border-radius:9px;background:#343b43;color:#fff;padding:17px 58px 16px 15px;text-align:left;cursor:pointer;overflow:hidden;box-shadow:0 8px 18px rgba(0,0,0,.08)}
+  #pc-employee-shell .pce-table.occupied{background:#c93b31;border-color:#d9584f}
+  #pc-employee-shell .pce-table-name{display:block;font-size:20px;font-weight:900;line-height:1.15;word-break:break-word}
+  #pc-employee-shell .pce-table-time{display:block;margin-top:12px;font-size:11px;opacity:.82}
+  #pc-employee-shell .pce-table-total{position:absolute;left:15px;bottom:16px;font-size:17px;font-weight:900}
+  #pc-employee-shell .pce-table-status{position:absolute;left:15px;bottom:16px;font-size:14px;font-weight:800;color:#e6eaee}
+  #pc-employee-shell .pce-table-action{position:absolute;right:0;top:0;bottom:0;width:48px;border:0;background:#277c31;color:#fff;font-size:17px;cursor:pointer}
+  #pc-employee-shell .pce-empty{grid-column:1/-1;padding:35px;border:1px dashed #56616b;border-radius:12px;text-align:center;color:#aab3bc;background:#2a3138}
+  #pc-employee-shell .pce-signature{text-align:center;color:#c7a56b;font-family:Georgia,'Times New Roman',serif;font-size:18px;font-style:italic;font-weight:700;letter-spacing:3.5px;margin:36px 0 0;transform:translateX(-12px)}
+}
+@media(min-width:701px) and (max-width:1350px){#pc-employee-shell .pce-grid{grid-template-columns:repeat(4,minmax(170px,1fr))}}
+@media(min-width:701px) and (max-width:1050px){#pc-employee-shell .pce-grid{grid-template-columns:repeat(3,minmax(160px,1fr))}}
 
 /* ---------- PC ÇALIŞAN: yeni masa/sipariş arayüzü ---------- */
 @media(min-width:701px){
@@ -1257,6 +1293,28 @@
 </div>
 
 <!-- PC PATRON FULL ORDER SCREEN -->
+
+<!-- PC ÇALIŞAN MODERN SHELL -->
+<section id="pc-employee-shell" aria-hidden="true">
+  <aside class="pce-sidebar">
+    <div class="pce-brand"><img id="pce-logo" alt="Kebapçı Özarpa"><div><strong>Kebapçı Özarpa</strong><small>POS · ADİSYON</small></div></div>
+    <div class="pce-nav"><button type="button">▦ &nbsp; Masalar</button></div>
+    <div class="pce-sidebar-foot">Çalışan Paneli</div>
+  </aside>
+  <header class="pce-top">
+    <button class="pce-menu" type="button" aria-label="Menü">☰</button>
+    <input id="pce-search" class="pce-search" placeholder="Masa ara" oninput="pcEmployeeSetSearch(this.value)">
+    <span class="pce-role">ÇALIŞAN</span>
+    <button class="pce-logout" type="button" onclick="logout()">Çıkış</button>
+  </header>
+  <main class="pce-main">
+    <div class="pce-head"><h2>Masalar</h2><small>Masa ve sipariş yönetimi</small></div>
+    <div id="pce-filters" class="pce-filters"></div>
+    <div id="pce-grid" class="pce-grid"></div>
+    <div class="pce-signature">1934’ten beri</div>
+  </main>
+</section>
+
 <section class="desktop-order-screen" id="desktop-order-screen" aria-hidden="true">
   <div class="desktop-order-top">
     <button class="desktop-order-back" type="button" onclick="closeDesktopOrderScreen()">←</button>
@@ -1471,8 +1529,8 @@ usersRef.on('value',snap=>{
           syncDesktopPatronShell();
           updateRoleUI();
           renderAll();
-          requestAnimationFrame(()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();});
-          setTimeout(()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();},60);
+          requestAnimationFrame(()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();syncPcEmployeeShell();});
+          setTimeout(()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();syncPcEmployeeShell();},60);
           showToast(nextRole==='manager'?'Yönetici yetkisi aktif':'Yönetici yetkisi kaldırıldı');
         }
       }
@@ -2073,6 +2131,7 @@ function closeDesktopOrderScreen(resetMasa=true){
   if(resetMasa)currentMasa=null;
   desktopAccountMode=false;desktopAccountId=null;
   renderMasaGrid();
+  if(isDesktopEmployee())renderPcEmployeeShell();
 }
 function renderDesktopOrderScreen(){
   if(!isDesktopOrderOpen()||(!currentMasa&&!desktopAccountMode))return;
@@ -2301,15 +2360,57 @@ function desktopSearchTables(q){
   desktopApplyTableFilters();
 }
 
-window.addEventListener('resize',()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();syncMobilePosShell();if(isDesktopPos())desktopFilterTables(desktopTableFilter);else{closeDesktopPaymentPanel();closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();}if(isMobilePos())mposRender();});
+window.addEventListener('resize',()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();syncPcEmployeeShell();syncMobilePosShell();if(isDesktopPos())desktopFilterTables(desktopTableFilter);else{closeDesktopPaymentPanel();closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();}if(isMobilePos())mposRender();});
 // PC çalışan arayüz koruması: Firebase/render yarışları eski sekmeli görünümü geri getirmesin.
 setInterval(()=>{
   if(currentUser&&currentUser.username&&currentUser.role!=='guest'&&window.innerWidth>700&&!hasPatronAccess()){
     syncDesktopPatronShell();
     forcePcEmployeeModernShell();
+    syncPcEmployeeShell();
   }
 },1200);
 
+
+
+
+// ---------- PC ÇALIŞAN: bağımsız modern shell ----------
+let pcEmployeeSearch='';
+let pcEmployeeFilter='open';
+function pcEmployeeShouldShow(){
+  const app=document.getElementById('app-screen');
+  return !!(window.innerWidth>700&&currentUser&&currentUser.username&&currentUser.role!=='guest'&&!hasPatronAccess()&&app&&app.style.display!=='none');
+}
+function pcEmployeeSetSearch(v){pcEmployeeSearch=String(v||'').toLocaleLowerCase('tr-TR');renderPcEmployeeShell();}
+function pcEmployeeSetFilter(v){pcEmployeeFilter=String(v||'open');renderPcEmployeeShell();}
+function pcEmployeeOpenOrder(id){openDesktopOrderScreen(String(id));}
+function syncPcEmployeeShell(){
+  const shell=document.getElementById('pc-employee-shell');if(!shell)return;
+  const on=pcEmployeeShouldShow();
+  shell.classList.toggle('open',on);shell.setAttribute('aria-hidden',on?'false':'true');
+  if(!on)return;
+  const src=document.querySelector('.desktop-brand-logo')?.src||document.querySelector('#app-screen header .brand .logo-mark img')?.src||document.querySelector('#login-screen .logo-mark img')?.src||'';
+  const logo=document.getElementById('pce-logo');if(logo&&src)logo.src=src;
+  renderPcEmployeeShell();
+}
+function renderPcEmployeeShell(){
+  if(!pcEmployeeShouldShow())return;
+  const filters=document.getElementById('pce-filters'),grid=document.getElementById('pce-grid');if(!filters||!grid)return;
+  const ids=seatingAllTableIds();
+  const defs=[['open','Açık Masalar ('+ids.filter(id=>tableTotal(id)>0).length+')'],...seatingLayouts().map(l=>['layout:'+String(l.id),String(l.name||'Bölüm')])];
+  if(!defs.some(x=>x[0]===pcEmployeeFilter))pcEmployeeFilter=defs[0]?.[0]||'open';
+  filters.innerHTML=defs.map(([id,label])=>`<button type="button" class="${pcEmployeeFilter===id?'active':''}" onclick="pcEmployeeSetFilter('${String(id).replace(/'/g,"\'")}')">${escapeHtml(label)}</button>`).join('');
+  let source=[];
+  if(pcEmployeeFilter==='open')source=ids.filter(id=>tableTotal(id)>0);
+  else{
+    const lid=pcEmployeeFilter.startsWith('layout:')?pcEmployeeFilter.slice(7):'';
+    const layout=lid?seatingLayoutById(lid):null;source=layout?(layout.tableIds||[]).map(String):ids;
+  }
+  source=source.filter(id=>{const hay=(seatingTableLabel(id)+' '+id+' '+fmt(tableTotal(id))).toLocaleLowerCase('tr-TR');return !pcEmployeeSearch||hay.includes(pcEmployeeSearch);});
+  grid.innerHTML=source.length?source.map(id=>{
+    const total=tableTotal(id),occ=total>0,mins=occ?mposElapsedMinutes(id):0,time=occ?(mins<1?'az önce':mins+' dk önce'):'';
+    return `<button type="button" class="pce-table ${occ?'occupied':'empty'}" onclick="pcEmployeeOpenOrder('${id}')"><span class="pce-table-name">${escapeHtml(seatingTableLabel(id))}</span>${occ?`<span class="pce-table-time">◷ ${escapeHtml(time)}</span><span class="pce-table-total">${fmt(total)}</span>`:`<span class="pce-table-status">boş</span>`}<span class="pce-table-action">▤</span></button>`;
+  }).join(''):'<div class="pce-empty">Seçili bölümde gösterilecek masa yok.</div>';
+}
 
 function tryLogin(){
   const u=document.getElementById('login-user').value.trim(); const p=document.getElementById('login-pass').value.trim(); const err=document.getElementById('login-error');
@@ -2369,6 +2470,7 @@ function playWelcomeAnimation(name,options={}){
       // Böylece normal çalışan hesabı eski sekmeli arayüze geri düşemez.
       syncDesktopPatronShell();
       forcePcEmployeeModernShell();
+      syncPcEmployeeShell();
       syncMobilePosShell();
       if(resume){
         arpaSetVisibility();
@@ -2407,6 +2509,7 @@ function updateRoleUI(){
   if(!admin){switchTab('masa');} else updateTestUI();
   syncDesktopPatronShell();
   forcePcEmployeeModernShell();
+  syncPcEmployeeShell();
   syncMobilePosShell();
 }
 function toggleTestMode(){
@@ -2440,6 +2543,7 @@ function logout(){
   document.getElementById('login-user').value='';
   document.getElementById('login-pass').value='';
   mposShutdown();
+  document.getElementById('pc-employee-shell')?.classList.remove('open');
   // Çıkış ekranında Arpa Asistan tamamen gizlenir; ses ve sohbet de temizlenir.
   arpaSetVisibility();
 }
@@ -2447,7 +2551,7 @@ function logout(){
 // PC çalışan görünümü güvenlik ağı: geç gelen Firebase/render işlemleri eski arayüzü geri getiremez.
 setInterval(()=>{
   const app=document.getElementById('app-screen');
-  if(app&&app.style.display!=='none'&&isDesktopEmployee())forcePcEmployeeModernShell();
+  if(app&&app.style.display!=='none'&&isDesktopEmployee()){forcePcEmployeeModernShell();syncPcEmployeeShell();}
 },700);
 
 // ---------- tabs ----------
@@ -2860,6 +2964,7 @@ function renderAll(){
   // Firebase/state güncellemelerinde de PC çalışan arayüzünü yeniden zorla.
   syncDesktopPatronShell();
   forcePcEmployeeModernShell();
+  syncPcEmployeeShell();
   syncMobilePosShell();
   renderMasaGrid();
   if(isDesktopOrderOpen())renderDesktopOrderScreen();
@@ -3375,7 +3480,7 @@ function mposRenderTables(){
   const arr=[];source.forEach(id=>{const total=tableTotal(id),occ=total>0;const hay=(seatingTableLabel(id)+' masa '+id+' '+fmt(total)).toLocaleLowerCase('tr-TR');if(mposSearch&&!hay.includes(mposSearch))return;arr.push({id,total,occ});});
   c.innerHTML=arr.length?'<div class="mpos-table-grid">'+arr.map(x=>mposTableHtml(x)).join('')+'</div>':'<div class="mpos-empty"><b>Masa bulunamadı</b>Seçili bölümde gösterilecek masa yok.</div>';
 }
-function mposTableHtml(x){const mins=mposElapsedMinutes(x.id),time=x.occ?(mins<1?'az önce':mins+' dk önce'):'';return `<button class="mpos-table ${x.occ?'occupied':'empty'}" style="${x.occ?'--mpos-table-color:'+mposTableColor(x.id):''}" onclick="mposOpenOrder('${x.id}')"><span class="mpos-table-name">${escapeHtml(seatingTableLabel(x.id))}</span>${x.occ?`<span class="mpos-table-meta">#${x.id}</span><span class="mpos-table-time">◷ ${time}</span><span class="mpos-table-total">${fmt(x.total)}</span><span class="mpos-table-actions"><span>▣</span><span>▤</span></span>`:''}</button>`;}
+function mposTableHtml(x){const mins=mposElapsedMinutes(x.id),time=x.occ?(mins<1?'az önce':mins+' dk önce'):'';return `<button class="mpos-table ${x.occ?'occupied':'empty'}" style="${x.occ?'--mpos-table-color:'+mposTableColor(x.id):''}" onclick="mposOpenOrder('${x.id}')"><span class="mpos-table-name">${escapeHtml(seatingTableLabel(x.id))}</span>${x.occ?`<span class="mpos-table-time">◷ ${time}</span><span class="mpos-table-total">${fmt(x.total)}</span><span class="mpos-table-actions"><span>▣</span><span>▤</span></span>`:''}</button>`;}
 
 function mposOpenOrder(id){mposQuickMode=false;mposAccountMode=false;mposAccountId=null;mposOrderReturnFilter=mposTableFilter||'open';mposOrderMasa=String(id);currentMasa=String(id);mposOrderCategory='all';mposProductSearch='';document.getElementById('mpos-order-search').value='';document.getElementById('mpos-order-screen').classList.add('open');document.getElementById('mpos-order-screen').setAttribute('aria-hidden','false');mposRenderOrder();}
 function mposCloseOrder(){const s=document.getElementById('mpos-order-screen');s?.classList.remove('open');s?.setAttribute('aria-hidden','true');if(!mposQuickMode){mposOrderMasa=null;currentMasa=null;}mposQuickMode=false;mposAccountMode=false;mposAccountId=null;if(isMobilePos())mposRender();}
@@ -3453,26 +3558,52 @@ function mposSaveStaffOrder(){
   if(hasPatronAccess()||mposQuickMode||mposAccountMode)return;
   const masa=String(mposOrderMasa||'');
   if(!masa||mposOrderTotal()<=0){showToast('Kaydedilecek sipariş yok');return;}
-  // Ürün eklerken debounce ile kayıt zaten sıraya giriyor; Kaydet butonunda bunu
-  // bekletmeden o anki masa durumunu localStorage + Firebase'e gönder.
+
+  const d=activeState();
+  const order=JSON.parse(JSON.stringify(d.tables[masa]||{}));
+  if(!Object.keys(order).length){showToast('Kaydedilecek sipariş yok');return;}
+
+  // Ürün eklerken oluşan genel debounce kaydını durdur. Çalışan "Siparişi Kaydet"
+  // dediğinde yalnızca bu masayı Firebase'e yazar; başka masaların verisine dokunmaz.
   clearTimeout(saveTimer);
   saveTimer=null;
+  const now=Date.now();
   mposTouchTable(masa);
-  saveState();
-  const returnFilter=mposOrderReturnFilter||mposTableFilter||'open';
-  showToast('Sipariş kaydedildi');
-  const screen=document.getElementById('mpos-order-screen');
-  if(screen){screen.classList.remove('open');screen.setAttribute('aria-hidden','true');}
-  mposOrderMasa=null;
-  currentMasa=null;
-  mposQuickMode=false;
-  mposAccountMode=false;
-  mposAccountId=null;
-  mposPage='tables';
-  mposTableFilter=returnFilter;
-  mposProductSearch='';
-  const search=document.getElementById('mpos-order-search');if(search)search.value='';
-  if(isMobilePos()){mposRenderTabs();mposRenderTables();}
+  lastLocalEdit=now;
+
+  try{
+    localStorage.setItem(testMode?'ozarpa-test-state-local':'ozarpa-state-local',JSON.stringify(d));
+  }catch(e){}
+
+  const btn=document.getElementById('mpos-order-primary');
+  if(btn){btn.disabled=true;btn.textContent='Kaydediliyor...';}
+
+  const ref=testMode?testStateRef:stateRef;
+  const updates={};
+  updates['tables/'+masa]=order;
+  updates['posAdmin/tableActivity/'+masa]=now;
+
+  ref.update(updates).then(()=>{
+    setTimeout(()=>{lastLocalEdit=0;},800);
+    const returnFilter=mposOrderReturnFilter||mposTableFilter||'open';
+    showToast('Sipariş kaydedildi');
+    const screen=document.getElementById('mpos-order-screen');
+    if(screen){screen.classList.remove('open');screen.setAttribute('aria-hidden','true');}
+    mposOrderMasa=null;
+    currentMasa=null;
+    mposQuickMode=false;
+    mposAccountMode=false;
+    mposAccountId=null;
+    mposPage='tables';
+    mposTableFilter=returnFilter;
+    mposProductSearch='';
+    const search=document.getElementById('mpos-order-search');if(search)search.value='';
+    if(isMobilePos()){mposRenderTabs();mposRenderTables();}
+  }).catch(e=>{
+    console.error('Çalışan sipariş kaydı hatası',e);
+    showToast('Sipariş kaydedilemedi — tekrar deneyin');
+    if(btn){btn.disabled=false;btn.textContent='Siparişi Kaydet';}
+  });
 }
 function mposPrimaryOrderAction(){if(mposOrderTotal()<=0)return;if(!hasPatronAccess()){mposSaveStaffOrder();return;}mposOpenPayment();}
 function mposOpenPayment(){const total=mposOrderTotal();if(total<=0)return;const a=mposAccountMode?cariAccountById(mposAccountId):null;document.getElementById('mpos-payment-title').textContent=mposAccountMode?((a?.name||'Cari')+' Tahsilat'):(mposQuickMode?'Hızlı Sipariş Ödemesi':'Masa '+mposOrderMasa+' Ödeme');document.getElementById('mpos-payment-total').textContent=fmt(total);document.getElementById('mpos-payment-backdrop').classList.add('open');}
@@ -3598,7 +3729,7 @@ setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();els
 // ---------- PWA: service worker kaydı ----------
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    const UI_BUILD='20260818-pc-employee-v6';
+    const UI_BUILD='20260818-pc-employee-v7';
     let needsRefresh=false;
     try{
       needsRefresh=localStorage.getItem('ozarpa-ui-build')!==UI_BUILD;
