@@ -1,7 +1,6 @@
-const CACHE_NAME = 'ozarpa-cache-v8';
+const CACHE_NAME = 'ozarpa-cache-v10';
 
-const FILES_TO_CACHE = [
-  './index.html',
+const APP_SHELL = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -9,7 +8,13 @@ const FILES_TO_CACHE = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(
+        APP_SHELL.map((url) =>
+          cache.add(url).catch(() => null)
+        )
+      )
+    )
   );
 
   self.skipWaiting();
@@ -30,29 +35,43 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Firebase verilerine müdahale etme
+  const url = event.request.url;
+
+  // Firebase verilerine dokunma
   if (
-    event.request.url.includes('firebaseio.com') ||
-    event.request.url.includes('googleapis.com')
+    url.includes('firebaseio.com') ||
+    url.includes('googleapis.com')
   ) {
     return;
   }
 
-  // Önce güncel dosyayı internetten al.
-  // İnternet yoksa cache'deki sürümü kullan.
-  event.respondWith(
-    fetch(
-      event.request,
-      event.request.mode === 'navigate'
-        ? { cache: 'no-store' }
-        : undefined
-    )
-      .then((response) => {
-        const copy = response.clone();
+  // index.html her zaman güncel olarak internetten gelsin.
+  // Eski PC / mobil arayüz cache'de kalmasın.
+  if (
+    event.request.mode === 'navigate' ||
+    url.includes('index.html')
+  ) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' })
+        .catch(() => caches.match('./index.html'))
+    );
 
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, copy);
-        });
+    return;
+  }
+
+  // Diğer dosyalarda önce internet,
+  // internet yoksa cache kullan.
+  event.respondWith(
+    fetch(event.request, { cache: 'no-cache' })
+      .then((response) => {
+        if (response && response.ok) {
+          const copy = response.clone();
+
+          caches
+            .open(CACHE_NAME)
+            .then((cache) => cache.put(event.request, copy))
+            .catch(() => {});
+        }
 
         return response;
       })
