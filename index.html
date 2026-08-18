@@ -489,7 +489,7 @@
   #app-screen.desktop-patron .masa-tile .num::before{content:none}
   #app-screen.desktop-patron .masa-tile .sub{margin-top:auto;font-size:16px;color:#fff;font-weight:900}
   #app-screen.desktop-patron .masa-tile .desktop-table-meta{margin-top:16px;display:flex;flex-direction:column;gap:5px;max-width:calc(100% - 6px);font-family:var(--font-body);line-height:1.15}
-  #app-screen.desktop-patron .masa-tile .desktop-table-age{display:inline-flex;align-items:center;width:max-content;max-width:100%;padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.18);color:#fff;font-size:11px;font-weight:800;white-space:nowrap}
+  #app-screen.desktop-patron .masa-tile .desktop-table-age{display:inline-flex;align-items:center;width:max-content;max-width:100%;margin-left:-4px;padding:5px 9px;border-radius:999px;background:rgba(0,0,0,.18);color:#fff;font-size:11px;font-weight:800;white-space:nowrap}
   #app-screen.desktop-patron .masa-tile .desktop-table-by{color:rgba(255,255,255,.88);font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   #app-screen.desktop-patron .masa-tile .dot{top:14px;right:14px}
   #app-screen.desktop-patron .masa-tile.occupied{background:#c93b31;border-color:#d9584f}
@@ -720,8 +720,10 @@
   .mpos-table{position:relative;min-height:185px;border:0;border-radius:18px;background:#171c22;color:#fff;text-align:left;overflow:hidden;padding:17px 58px 16px 16px;box-shadow:0 8px 18px rgba(36,45,55,.08)}
   .mpos-table.occupied{background:var(--mpos-table-color,#c93b31)}
   .mpos-table-name{display:block;font-size:25px;line-height:1.05;font-weight:500;word-break:break-word;max-height:92px;overflow:hidden;padding-right:2px;transform:translateY(-7px)}
+  .mpos-table.occupied .mpos-table-name{transform:translateY(-12px)}
   /* Mobil masa kartında masa adı zaten numarayı içeriyor. Tekrar #no yazmayarak çakışmayı önle. */
   .mpos-table-meta,.mpos-table-number,.mpos-table-no,.mpos-table-index{display:none!important}
+  .mpos-table-by{position:absolute;left:16px;right:58px;bottom:73px;display:block;max-width:calc(100% - 78px);font-size:10px;font-weight:700;line-height:14px;color:rgba(255,255,255,.92);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mpos-table-time{position:absolute;left:16px;right:58px;bottom:49px;display:block;width:max-content;max-width:calc(100% - 78px);padding:4px 9px;background:rgba(0,0,0,.17);border-radius:12px;font-size:11px;font-weight:700;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mpos-table-total{position:absolute;left:16px;right:58px;bottom:14px;font-size:22px;line-height:26px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mpos-table-actions{position:absolute;right:0;top:0;bottom:0;width:48px;display:flex;flex-direction:column}
@@ -895,7 +897,8 @@
   #pc-employee-shell .pce-table{position:relative;min-height:145px;border:1px solid #505962;border-radius:9px;background:#343b43;color:#fff;padding:17px 58px 16px 15px;text-align:left;cursor:pointer;overflow:hidden;box-shadow:0 8px 18px rgba(0,0,0,.08)}
   #pc-employee-shell .pce-table.occupied{background:#c93b31;border-color:#d9584f}
   #pc-employee-shell .pce-table-name{display:block;font-size:20px;font-weight:900;line-height:1.15;word-break:break-word}
-  #pc-employee-shell .pce-table-time{display:block;margin-top:12px;font-size:11px;opacity:.82}
+  #pc-employee-shell .pce-table-time{display:block;margin-top:12px;margin-left:-4px;font-size:11px;opacity:.82}
+  #pc-employee-shell .pce-table-by{display:block;margin-top:5px;margin-left:-4px;font-size:10px;font-weight:700;opacity:.86;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 6px)}
   #pc-employee-shell .pce-table-total{position:absolute;left:15px;bottom:16px;font-size:17px;font-weight:900}
   #pc-employee-shell .pce-table-status{position:absolute;left:15px;bottom:16px;font-size:14px;font-weight:800;color:#e6eaee}
   #pc-employee-shell .pce-table-action{position:absolute;right:0;top:0;bottom:0;width:48px;border:0;background:#277c31;color:#fff;font-size:17px;cursor:pointer}
@@ -2551,7 +2554,8 @@ function renderPcEmployeeShell(){
   source=source.filter(id=>{const hay=(seatingTableLabel(id)+' '+id+' '+fmt(tableTotal(id))).toLocaleLowerCase('tr-TR');return !pcEmployeeSearch||hay.includes(pcEmployeeSearch);});
   grid.innerHTML=source.length?source.map(id=>{
     const total=tableTotal(id),occ=total>0,mins=occ?mposElapsedMinutes(id):0,time=occ?(mins<1?'az önce':mins+' dk önce'):'';
-    return `<button type="button" class="pce-table ${occ?'occupied':'empty'}" onclick="pcEmployeeOpenOrder('${id}')"><span class="pce-table-name">${escapeHtml(seatingTableLabel(id))}</span>${occ?`<span class="pce-table-time">◷ ${escapeHtml(time)}</span><span class="pce-table-total">${fmt(total)}</span>`:`<span class="pce-table-status">boş</span>`}<span class="pce-table-action">▤</span></button>`;
+    const orderMeta=occ?mposTableOrderMeta(id):null;
+    return `<button type="button" class="pce-table ${occ?'occupied':'empty'}" onclick="pcEmployeeOpenOrder('${id}')"><span class="pce-table-name">${escapeHtml(seatingTableLabel(id))}</span>${occ?`<span class="pce-table-time">◷ ${escapeHtml(time)}</span><span class="pce-table-by">Siparişi alan: ${escapeHtml(orderMeta?.openedBy||'—')}</span><span class="pce-table-total">${fmt(total)}</span>`:`<span class="pce-table-status">boş</span>`}<span class="pce-table-action">▤</span></button>`;
   }).join(''):'<div class="pce-empty">Seçili bölümde gösterilecek masa yok.</div>';
 }
 
@@ -3627,7 +3631,7 @@ function mposStripLegacyTableNumbers(){
     if(name)name.textContent=String(name.textContent||'').replace(/[#＃]+\s*(\d+)/g,' $1').replace(/[#＃]+/g,' ').replace(/\s+/g,' ').trim();
   });
 }
-function mposTableHtml(x){const mins=mposElapsedMinutes(x.id),time=x.occ?(mins<1?'az önce':mins+' dk önce'):'';return `<button type="button" class="mpos-table ${x.occ?'occupied':'empty'}" style="${x.occ?'--mpos-table-color:'+mposTableColor(x.id):''}" onclick="mposOpenOrder('${x.id}')"><span class="mpos-table-name">${escapeHtml(mposDisplayTableLabel(x.id))}</span>${x.occ?`<span class="mpos-table-time">◷ ${time}</span><span class="mpos-table-total">${fmt(x.total)}</span><span class="mpos-table-actions"><span>▣</span><span>▤</span></span>`:''}</button>`;}
+function mposTableHtml(x){const mins=mposElapsedMinutes(x.id),time=x.occ?(mins<1?'az önce':mins+' dk önce'):'';const orderMeta=x.occ?mposTableOrderMeta(x.id):null;const takenBy=String(orderMeta?.openedBy||'—');return `<button type="button" class="mpos-table ${x.occ?'occupied':'empty'}" style="${x.occ?'--mpos-table-color:'+mposTableColor(x.id):''}" onclick="mposOpenOrder('${x.id}')"><span class="mpos-table-name">${escapeHtml(mposDisplayTableLabel(x.id))}</span>${x.occ?`<span class="mpos-table-by">Siparişi alan: ${escapeHtml(takenBy)}</span><span class="mpos-table-time">◷ ${time}</span><span class="mpos-table-total">${fmt(x.total)}</span><span class="mpos-table-actions"><span>▣</span><span>▤</span></span>`:''}</button>`;}
 
 function mposOpenOrder(id){
   mposQuickMode=false;mposAccountMode=false;mposAccountId=null;mposOrderReturnFilter=mposTableFilter||'open';mposOrderMasa=String(id);currentMasa=String(id);mposOrderCategory='all';mposProductSearch='';
