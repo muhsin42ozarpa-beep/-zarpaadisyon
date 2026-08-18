@@ -139,6 +139,12 @@
       radial-gradient(ellipse at 50% 28%, rgba(227,91,42,.16), transparent 58%),
       #1c1815;
   }
+  /* PC: karşılama ekranı ana POS temasıyla aynı paleti kullanır */
+  #welcome-screen.welcome-desktop-pos{
+    background:
+      radial-gradient(ellipse at 50% 34%, rgba(255,157,10,.13), transparent 54%),
+      linear-gradient(135deg,#2f343a 0%,#293038 100%);
+  }
   .welcome-text{
     font-family:var(--font-display);
     font-size:clamp(24px, 6vw, 44px);
@@ -162,6 +168,19 @@
     border:1px solid rgba(255,255,255,.08);
     box-shadow:0 18px 48px rgba(0,0,0,.30);
   }
+  #welcome-screen.welcome-desktop-pos .welcome-text{
+    color:#f6f7f8;
+    background:rgba(38,45,51,.96);
+    border:1px solid #424b54;
+    box-shadow:0 22px 60px rgba(0,0,0,.28);
+    border-radius:14px;
+    padding:26px 36px;
+    font-family:var(--font-body);
+    font-size:clamp(28px,3vw,42px);
+    font-weight:800;
+    letter-spacing:.2px;
+  }
+  #welcome-screen.welcome-desktop-pos .welcome-cursor{color:#ff9d0a;}
   #welcome-typed .accent{ color:var(--ember); }
   .welcome-cursor{
     color:var(--ember);
@@ -435,7 +454,16 @@
   #app-screen.desktop-patron .desktop-top-search input:focus{border-color:#ff9d0a;box-shadow:0 0 0 2px rgba(255,157,10,.12)}
 
   #app-screen.desktop-patron > main{margin-left:250px;max-width:none;width:auto;padding:14px 14px 30px 0}
-  #app-screen.desktop-patron .save-hint{margin-left:250px;color:#76818b;font-family:var(--font-body);font-size:11px;padding-bottom:12px}
+  #app-screen.desktop-patron .save-hint{
+    margin-left:250px;padding:20px 18px 26px;text-align:center;
+    color:#c7a56b;font-family:Georgia,'Times New Roman',serif;font-size:18px;
+    font-style:italic;font-weight:700;letter-spacing:3.5px;line-height:1;
+    text-shadow:0 2px 12px rgba(0,0,0,.28);opacity:.96
+  }
+  #app-screen.desktop-patron #view-admin.desktop-mode-settings .desktop-settings-block.settings-active{
+    min-height:210px;overflow:hidden
+  }
+  #app-screen.desktop-patron #view-admin.desktop-mode-settings .desktop-settings-block.settings-active:last-of-type{margin-bottom:0}
   #app-screen.desktop-patron .section-title{font-family:var(--font-body);font-weight:800;color:#f6f7f8;letter-spacing:.3px;text-transform:none;font-size:16px}
   #app-screen.desktop-patron .admin-block{background:#30373e;border:1px solid #424b54;border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.08)}
   #app-screen.desktop-patron .admin-block h3{font-family:var(--font-body);font-size:14px;color:#fff}
@@ -646,6 +674,8 @@
    urun/kategori siparis, rapor, finans, personel ve ayarlar.
    ========================================================== */
 #mobile-pos-shell{display:none}
+/* Mobil POS katmanları masaüstünde DOM'a sızmasın. */
+.mpos-order-screen,.mpos-payment-backdrop,.mpos-quick-backdrop{display:none}
 @media(max-width:700px){
   html,body{background:#f3f5f8!important;color:#202733!important;overflow-x:hidden}
   #login-screen{background:linear-gradient(180deg,#fff8e8 0,#f7f8fb 34%,#f1f3f6 100%)!important;padding:20px}
@@ -1081,7 +1111,7 @@
     </div>
   </main>
 
-  <div class="save-hint">1934'den beri</div>
+  <div class="save-hint">1934’ten beri</div>
 </div>
 
 
@@ -2063,13 +2093,11 @@ function renderDesktopCariAccounts(){
   document.getElementById('desktop-cari-view-grid')?.classList.toggle('active',desktopCariView==='grid');
   document.getElementById('desktop-cari-view-list')?.classList.toggle('active',desktopCariView==='list');
   grid.classList.toggle('list-mode',desktopCariView==='list');
-  const categories={};all.forEach(a=>{const key=String(a.category||'Diğer').trim()||'Diğer';categories[key]=(categories[key]||0)+1;});
-  if(desktopCariCategory!=='all'&&!Object.prototype.hasOwnProperty.call(categories,desktopCariCategory))desktopCariCategory='all';
+  // PC Cari Hesaplar: kategori chiplerini göstermiyoruz; üst arama isim/telefon/kategori arıyor.
+  desktopCariCategory='all';
   const catBox=document.getElementById('desktop-cari-categories');
   if(catBox){
-    const catList=Object.entries(categories).sort((a,b)=>a[0].localeCompare(b[0],'tr'));
-    catBox.innerHTML=`<button class="desktop-cari-category ${desktopCariCategory==='all'?'active':''}" onclick="desktopSetCariCategory('all')">Hepsi <span class="count">${all.length}</span></button>`+
-      catList.map(([name,count])=>`<button class="desktop-cari-category ${desktopCariCategory===name?'active':''}" onclick="desktopSetCariCategory(decodeURIComponent('${encodeURIComponent(name)}'))">${escapeHtml(name)} <span class="count">${count}</span></button>`).join('');
+    catBox.innerHTML=`<button class="desktop-cari-category active" onclick="desktopSetCariCategory('all')">Hepsi <span class="count">${all.length}</span></button>`;
   }
   grid.innerHTML=list.length?list.map(a=>{
     const debt=cariAccountTotal(a),owed=debt>0,category=String(a.category||'Diğer').trim()||'Diğer';
@@ -2166,13 +2194,15 @@ function tryLogin(){
 function applyWelcomeTheme(){
   const screen=document.getElementById('welcome-screen');
   if(!screen)return;
+  const desktop=window.innerWidth>700;
   let dark=true;
-  if(window.innerWidth<=700){
+  if(!desktop){
     try{
       const d=activeState();
       dark=!!(d&&d.posAdmin&&d.posAdmin.ui&&d.posAdmin.ui.darkMode);
     }catch(e){ dark=false; }
   }
+  screen.classList.toggle('welcome-desktop-pos',desktop);
   screen.classList.toggle('welcome-dark',dark);
   screen.classList.toggle('welcome-light',!dark);
 }
