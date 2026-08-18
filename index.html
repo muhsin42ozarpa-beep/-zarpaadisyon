@@ -720,7 +720,7 @@
   .mpos-table{position:relative;min-height:185px;border:0;border-radius:18px;background:#171c22;color:#fff;text-align:left;overflow:hidden;padding:17px 58px 16px 16px;box-shadow:0 8px 18px rgba(36,45,55,.08)}
   .mpos-table.occupied{background:var(--mpos-table-color,#c93b31)}
   .mpos-table-name{display:block;font-size:25px;line-height:1.05;font-weight:500;word-break:break-word;max-height:92px;overflow:hidden;padding-right:2px;transform:translateY(-7px)}
-  .mpos-table.occupied .mpos-table-name{transform:translateY(-12px)}
+  .mpos-table.occupied .mpos-table-name{transform:translateY(-21px)}
   /* Mobil masa kartında masa adı zaten numarayı içeriyor. Tekrar #no yazmayarak çakışmayı önle. */
   .mpos-table-meta,.mpos-table-number,.mpos-table-no,.mpos-table-index{display:none!important}
   .mpos-table-by{position:absolute;left:16px;right:58px;bottom:73px;display:block;max-width:calc(100% - 78px);font-size:10px;font-weight:700;line-height:14px;color:rgba(255,255,255,.92);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1285,7 +1285,7 @@
 <div class="mpos-payment-backdrop" id="mpos-payment-backdrop" onclick="if(event.target===this)mposClosePayment()">
   <div class="mpos-sheet">
     <h3 id="mpos-payment-title">Ödeme Al</h3><p id="mpos-payment-total">0₺</p>
-    <div class="mpos-sheet-actions"><button class="cash" onclick="mposCompletePayment('nakit')">Nakit</button><button class="card" onclick="mposCompletePayment('kart')">Kredi Kartı</button><button class="cancel" onclick="mposClosePayment()">İptal</button></div>
+    <div class="mpos-sheet-actions"><button type="button" class="cash" onclick="event.stopPropagation();mposCompletePayment('nakit')">Nakit</button><button type="button" class="card" onclick="event.stopPropagation();mposCompletePayment('kart')">Kredi Kartı</button><button type="button" class="cancel" onclick="event.stopPropagation();mposClosePayment()">İptal</button></div>
   </div>
 </div>
 
@@ -1507,6 +1507,7 @@ function isOwnerAdmin(){ return !!(currentUser && currentUser.role==='admin'); }
 function hasPatronAccess(){ return !!(currentUser && (currentUser.role==='admin' || currentUser.role==='manager')); }
 function isStaffAccount(){ return !!(currentUser && (currentUser.role==='employee' || currentUser.role==='manager')); }
 function roleDisplayName(){ return currentUser.role==='admin'?'Patron / Admin':(currentUser.role==='manager'?'Yönetici':'Çalışan'); }
+function currentOrderTakerName(){return String((currentUser&&(currentUser.name||currentUser.username))||'Bilinmiyor').trim()||'Bilinmiyor';}
 function isUserTyping(){ const el=document.activeElement; return el && (el.tagName==='INPUT'||el.tagName==='TEXTAREA'); }
 function cloneStateValue(v){
   return v==null?v:JSON.parse(JSON.stringify(v));
@@ -2553,7 +2554,7 @@ function renderPcEmployeeShell(){
   }
   source=source.filter(id=>{const hay=(seatingTableLabel(id)+' '+id+' '+fmt(tableTotal(id))).toLocaleLowerCase('tr-TR');return !pcEmployeeSearch||hay.includes(pcEmployeeSearch);});
   grid.innerHTML=source.length?source.map(id=>{
-    const total=tableTotal(id),occ=total>0,mins=occ?mposElapsedMinutes(id):0,time=occ?(mins<1?'az önce':mins+' dk önce'):'';
+    const total=tableTotal(id),occ=total>0,time=occ?(mposOrderAgeText(id)||'az önce'):'';
     const orderMeta=occ?mposTableOrderMeta(id):null;
     return `<button type="button" class="pce-table ${occ?'occupied':'empty'}" onclick="pcEmployeeOpenOrder('${id}')"><span class="pce-table-name">${escapeHtml(seatingTableLabel(id))}</span>${occ?`<span class="pce-table-time">◷ ${escapeHtml(time)}</span><span class="pce-table-by">Siparişi alan: ${escapeHtml(orderMeta?.openedBy||'—')}</span><span class="pce-table-total">${fmt(total)}</span>`:`<span class="pce-table-status">boş</span>`}<span class="pce-table-action">▤</span></button>`;
   }).join(''):'<div class="pce-empty">Seçili bölümde gösterilecek masa yok.</div>';
@@ -2759,7 +2760,7 @@ function renderMasaGrid(){
 }
 
 function refreshOpenOrderSurfaces(){renderMasaGrid();if(isDesktopOrderOpen())renderDesktopOrderScreen();if(isMobilePos()&&document.getElementById('mpos-order-screen')?.classList.contains('open'))mposRenderOrder();if(document.getElementById('order-overlay')?.style.display==='flex')renderModalMenu();}
-function ensureSharedTableMeta(masaId){const id=String(masaId||'');if(!id)return Promise.resolve();const ref=testMode?testStateRef:stateRef,p=ensurePosAdmin(),now=Date.now(),who=String((currentUser&&(currentUser.name||currentUser.username))||'Bilinmiyor');if(!p.tableActivity)p.tableActivity={};if(!p.tableOrderMeta)p.tableOrderMeta={};p.tableActivity[id]=now;if(!p.tableOrderMeta[id])p.tableOrderMeta[id]={openedAt:now,openedBy:who,openedByUsername:String(currentUser?.username||'')};const meta=cloneStateValue(p.tableOrderMeta[id]);return Promise.all([ref.child('posAdmin/tableActivity/'+id).set(firebase.database.ServerValue.TIMESTAMP),ref.child('posAdmin/tableOrderMeta/'+id).transaction(cur=>cur||meta,()=>{},false)]).catch(e=>console.error('Masa meta eşitleme hatası',e));}
+function ensureSharedTableMeta(masaId){const id=String(masaId||'');if(!id)return Promise.resolve();const ref=testMode?testStateRef:stateRef,p=ensurePosAdmin(),now=Date.now(),who=currentOrderTakerName(),username=String(currentUser?.username||'');if(!p.tableActivity)p.tableActivity={};if(!p.tableOrderMeta)p.tableOrderMeta={};p.tableActivity[id]=now;const prev=p.tableOrderMeta[id]||{};p.tableOrderMeta[id]={openedAt:Number(prev.openedAt)||now,openedBy:who,openedByUsername:username};const localMeta=cloneStateValue(p.tableOrderMeta[id]);return Promise.all([ref.child('posAdmin/tableActivity/'+id).set(firebase.database.ServerValue.TIMESTAMP),ref.child('posAdmin/tableOrderMeta/'+id).transaction(cur=>{const old=cur&&typeof cur==='object'?cur:{};return{openedAt:Number(old.openedAt)||localMeta.openedAt,openedBy:who,openedByUsername:username};},()=>{},false)]).catch(e=>console.error('Masa meta eşitleme hatası',e));}
 function updateSharedTableItem(masaId,itemId,delta){const id=String(masaId||''),pid=String(itemId||'');if(!id||!pid)return Promise.resolve();const d=activeState(),beforeOrder=cloneStateValue(d.tables[id]||{});if(!d.tables[id])d.tables[id]={};const localOrder=d.tables[id],next=(Number(localOrder[pid])||0)+Number(delta||0);if(next<=0)delete localOrder[pid];else localOrder[pid]=next;if(!Object.keys(localOrder).length)delete d.tables[id];else mposTouchTable(id);refreshOpenOrderSurfaces();const ref=testMode?testStateRef:stateRef,itemRef=ref.child('tables/'+id+'/'+pid);const run=()=>itemRef.transaction(cur=>{const n=(Number(cur)||0)+Number(delta||0);return n<=0?null:n;},null,false).then(()=>ref.child('tables/'+id).once('value')).then(snap=>{const remote=snap.val();if(remote&&Object.keys(remote).length){d.tables[id]=cloneStateValue(remote);return ensureSharedTableMeta(id);}delete d.tables[id];mposClearTableActivity(id);return ref.update({['posAdmin/tableActivity/'+id]:null,['posAdmin/tableOrderMeta/'+id]:null});});const guarded=testMode?run():db.ref('ozarpa-payment-locks/masa_'+id).once('value').then(lockSnap=>{const lock=lockSnap.val();if(lock&&Date.now()-Number(lock.at||0)<120000)throw new Error('PAYMENT_IN_PROGRESS');return run();});return guarded.then(refreshOpenOrderSurfaces).catch(e=>{if(e&&e.message==='PAYMENT_IN_PROGRESS'){d.tables[id]=beforeOrder;if(!Object.keys(beforeOrder).length)delete d.tables[id];showToast('Bu masa şu anda ödeme işleminde');refreshOpenOrderSurfaces();return;}console.error('Masa ürün eşitleme hatası',e);showToast('Sipariş eşitlenemedi, tekrar deneniyor');refreshStateFromFirebase(ref,testMode).then(refreshOpenOrderSurfaces);});}
 function clearSharedTable(masaId){const id=String(masaId||'');if(!id)return Promise.resolve();const d=activeState(),stateBase=testMode?'ozarpa-test-state':'ozarpa-state',updates={};updates[stateBase+'/tables/'+id]=null;updates[stateBase+'/posAdmin/tableActivity/'+id]=null;updates[stateBase+'/posAdmin/tableOrderMeta/'+id]=null;delete d.tables[id];mposClearTableActivity(id);refreshOpenOrderSurfaces();return db.ref().update(updates).catch(e=>{console.error('Masa temizleme hatası',e);showToast('Masa temizlenemedi');refreshStateFromFirebase(testMode?testStateRef:stateRef,testMode);});}
 
@@ -2820,7 +2821,7 @@ function completeOrderPayment(method,amountOverride=null,meta={}){
   const masaId=String(meta.masaId||currentMasa||'');if(!masaId)return;
   const flightKey='masa:'+masaId;if(paymentInFlight.has(flightKey)){showToast('Bu masa için ödeme zaten işleniyor');return;}paymentInFlight.add(flightKey);
   const stateBase=testMode?'ozarpa-test-state':'ozarpa-state',salesBase=testMode?'ozarpa-test-sales':'ozarpa-sales',tablePath=stateBase+'/tables/'+masaId;let releaseLock=()=>Promise.resolve();showToast('Ödeme kaydediliyor…');
-  acquirePaymentLock('masa',masaId).then(release=>{releaseLock=release;return db.ref(tablePath).once('value');}).then(snap=>{
+  return acquirePaymentLock('masa',masaId).then(release=>{releaseLock=release;return db.ref(tablePath).once('value');}).then(snap=>{
     const remoteOrder=snap.val();if(!remoteOrder||typeof remoteOrder!=='object'||!Object.keys(remoteOrder).length)throw new Error('TABLE_ALREADY_CLOSED');
     const menu=activeState().menu||[],originalTotal=Object.entries(remoteOrder).reduce((sum,[itemId,q])=>{const it=menu.find(x=>String(x.id)===String(itemId));return sum+(Number(q)||0)*(Number(it?.price)||0);},0);if(originalTotal<=0)throw new Error('EMPTY_TOTAL');
     const pct=Math.max(0,Math.min(100,Number(meta.discountPercent)||0)),disc=Math.max(0,Number(meta.discountAmount)||0);let total=originalTotal;if(pct>0)total=Math.max(0,originalTotal*(1-pct/100));else if(disc>0)total=Math.max(0,originalTotal-disc);else if(amountOverride!==null&&Number.isFinite(Number(amountOverride)))total=Math.max(0,Number(amountOverride));total=Math.round((total+Number.EPSILON)*100)/100;
@@ -3452,10 +3453,8 @@ function mposTouchTable(id){
   const p=ensurePosAdmin(),key=String(id),now=Date.now();
   p.tableActivity[key]=now;
   if(!p.tableOrderMeta||typeof p.tableOrderMeta!=='object')p.tableOrderMeta={};
-  if(!p.tableOrderMeta[key]){
-    const who=(currentUser&&(currentUser.name||currentUser.username))||'Bilinmiyor';
-    p.tableOrderMeta[key]={openedAt:now,openedBy:String(who),openedByUsername:String(currentUser?.username||'')};
-  }
+  const prev=p.tableOrderMeta[key]||{};
+  p.tableOrderMeta[key]={openedAt:Number(prev.openedAt)||now,openedBy:currentOrderTakerName(),openedByUsername:String(currentUser?.username||'')};
 }
 function mposClearTableActivity(id){const p=ensurePosAdmin(),key=String(id);delete p.tableActivity[key];if(p.tableOrderMeta)delete p.tableOrderMeta[key];}
 function mposTableActivity(id){return Number(ensurePosAdmin().tableActivity[String(id)]||0);}
@@ -3504,7 +3503,7 @@ renderMasaGrid=function(){
       if(occupied)tile.style.background=mposTableColor(id);
       const actions=occupied?`<div class="desktop-table-actions">${hasPatronAccess()?`<button class="employee-no-pay" type="button" title="Ödeme Al" onclick="event.stopPropagation();openDesktopPaymentPanel('${id}')">▣</button>`:''}<button class="employee-order-open" type="button" title="Adisyonu Aç" onclick="event.stopPropagation();openDesktopOrderScreen('${id}')">▤</button></div>`:'';
       const orderMeta=mposTableOrderMeta(id);
-      const metaHtml=(occupied&&hasPatronAccess())?`<div class="desktop-table-meta"><span class="desktop-table-age">◷ ${escapeHtml(mposOrderAgeText(id)||'az önce')}</span><span class="desktop-table-by">Siparişi alan: ${escapeHtml(orderMeta?.openedBy||'—')}</span></div>`:'';
+      const metaHtml=occupied?`<div class="desktop-table-meta"><span class="desktop-table-age">◷ ${escapeHtml(mposOrderAgeText(id)||'az önce')}</span><span class="desktop-table-by">Siparişi alan: ${escapeHtml(orderMeta?.openedBy||'—')}</span></div>`:'';
       tile.innerHTML=`<div class="dot"></div><div class="num">${escapeHtml(label)}</div>${metaHtml}<div class="sub">${occupied?fmt(total):'boş'}</div>${actions}`;
       grid.appendChild(tile);
     });
@@ -3563,7 +3562,7 @@ function savePatronTableColors(){const rules=[];for(let i=0;i<3;i++){const raw=d
 function resetPatronTableColors(){ensurePosAdmin().tableTimeRules=[{minutes:45,color:'#c93b31'},{minutes:30,color:'#f39c12'}];queueSave();openPatronTool('table-colors');renderMasaGrid();}
 
 // ---------------- MOBILE POS SHELL ----------------
-let mposPage='tables',mposTableFilter='open',mposSearch='',mposOrderMasa=null,mposOrderReturnFilter='open',mposOrderCategory='all',mposProductSearch='',mposQuickCart={},mposQuickMode=false,mposAccountMode=false,mposAccountId=null;
+let mposPage='tables',mposTableFilter='open',mposSearch='',mposOrderMasa=null,mposOrderReturnFilter='open',mposOrderCategory='all',mposProductSearch='',mposQuickCart={},mposQuickMode=false,mposAccountMode=false,mposAccountId=null,mposPendingPayment=null;
 let mposSeatingEditId=null,mposSeatingDraft={labels:[]};
 function isMobilePos(){return !!(currentUser&&currentUser.username&&window.innerWidth<=700);}
 function mposInitial(){return ((currentUser.name||currentUser.username||'Ö').trim().charAt(0)||'Ö').toLocaleUpperCase('tr-TR');}
@@ -3631,7 +3630,7 @@ function mposStripLegacyTableNumbers(){
     if(name)name.textContent=String(name.textContent||'').replace(/[#＃]+\s*(\d+)/g,' $1').replace(/[#＃]+/g,' ').replace(/\s+/g,' ').trim();
   });
 }
-function mposTableHtml(x){const mins=mposElapsedMinutes(x.id),time=x.occ?(mins<1?'az önce':mins+' dk önce'):'';const orderMeta=x.occ?mposTableOrderMeta(x.id):null;const takenBy=String(orderMeta?.openedBy||'—');return `<button type="button" class="mpos-table ${x.occ?'occupied':'empty'}" style="${x.occ?'--mpos-table-color:'+mposTableColor(x.id):''}" onclick="mposOpenOrder('${x.id}')"><span class="mpos-table-name">${escapeHtml(mposDisplayTableLabel(x.id))}</span>${x.occ?`<span class="mpos-table-by">Siparişi alan: ${escapeHtml(takenBy)}</span><span class="mpos-table-time">◷ ${time}</span><span class="mpos-table-total">${fmt(x.total)}</span><span class="mpos-table-actions"><span>▣</span><span>▤</span></span>`:''}</button>`;}
+function mposTableHtml(x){const time=x.occ?(mposOrderAgeText(x.id)||'az önce'):'';const orderMeta=x.occ?mposTableOrderMeta(x.id):null;const takenBy=String(orderMeta?.openedBy||'—');return `<button type="button" class="mpos-table ${x.occ?'occupied':'empty'}" style="${x.occ?'--mpos-table-color:'+mposTableColor(x.id):''}" onclick="mposOpenOrder('${x.id}')"><span class="mpos-table-name">${escapeHtml(mposDisplayTableLabel(x.id))}</span>${x.occ?`<span class="mpos-table-by">Siparişi alan: ${escapeHtml(takenBy)}</span><span class="mpos-table-time">◷ ${escapeHtml(time)}</span><span class="mpos-table-total">${fmt(x.total)}</span><span class="mpos-table-actions"><span>▣</span><span>▤</span></span>`:''}</button>`;}
 
 function mposOpenOrder(id){
   mposQuickMode=false;mposAccountMode=false;mposAccountId=null;mposOrderReturnFilter=mposTableFilter||'open';mposOrderMasa=String(id);currentMasa=String(id);mposOrderCategory='all';mposProductSearch='';
@@ -3732,15 +3731,18 @@ function mposReturnStaffToTables(returnFilter){
 }
 function mposSaveStaffOrder(){if(hasPatronAccess()||mposQuickMode||mposAccountMode)return;const masa=String(mposOrderMasa||''),total=mposOrderTotal();if(!masa||total<=0){showToast('Kaydedilecek sipariş yok');return;}const returnFilter=mposOrderReturnFilter||mposTableFilter||'open';ensureSharedTableMeta(masa);mposReturnStaffToTables(returnFilter);showToast('Sipariş kaydedildi');}
 function mposPrimaryOrderAction(){if(mposOrderTotal()<=0)return;if(!hasPatronAccess()){mposSaveStaffOrder();return;}mposOpenPayment();}
-function mposOpenPayment(){const total=mposOrderTotal();if(total<=0)return;const a=mposAccountMode?cariAccountById(mposAccountId):null;document.getElementById('mpos-payment-title').textContent=mposAccountMode?((a?.name||'Cari')+' Tahsilat'):(mposQuickMode?'Hızlı Sipariş Ödemesi':mposDisplayTableLabel(mposOrderMasa)+' Ödeme');document.getElementById('mpos-payment-total').textContent=fmt(total);document.getElementById('mpos-payment-backdrop').classList.add('open');}
-function mposClosePayment(){document.getElementById('mpos-payment-backdrop')?.classList.remove('open');}
+function mposOpenPayment(){const total=mposOrderTotal();if(total<=0)return;const a=mposAccountMode?cariAccountById(mposAccountId):null;mposPendingPayment=mposAccountMode?{type:'account',accountId:String(mposAccountId||'')}:(mposQuickMode?{type:'quick'}:{type:'table',masaId:String(mposOrderMasa||currentMasa||'')});document.getElementById('mpos-payment-title').textContent=mposAccountMode?((a?.name||'Cari')+' Tahsilat'):(mposQuickMode?'Hızlı Sipariş Ödemesi':mposDisplayTableLabel(mposPendingPayment.masaId)+' Ödeme');document.getElementById('mpos-payment-total').textContent=fmt(total);document.getElementById('mpos-payment-backdrop').classList.add('open');}
+function mposClosePayment(){document.getElementById('mpos-payment-backdrop')?.classList.remove('open');mposPendingPayment=null;}
 function mposCompletePayment(method){
-  if(!hasPatronAccess())return;
-  if(mposAccountMode){if(mposAccountId)completeCariPayment(mposAccountId,method,null,{mobile:true});return;}
-  if(mposQuickMode){mposCompleteQuickSale(method);return;}
-  const id=mposOrderMasa;
-  if(!id)return;
-  completeOrderPayment(method,null,{masaId:id,desktop:false,mobile:true});
+  if(!hasPatronAccess()){showToast('Ödeme yetkiniz yok');return;}
+  const ctx=mposPendingPayment|| (mposAccountMode?{type:'account',accountId:String(mposAccountId||'')}:(mposQuickMode?{type:'quick'}:{type:'table',masaId:String(mposOrderMasa||currentMasa||'')}));
+  if(ctx.type==='account'){if(ctx.accountId)completeCariPayment(ctx.accountId,method,null,{mobile:true});return;}
+  if(ctx.type==='quick'){mposCompleteQuickSale(method);return;}
+  const id=String(ctx.masaId||'');
+  if(!id){showToast('Masa bilgisi bulunamadı');return;}
+  const buttons=document.querySelectorAll('#mpos-payment-backdrop .mpos-sheet-actions button.cash,#mpos-payment-backdrop .mpos-sheet-actions button.card');buttons.forEach(b=>b.disabled=true);
+  const done=completeOrderPayment(method,null,{masaId:id,desktop:false,mobile:true});
+  Promise.resolve(done).finally(()=>buttons.forEach(b=>b.disabled=false));
   try{window.scrollTo({top:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}
 }
 
