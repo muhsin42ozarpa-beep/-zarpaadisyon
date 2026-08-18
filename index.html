@@ -646,7 +646,7 @@
   .mpos-empty{padding:44px 20px;text-align:center;color:#7b8795}.mpos-empty b{display:block;color:#344151;font-size:18px;margin-bottom:6px}
   .mpos-card{background:#fff;border:1px solid #e2e5e9;border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:0 8px 20px rgba(44,56,68,.05)}
   .mpos-card h3{margin:0 0 14px;font-size:18px;color:#222b36}.mpos-card h3 span{color:#ff9d0a;margin-right:7px}
-  .mpos-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.mpos-kpi{background:#f5f7f9;border:1px solid #e4e8ec;border-radius:16px;padding:14px}.mpos-kpi span{display:block;color:#7b8794;font-size:11px;text-transform:uppercase}.mpos-kpi strong{display:block;color:#1d2834;font-size:22px;margin-top:5px}.mpos-kpi.hero{grid-column:1/-1;background:linear-gradient(135deg,#21b784,#159b73)}.mpos-kpi.hero span,.mpos-kpi.hero strong{color:#fff}
+  .mpos-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.mpos-kpi{background:#f5f7f9;border:1px solid #e4e8ec;border-radius:16px;padding:14px}.mpos-kpi span{display:block;color:#7b8794;font-size:11px;text-transform:uppercase}.mpos-kpi strong{display:block;color:#1d2834;font-size:22px;margin-top:5px}.mpos-kpi.hero{grid-column:1/-1;background:linear-gradient(135deg,#21b784,#159b73)}.mpos-kpi.hero span,.mpos-kpi.hero strong{color:#fff}.mpos-kpi-payments{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.28)}.mpos-kpi-payment{min-width:0}.mpos-kpi-payment span{font-size:10px!important;opacity:.85}.mpos-kpi-payment strong{font-size:17px!important;margin-top:3px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mpos-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid #edf0f2}.mpos-row:last-child{border-bottom:0}.mpos-row small{color:#89939d;display:block;margin-top:3px}
   .mpos-btn{border:0;border-radius:13px;background:#ff9d0a;color:#fff;padding:12px 16px;font-weight:800}.mpos-btn.secondary{background:#eef1f4;color:#354252}.mpos-btn.danger{background:#e64b45}.mpos-btn.green{background:#26af80}
   .mpos-field{width:100%;box-sizing:border-box;height:48px;background:#f4f6f8;border:1px solid #dfe4e9;border-radius:13px;padding:0 13px;color:#273241;margin:6px 0}.mpos-field[type=number]{font-variant-numeric:tabular-nums}
@@ -673,6 +673,25 @@
 
 .desktop-product-disabled{opacity:.38!important;filter:grayscale(1);cursor:not-allowed!important}
 @media(max-width:700px){#mobile-pos-shell.no-animations *,#mobile-pos-shell.no-animations *:before,#mobile-pos-shell.no-animations *:after{transition:none!important;animation:none!important}}
+
+/* ---------- TERMAL FIS YAZDIRMA ---------- */
+#receipt-print-root{display:none}
+@media print{
+  @page{size:80mm auto;margin:3mm}
+  html,body{background:#fff!important;width:auto!important;height:auto!important;overflow:visible!important}
+  body *{visibility:hidden!important}
+  #receipt-print-root,#receipt-print-root *{visibility:visible!important}
+  #receipt-print-root{display:block!important;position:absolute!important;left:0!important;top:0!important;width:72mm!important;max-width:72mm!important;background:#fff!important;color:#000!important;font-family:Arial,Helvetica,sans-serif!important;padding:0!important;margin:0!important}
+  #receipt-print-root .r-head{text-align:center;border-bottom:1px dashed #000;padding-bottom:8px;margin-bottom:8px}
+  #receipt-print-root .r-brand{font-size:18px;font-weight:900;letter-spacing:.3px}
+  #receipt-print-root .r-sub{font-size:11px;margin-top:3px}
+  #receipt-print-root .r-meta{font-size:10px;line-height:1.5;margin:7px 0;border-bottom:1px dashed #000;padding-bottom:7px}
+  #receipt-print-root .r-row{display:grid;grid-template-columns:1fr auto;gap:7px;font-size:11px;padding:4px 0;border-bottom:1px dotted #bbb}
+  #receipt-print-root .r-row .r-name{font-weight:700}
+  #receipt-print-root .r-row small{display:block;font-size:9px;font-weight:400;margin-top:1px}
+  #receipt-print-root .r-total{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:900;border-top:1px dashed #000;margin-top:7px;padding-top:8px}
+  #receipt-print-root .r-foot{text-align:center;font-size:10px;border-top:1px dashed #000;margin-top:10px;padding-top:8px}
+}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -950,12 +969,14 @@
         <div class="mpos-order-actions">
           <button class="mpos-order-primary" id="mpos-order-primary" onclick="mposPrimaryOrderAction()">Hesabı Kapat</button>
           <button class="mpos-order-other" onclick="mposOpenQuickMenu()">•••</button>
-          <button class="mpos-order-print" onclick="window.print()">🖨</button>
+          <button class="mpos-order-print" onclick="mposPrintReceipt()" title="Fiş Yazdır">🖨</button>
         </div>
       </div>
     </section>
   </div>
 </section>
+
+<div id="receipt-print-root" aria-hidden="true"></div>
 
 <div class="mpos-payment-backdrop" id="mpos-payment-backdrop" onclick="if(event.target===this)mposClosePayment()">
   <div class="mpos-sheet">
@@ -2066,6 +2087,14 @@ function completeOrderPayment(method,amountOverride=null,meta={}){
     if(isDesktopOrderOpen())closeDesktopOrderScreen(false);
     currentMasa=null;
     renderMasaGrid();
+  }else if(meta.mobile){
+    const screen=document.getElementById('mpos-order-screen');
+    if(screen){screen.classList.remove('open');screen.setAttribute('aria-hidden','true');}
+    mposClosePayment();
+    mposOrderMasa=null;
+    currentMasa=null;
+    mposQuickMode=false;
+    mposPage='tables';
   }else{
     closeOrder();
   }
@@ -2574,10 +2603,58 @@ function mposRenderOrder(){
 function mposCategoryInitials(n){return String(n||'').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toLocaleUpperCase('tr-TR')||'ÜR';}
 function mposChangeQty(itemId,delta){if(delta>0&&mposIsProductDisabled(itemId)){showToast('Bu ürün satışa kapalı');return;}if(mposQuickMode){const n=(mposQuickCart[itemId]||0)+delta;if(n<=0)delete mposQuickCart[itemId];else mposQuickCart[itemId]=n;mposRenderOrder();return;}if(!mposOrderMasa)return;const d=activeState();if(!d.tables[mposOrderMasa])d.tables[mposOrderMasa]={};const o=d.tables[mposOrderMasa],n=(o[itemId]||0)+delta;if(n<=0)delete o[itemId];else o[itemId]=n;if(Object.keys(o).length===0){delete d.tables[mposOrderMasa];mposClearTableActivity(mposOrderMasa);}else mposTouchTable(mposOrderMasa);queueSave();mposRenderOrder();renderMasaGrid();}
 function mposRenderCart(){const o=mposOrderData(),data=activeState(),list=document.getElementById('mpos-cart-list');const rows=Object.entries(o).filter(([,q])=>Number(q)>0);document.getElementById('mpos-cart-title').textContent=mposQuickMode?'Hızlı Sipariş':('Masa '+mposOrderMasa);document.getElementById('mpos-cart-count').textContent=rows.length+' kalem';document.getElementById('mpos-cart-total').textContent=fmt(mposOrderTotal());list.innerHTML=rows.length?rows.map(([id,q])=>{const it=data.menu.find(m=>m.id===id);if(!it)return'';return `<div class="mpos-cart-row"><div><strong>${escapeHtml(it.name)}</strong><small>${q} × ${fmt(Number(it.price)||0)}</small></div><div class="mpos-cart-qty"><button onclick="mposChangeQty('${id}',-1)">−</button><b>${q}</b><button onclick="mposChangeQty('${id}',1)">+</button></div></div>`}).join(''):'<div class="mpos-empty" style="padding:24px 10px"><b>Henüz sipariş yok</b>Ürünlere dokunarak sipariş ekleyin.</div>';const btn=document.getElementById('mpos-order-primary');if(mposQuickMode)btn.textContent=currentUser.role==='admin'?'Ödeme Al':'Siparişi Kaydet';else btn.textContent=currentUser.role==='admin'?'Hesabı Kapat':'Siparişi Kaydet';btn.disabled=mposOrderTotal()<=0;}
+function mposReceiptEscape(v){return escapeHtml(v==null?'':String(v));}
+function mposPrintReceipt(){
+  const root=document.getElementById('receipt-print-root');
+  if(!root)return;
+  const order=mposOrderData();
+  const data=activeState();
+  const rows=Object.entries(order||{}).filter(([,q])=>Number(q)>0).map(([id,q])=>{
+    const item=(data.menu||[]).find(x=>x.id===id);
+    if(!item)return null;
+    const qty=Number(q)||0,price=Number(item.price)||0;
+    return {name:item.name||'Ürün',qty,price,line:qty*price};
+  }).filter(Boolean);
+  if(!rows.length){showToast('Yazdırılacak sipariş yok');return;}
+  const total=rows.reduce((a,r)=>a+r.line,0);
+  const title=mposQuickMode?'Hızlı Sipariş':('Masa '+mposOrderMasa);
+  const now=new Date();
+  root.innerHTML=`
+    <div class="r-head"><div class="r-brand">KEBAPÇI ÖZARPA</div><div class="r-sub">Adisyon / Sipariş Fişi</div></div>
+    <div class="r-meta"><b>${mposReceiptEscape(title)}</b><br>${mposReceiptEscape(now.toLocaleString('tr-TR'))}<br>Personel: ${mposReceiptEscape(currentUser.name||currentUser.username||'')}</div>
+    ${rows.map(r=>`<div class="r-row"><div><span class="r-name">${mposReceiptEscape(r.name)}</span><small>${r.qty} × ${mposReceiptEscape(fmt(r.price))}</small></div><b>${mposReceiptEscape(fmt(r.line))}</b></div>`).join('')}
+    <div class="r-total"><span>TOPLAM</span><span>${mposReceiptEscape(fmt(total))}</span></div>
+    <div class="r-foot">Afiyet olsun.<br>Kebapçı Özarpa</div>`;
+  root.setAttribute('aria-hidden','false');
+  // Tarayıcının yazdırma penceresini açar. Sistem fiş yazıcısı seçilirse 80 mm fiş basılır.
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{root.setAttribute('aria-hidden','true');},250);
+  },60);
+}
+
 function mposPrimaryOrderAction(){if(mposOrderTotal()<=0)return;if(currentUser.role!=='admin'){showToast('Sipariş kaydedildi');mposCloseOrder();return;}mposOpenPayment();}
 function mposOpenPayment(){const total=mposOrderTotal();if(total<=0)return;document.getElementById('mpos-payment-title').textContent=mposQuickMode?'Hızlı Sipariş Ödemesi':'Masa '+mposOrderMasa+' Ödeme';document.getElementById('mpos-payment-total').textContent=fmt(total);document.getElementById('mpos-payment-backdrop').classList.add('open');}
 function mposClosePayment(){document.getElementById('mpos-payment-backdrop')?.classList.remove('open');}
-function mposCompletePayment(method){if(currentUser.role!=='admin')return;if(mposQuickMode){mposCompleteQuickSale(method);return;}const id=mposOrderMasa;if(!id)return;mposClosePayment();completeOrderPayment(method,null,{masaId:id,desktop:false});mposOrderMasa=null;document.getElementById('mpos-order-screen')?.classList.remove('open');mposRender();}
+function mposCompletePayment(method){
+  if(currentUser.role!=='admin')return;
+  if(mposQuickMode){mposCompleteQuickSale(method);return;}
+  const id=mposOrderMasa;
+  if(!id)return;
+  mposClosePayment();
+  completeOrderPayment(method,null,{masaId:id,desktop:false,mobile:true});
+  // Mobilde ödeme seçildiği anda sipariş ekranını kesin olarak kapat ve Masalar'a dön.
+  const screen=document.getElementById('mpos-order-screen');
+  if(screen){screen.classList.remove('open');screen.setAttribute('aria-hidden','true');}
+  mposOrderMasa=null;
+  currentMasa=null;
+  mposQuickMode=false;
+  mposPage='tables';
+  mposTableFilter='open';
+  mposProductSearch='';
+  mposRender();
+  try{window.scrollTo({top:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}
+}
 
 function mposOpenQuickMenu(){if(currentUser.role!=='admin'){return;}const box=document.getElementById('mpos-quick-actions');box.innerHTML=`<button class="mpos-btn" onclick="mposQuickTool('cash-open')">Kasa Açılış</button><button class="mpos-btn" onclick="mposQuickTool('cash-flow')">Kasa Giriş Çıkış</button><button class="mpos-btn" onclick="mposQuickTool('disabled-products')">Satışa Kapalı Ürünler</button><button class="mpos-btn" onclick="mposQuickTool('table-colors')">Masa Zaman Renkleri</button>`;document.getElementById('mpos-quick-backdrop').classList.add('open');}
 function mposCloseQuickMenu(){document.getElementById('mpos-quick-backdrop')?.classList.remove('open');}
@@ -2585,7 +2662,7 @@ function mposQuickTool(action){mposCloseQuickMenu();if(window.innerWidth>700)ope
   openPatronTool(action);const p=document.getElementById('patron-tool-panel');if(p){p.style.width='94vw';p.style.maxHeight='84vh';} }
 }
 
-function mposRenderReports(c){const m=mposMetrics();c.innerHTML=`<h2 class="mpos-page-title">Raporlar</h2><div class="mpos-page-sub">Finansal özet ve satış görünümü</div><div class="mpos-kpis"><div class="mpos-kpi hero"><span>Bugünkü Kazanç</span><strong>${fmt(m.day)}</strong></div><div class="mpos-kpi"><span>Nakit</span><strong>${fmt(m.cash)}</strong></div><div class="mpos-kpi"><span>Kart</span><strong>${fmt(m.card)}</strong></div><div class="mpos-kpi"><span>Bu Hafta</span><strong>${fmt(m.week)}</strong></div><div class="mpos-kpi"><span>Bu Ay</span><strong>${fmt(m.month)}</strong></div><div class="mpos-kpi"><span>Bu Yıl</span><strong>${fmt(m.year)}</strong></div></div>`;}
+function mposRenderReports(c){const m=mposMetrics();c.innerHTML=`<h2 class="mpos-page-title">Raporlar</h2><div class="mpos-page-sub">Finansal özet ve satış görünümü</div><div class="mpos-kpis"><div class="mpos-kpi hero"><span>Bugünkü Kazanç</span><strong>${fmt(m.day)}</strong><div class="mpos-kpi-payments"><div class="mpos-kpi-payment"><span>Nakit</span><strong>${fmt(m.cash)}</strong></div><div class="mpos-kpi-payment"><span>Kart</span><strong>${fmt(m.card)}</strong></div></div></div><div class="mpos-kpi"><span>Bu Hafta</span><strong>${fmt(m.week)}</strong></div><div class="mpos-kpi"><span>Bu Ay</span><strong>${fmt(m.month)}</strong></div><div class="mpos-kpi"><span>Bu Yıl</span><strong>${fmt(m.year)}</strong></div></div>`;}
 function mposMetrics(){const now=new Date(),day=startOfDay(now),ws=new Date(now.getFullYear(),now.getMonth(),now.getDate()),dow=ws.getDay()||7;ws.setDate(ws.getDate()-dow+1);const month=new Date(now.getFullYear(),now.getMonth(),1).getTime(),year=new Date(now.getFullYear(),0,1).getTime();let dayT=0,cash=0,card=0,week=0,mon=0,yr=0;Object.values(activeSales()).forEach(s=>{const t=Number(s.at)||0,a=Number(s.amount)||0;if(t>=day){dayT+=a;if(s.paymentMethod==='kart')card+=a;else cash+=a}if(t>=ws.getTime())week+=a;if(t>=month)mon+=a;if(t>=year)yr+=a});return{day:dayT,cash,card,week,month:mon,year:yr};}
 function mposRenderFinance(c){const p=ensurePosAdmin(),m=mposMetrics(),mov=(p.cashMovements||[]).reduce((a,x)=>a+(x.type==='out'?-Number(x.amount||0):Number(x.amount||0)),0);c.innerHTML=`<h2 class="mpos-page-title">Finans</h2><div class="mpos-card"><h3><span>💵</span>Kasa</h3><div class="mpos-kpis"><div class="mpos-kpi"><span>Kasa Açılış</span><strong>${fmt(Number(p.cashOpening)||0)}</strong></div><div class="mpos-kpi"><span>Giriş / Çıkış Net</span><strong>${fmt(mov)}</strong></div><div class="mpos-kpi hero"><span>Bugünkü Tahsilat</span><strong>${fmt(m.day)}</strong></div></div></div><div class="mpos-card"><h3><span>▦</span>Ödeme Dağılımı</h3><div class="mpos-row"><span>Nakit</span><b>${fmt(m.cash)}</b></div><div class="mpos-row"><span>Kart</span><b>${fmt(m.card)}</b></div></div>`;}
 function mposRenderPersonnel(c){if(currentUser.role==='admin'){const vals=Object.entries(employees);c.innerHTML=`<h2 class="mpos-page-title">Personel Yönetimi</h2><div class="mpos-card"><h3><span>＋</span>Yeni Çalışan</h3><input id="mpos-emp-name" class="mpos-field" placeholder="Çalışan adı"><input id="mpos-emp-user" class="mpos-field" placeholder="Kullanıcı adı"><input id="mpos-emp-pass" class="mpos-field" type="password" placeholder="Şifre"><button class="mpos-btn" style="width:100%;margin-top:7px" onclick="mposCreateEmployee()">Kaydet</button></div><div class="mpos-card"><h3><span>👥</span>Çalışanlar</h3>${vals.length?vals.map(([id,e])=>`<div class="mpos-list-item"><div class="mpos-list-avatar">${escapeHtml((e.name||e.username||'?')[0].toUpperCase())}</div><div class="mpos-list-main"><strong>${escapeHtml(e.name||e.username)}</strong><small>@${escapeHtml(e.username||'')}</small></div><button class="mpos-btn danger" onclick="mposFireEmployee('${id}')">Kov</button></div>`).join(''):'<div class="mpos-empty">Çalışan yok.</div>'}</div>`;}else{const now=Date.now(),fresh=Object.values(presence||{}).filter(e=>now-Number(e.lastSeen||e.at||0)<45000);c.innerHTML=`<h2 class="mpos-page-title">Personel</h2><div class="mpos-card"><h3><span>●</span>Aktif Çalışanlar</h3>${fresh.length?fresh.map(e=>`<div class="mpos-list-item"><div class="mpos-list-avatar">${escapeHtml((e.name||e.username||'?')[0].toUpperCase())}</div><div class="mpos-list-main"><strong>${escapeHtml(e.name||e.username)}</strong><small>Çevrimiçi</small></div></div>`).join(''):'<div class="mpos-empty">Aktif çalışan yok.</div>'}</div>`;}}
