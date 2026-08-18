@@ -456,7 +456,7 @@
   #app-screen.desktop-patron > main{margin-left:250px;max-width:none;width:auto;padding:14px 14px 30px 0}
   #app-screen.desktop-patron .save-hint{
     margin-left:250px;padding:20px 18px 26px;text-align:center;
-    transform:translateX(-40px);
+    transform:translateX(-52px);
     color:#c7a56b;font-family:Georgia,'Times New Roman',serif;font-size:18px;
     font-style:italic;font-weight:700;letter-spacing:3.5px;line-height:1;
     text-shadow:0 2px 12px rgba(0,0,0,.28);opacity:.96
@@ -855,6 +855,9 @@
   #app-screen.desktop-patron.desktop-employee .desktop-top-search .menu-square,
   #app-screen.desktop-patron.desktop-employee .desktop-user-wrap{display:none!important}
   #app-screen.desktop-patron.desktop-employee #desktop-nav-masa{display:flex!important}
+  #app-screen.desktop-patron.desktop-employee .desktop-sidebar{display:flex!important}
+  #app-screen.desktop-patron.desktop-employee > header nav.tabs,
+  #app-screen.desktop-patron.desktop-employee > header .brand{display:none!important}
   #app-screen.desktop-patron.desktop-employee .desktop-sidebar-nav{padding-top:10px}
   #app-screen.desktop-patron.desktop-employee #role-badge{background:#2563eb;color:#fff}
   #app-screen.desktop-patron.desktop-employee .desktop-table-actions .employee-no-pay{display:none!important}
@@ -2144,7 +2147,7 @@ function desktopTopSearch(q){if(desktopCurrentPage==='accounts'){desktopCariSear
 function desktopUpdateTopSearchUi(){const s=document.getElementById('desktop-table-search');if(!s)return;if(desktopCurrentPage==='accounts'){s.placeholder='Cari ara (isim, telefon, kategori)';s.value=desktopCariSearch||'';}else{s.placeholder='Masa ara';s.value=desktopCurrentPage==='masa'?(desktopTableSearch||''):'';}}
 
 function isDesktopPatron(){return !!(hasPatronAccess()&&window.innerWidth>700);}
-function isDesktopPos(){return !!(currentUser&&['admin','manager','employee'].includes(currentUser.role)&&window.innerWidth>700);}
+function isDesktopPos(){return !!(currentUser&&['admin','manager','employee'].includes(currentUser.role)&&window.matchMedia('(min-width: 701px)').matches);}
 function syncDesktopBrandLogo(){
   const source=document.querySelector('#app-screen header .brand .logo-mark img')||document.querySelector('#login-screen .logo-mark img');
   const target=document.querySelector('.desktop-brand-logo');
@@ -2162,12 +2165,23 @@ function syncDesktopPatronShell(){
   const users=document.getElementById('desktop-user-wrap');if(users)users.style.display=employeeOnly?'none':'';
   if(enabled){
     syncDesktopBrandLogo();
+    // PC çalışan kesinlikle eski üst sekmeli arayüze düşmesin.
+    const legacyTabs=app.querySelector('header nav.tabs');if(legacyTabs)legacyTabs.style.display='none';
+    const sidebar=app.querySelector('.desktop-sidebar');if(sidebar)sidebar.style.display='flex';
     const head=document.querySelector('#view-masa .desktop-page-head small');if(head)head.textContent=employeeOnly?'Masa ve sipariş yönetimi':'Salon masa ve adisyon yönetimi';
-    if(employeeOnly&&desktopCurrentPage!=='masa')desktopCurrentPage='masa';
+    if(employeeOnly){
+      desktopCurrentPage='masa';
+      const views=['view-accounts','view-active-employees','view-admin','view-special'];
+      views.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+      const masaView=document.getElementById('view-masa');if(masaView)masaView.style.display='block';
+    }
     if(!desktopShellInitialized){desktopShellInitialized=true;desktopNavigate('masa',true);}
+    else if(employeeOnly){syncDesktopNav('masa');renderDesktopTableFilters();desktopApplyTableFilters();}
   }else{
     desktopShellInitialized=false;
     app.classList.remove('desktop-employee');
+    const legacyTabs=app.querySelector('header nav.tabs');if(legacyTabs)legacyTabs.style.display='';
+    const sidebar=app.querySelector('.desktop-sidebar');if(sidebar)sidebar.style.display='';
   }
 }
 function desktopNavigate(page,silent=false){
