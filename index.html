@@ -344,7 +344,7 @@
   .toast{
     position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
     background:var(--ok);color:#132215;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;
-    opacity:0;pointer-events:none;transition:opacity .25s, bottom .25s;z-index:100;
+    opacity:0;pointer-events:none;transition:opacity .25s, bottom .25s;z-index:50000;
   }
   .toast.show{opacity:1;bottom:30px;}
   .save-hint{
@@ -755,7 +755,7 @@
   .mpos-order-cats{grid-column:1;grid-row:1/3;background:#fff;border-right:1px solid #e0e4e8;overflow-y:auto;padding:9px 7px}.mpos-cat-btn{width:100%;border:1px solid #e7e8eb;background:#fff;border-radius:18px;margin-bottom:10px;padding:0;overflow:hidden;color:#202733}.mpos-cat-badge{height:78px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ffd7c1,#ffbfa8);font-size:25px;font-weight:900;color:#fff}.mpos-cat-btn:nth-child(3n+2) .mpos-cat-badge{background:linear-gradient(135deg,#ff8da6,#e9c6f1)}.mpos-cat-btn:nth-child(3n) .mpos-cat-badge{background:linear-gradient(135deg,#5a7bef,#7846bb)}.mpos-cat-name{display:block;padding:8px 4px;font-size:12px;font-weight:800;word-break:break-word}.mpos-cat-btn.active{outline:2px solid #ff9d0a}
   .mpos-products{grid-column:2;grid-row:1;padding:12px;overflow-y:auto}.mpos-product-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.mpos-product{min-height:125px;border:0;border-radius:17px;background:linear-gradient(145deg,#475a64,#1f2d34);color:#fff;padding:12px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 14px rgba(24,32,40,.13)}.mpos-product.colored:nth-child(4n+2){background:linear-gradient(145deg,#a43c32,#c9654f)}.mpos-product.colored:nth-child(4n+3){background:linear-gradient(145deg,#394f91,#586fc8)}.mpos-product.colored:nth-child(4n){background:linear-gradient(145deg,#05899e,#18b9b5)}.mpos-product strong{font-size:15px;line-height:1.12}.mpos-product span{font-size:15px;font-weight:900}.mpos-product.disabled{opacity:.38;filter:grayscale(1)}
   .mpos-cart{grid-column:2;grid-row:2;background:#fff;border-top:1px solid #e1e5e9;display:flex;flex-direction:column;min-height:0}.mpos-cart-head{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-bottom:1px solid #eef0f2}.mpos-cart-list{flex:1;overflow:auto;padding:8px 12px}.mpos-cart-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 0;border-bottom:1px solid #eef0f2}.mpos-cart-row strong{display:block;font-size:13px}.mpos-cart-row small{color:#89939c}.mpos-cart-qty{display:flex;align-items:center;gap:7px}.mpos-cart-qty button{width:30px;height:30px;border:0;border-radius:9px;background:#eef1f4;font-weight:900}.mpos-cart-foot{padding:10px 12px;border-top:1px solid #e8ebee;background:#fff}.mpos-cart-total{display:flex;justify-content:space-between;font-size:18px;font-weight:900;margin-bottom:8px}.mpos-order-actions{display:grid;grid-template-columns:1fr auto auto;gap:8px}.mpos-order-actions button{height:48px;border:0;border-radius:13px;font-weight:900}.mpos-order-primary{background:#69cdb0;color:#fff}.mpos-order-other{background:#2f67e8;color:#fff}.mpos-order-print{background:#fff;border:1px solid #dce1e6!important;color:#25313f}
-  .mpos-payment-backdrop,.mpos-quick-backdrop{display:none;position:fixed;inset:0;z-index:9080;background:rgba(16,23,31,.55);align-items:flex-end}.mpos-payment-backdrop.open,.mpos-quick-backdrop.open{display:flex}.mpos-sheet{width:100%;background:#fff;border-radius:24px 24px 0 0;padding:19px 17px 24px;box-shadow:0 -18px 46px rgba(0,0,0,.16)}.mpos-sheet h3{margin:0 0 5px}.mpos-sheet p{margin:0 0 16px;color:#7e8994}.mpos-sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mpos-sheet-actions button{height:56px;border:0;border-radius:15px;color:#fff;font-weight:900;font-size:16px}.mpos-sheet-actions .cash{background:#3557be}.mpos-sheet-actions .card{background:#c52929}.mpos-sheet-actions .cancel{grid-column:1/-1;background:#eef1f4;color:#4a5766}
+  .mpos-payment-backdrop,.mpos-quick-backdrop{display:none;position:fixed;inset:0;z-index:9080;background:rgba(16,23,31,.55);align-items:flex-end}.mpos-payment-backdrop.open,.mpos-quick-backdrop.open{display:flex}.mpos-sheet{width:100%;background:#fff;border-radius:24px 24px 0 0;padding:19px 17px 24px;box-shadow:0 -18px 46px rgba(0,0,0,.16)}.mpos-sheet h3{margin:0 0 5px}.mpos-sheet p{margin:0 0 16px;color:#7e8994}.mpos-sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mpos-sheet-actions button{height:56px;border:0;border-radius:15px;color:#fff;font-weight:900;font-size:16px;cursor:pointer;touch-action:manipulation;pointer-events:auto;position:relative;z-index:2}.mpos-sheet-actions button:disabled{opacity:.58;cursor:wait}.mpos-sheet-actions .cash{background:#3557be}.mpos-sheet-actions .card{background:#c52929}.mpos-sheet-actions .cancel{grid-column:1/-1;background:#eef1f4;color:#4a5766}
   .mpos-dark{background:#232a31!important;color:#f5f7f8!important}.mpos-dark .mpos-content{background:#2d343b}.mpos-dark .mpos-topbar,.mpos-dark .mpos-tabs,.mpos-dark .mpos-card,.mpos-dark .mpos-cart,.mpos-dark .mpos-order-cats,.mpos-dark .mpos-order-head{background:#252c33;color:#fff;border-color:#424b54}.mpos-dark .mpos-search,.mpos-dark .mpos-order-head input,.mpos-dark .mpos-field,.mpos-dark .mpos-select,.mpos-dark .mpos-toggle-row,.mpos-dark .mpos-kpi{background:#303840;color:#fff;border-color:#46515c}.mpos-dark .mpos-page-title,.mpos-dark .mpos-card h3,.mpos-dark .mpos-kpi strong,.mpos-dark .mpos-list-main strong{color:#fff}
 }
 
@@ -1274,7 +1274,7 @@
         <div class="mpos-order-actions">
           <button type="button" class="mpos-order-primary" id="mpos-order-primary" onclick="mposPrimaryOrderAction()">Hesabı Kapat</button>
           <button class="mpos-order-other" onclick="mposOpenQuickMenu()">•••</button>
-          <button class="mpos-order-print" onclick="mposPrintReceipt()" title="Fiş Yazdır">🖨</button>
+          <button type="button" class="mpos-order-print" onclick="event.stopPropagation();mposPrintReceipt(this)" title="Fiş Yazdır">🖨</button>
         </div>
       </div>
     </section>
@@ -1369,7 +1369,7 @@
       <div class="desktop-order-cart-foot">
         <div class="desktop-order-total-row"><span>Toplam</span><strong id="desktop-order-cart-total">0₺</strong></div>
         <button class="desktop-order-pay-btn" id="desktop-order-pay-btn" type="button" onclick="desktopOrderTakePayment()">Ödeme Al: 0₺</button>
-        <button class="desktop-order-print-btn" id="desktop-order-print-btn" type="button" onclick="desktopPrintReceipt()">🖨 Fiş Yazdır</button>
+        <button class="desktop-order-print-btn" id="desktop-order-print-btn" type="button" onclick="desktopPrintReceipt(this)">🖨 Fiş Yazdır</button>
         <button class="desktop-order-clear-btn" id="desktop-order-clear-btn" type="button" onclick="desktopOrderClear()">Masayı Temizle</button>
       </div>
     </aside>
@@ -1514,6 +1514,15 @@ function hasPatronAccess(){ return !!(currentUser && (currentUser.role==='admin'
 function isStaffAccount(){ return !!(currentUser && (currentUser.role==='employee' || currentUser.role==='manager')); }
 function roleDisplayName(){ return currentUser.role==='admin'?'Patron / Admin':(currentUser.role==='manager'?'Yönetici':'Çalışan'); }
 function currentOrderTakerName(){return String((currentUser&&(currentUser.name||currentUser.username))||'Bilinmiyor').trim()||'Bilinmiyor';}
+let toastHideTimer=null;
+function showToast(message,duration=2200){
+  const el=document.getElementById('toast');
+  if(!el){console.log('[Özarpa]',message);return;}
+  el.textContent=String(message||'');
+  el.classList.add('show');
+  if(toastHideTimer)clearTimeout(toastHideTimer);
+  toastHideTimer=setTimeout(()=>el.classList.remove('show'),Math.max(900,Number(duration)||2200));
+}
 function isUserTyping(){ const el=document.activeElement; return el && (el.tagName==='INPUT'||el.tagName==='TEXTAREA'); }
 function cloneStateValue(v){
   return v==null?v:JSON.parse(JSON.stringify(v));
@@ -3696,14 +3705,33 @@ function buildReceiptPrintJob(opts={}){
     total
   };
 }
-function enqueueReceiptPrint(job){
-  if(!job){showToast('Yazdırılacak sipariş yok');return Promise.resolve(false);}
+function setReceiptPrintButtonState(button,busy){
+  if(!button)return;
+  if(busy){
+    if(!button.dataset.originalHtml)button.dataset.originalHtml=button.innerHTML;
+    button.disabled=true;
+    button.innerHTML=button.classList.contains('mpos-order-print')?'…':'⏳ Yazdırılıyor…';
+  }else{
+    button.disabled=false;
+    if(button.dataset.originalHtml){button.innerHTML=button.dataset.originalHtml;delete button.dataset.originalHtml;}
+  }
+}
+function enqueueReceiptPrint(job,button=null){
+  if(!job){showToast('Yazdırılacak sipariş yok');setReceiptPrintButtonState(button,false);return Promise.resolve(false);}
+  setReceiptPrintButtonState(button,true);
+  showToast('Fiş yazdırma isteği gönderiliyor…',1800);
   const node=printQueueRef.push();
   const online=printerIsOnline();
-  showToast(online?'Fiş POS-80C yazıcıya gönderildi':'Yazıcı PC çevrimdışı; fiş kuyruğa alındı');
-  return node.set(job).then(()=>true).catch(e=>{console.error('Fiş kuyruğu hatası',e);showToast('Fiş yazıcı kuyruğuna gönderilemedi');return false;});
+  return node.set(job).then(()=>{
+    showToast(online?'Fiş POS-80C yazıcıya gönderildi':'Fiş yazdırma kuyruğuna alındı',2600);
+    return true;
+  }).catch(e=>{
+    console.error('Fiş kuyruğu hatası',e);
+    showToast('Fiş gönderilemedi — Firebase yazdırma kuyruğunu kontrol edin',3200);
+    return false;
+  }).finally(()=>setTimeout(()=>setReceiptPrintButtonState(button,false),450));
 }
-function mposPrintReceipt(){
+function mposPrintReceipt(button=null){
   const account=mposAccountMode?cariAccountById(mposAccountId):null;
   const order=mposOrderData();
   const title=mposAccountMode?(account?.name||'Cari Hesap'):(mposQuickMode?'Hızlı Sipariş':mposDisplayTableLabel(mposOrderMasa));
@@ -3714,10 +3742,10 @@ function mposPrintReceipt(){
     tableName:(!mposAccountMode&&!mposQuickMode)?mposDisplayTableLabel(mposOrderMasa):'',
     accountId:mposAccountMode?mposAccountId:'',account,order
   });
-  enqueueReceiptPrint(job);
+  return enqueueReceiptPrint(job,button);
 }
-function desktopPrintReceipt(){
-  if(!isDesktopOrderOpen())return;
+function desktopPrintReceipt(button=null){
+  if(!isDesktopOrderOpen()){showToast('Yazdırılacak açık sipariş yok');return Promise.resolve(false);}
   const account=desktopAccountMode?cariAccountById(desktopAccountId):null;
   const order=desktopAccountMode?(account?.items||{}):(activeState().tables[currentMasa]||{});
   const title=desktopAccountMode?(account?.name||'Cari Hesap'):seatingTableLabel(currentMasa);
@@ -3727,7 +3755,7 @@ function desktopPrintReceipt(){
     tableName:desktopAccountMode?'':seatingTableLabel(currentMasa),
     accountId:desktopAccountMode?desktopAccountId:'',account,order
   });
-  enqueueReceiptPrint(job);
+  return enqueueReceiptPrint(job,button);
 }
 function browserPrintCurrentReceipt(){
   const root=document.getElementById('receipt-print-root');if(!root)return;
@@ -3794,16 +3822,23 @@ function mposPrimaryOrderAction(){if(mposOrderTotal()<=0)return;if(!hasPatronAcc
 function mposOpenPayment(){const total=mposOrderTotal();if(total<=0)return;const a=mposAccountMode?cariAccountById(mposAccountId):null;mposPendingPayment=mposAccountMode?{type:'account',accountId:String(mposAccountId||'')}:(mposQuickMode?{type:'quick'}:{type:'table',masaId:String(mposOrderMasa||currentMasa||'')});document.getElementById('mpos-payment-title').textContent=mposAccountMode?((a?.name||'Cari')+' Tahsilat'):(mposQuickMode?'Hızlı Sipariş Ödemesi':mposDisplayTableLabel(mposPendingPayment.masaId)+' Ödeme');document.getElementById('mpos-payment-total').textContent=fmt(total);document.getElementById('mpos-payment-backdrop').classList.add('open');}
 function mposClosePayment(){document.getElementById('mpos-payment-backdrop')?.classList.remove('open');mposPendingPayment=null;}
 function mposCompletePayment(method){
-  if(!hasPatronAccess()){showToast('Ödeme yetkiniz yok');return;}
+  if(!hasPatronAccess()){showToast('Ödeme yetkiniz yok');return Promise.resolve(false);}
   const ctx=mposPendingPayment|| (mposAccountMode?{type:'account',accountId:String(mposAccountId||'')}:(mposQuickMode?{type:'quick'}:{type:'table',masaId:String(mposOrderMasa||currentMasa||'')}));
-  if(ctx.type==='account'){if(ctx.accountId)completeCariPayment(ctx.accountId,method,null,{mobile:true});return;}
-  if(ctx.type==='quick'){mposCompleteQuickSale(method);return;}
+  const normalized=method==='kart'?'kart':'nakit';
+  showToast((normalized==='kart'?'Kredi kartı':'Nakit')+' ödeme işleniyor…',1800);
+  if(ctx.type==='account'){
+    if(!ctx.accountId){showToast('Cari hesap bilgisi bulunamadı');return Promise.resolve(false);}
+    return Promise.resolve(completeCariPayment(ctx.accountId,normalized,null,{mobile:true}));
+  }
+  if(ctx.type==='quick'){mposCompleteQuickSale(normalized);return Promise.resolve(true);}
   const id=String(ctx.masaId||'');
-  if(!id){showToast('Masa bilgisi bulunamadı');return;}
-  const buttons=document.querySelectorAll('#mpos-payment-backdrop .mpos-sheet-actions button.cash,#mpos-payment-backdrop .mpos-sheet-actions button.card');buttons.forEach(b=>b.disabled=true);
-  const done=completeOrderPayment(method,null,{masaId:id,desktop:false,mobile:true});
-  Promise.resolve(done).finally(()=>buttons.forEach(b=>b.disabled=false));
-  try{window.scrollTo({top:0,behavior:'instant'});}catch(e){window.scrollTo(0,0);}
+  if(!id){showToast('Masa bilgisi bulunamadı');return Promise.resolve(false);}
+  const buttons=document.querySelectorAll('#mpos-payment-backdrop .mpos-sheet-actions button.cash,#mpos-payment-backdrop .mpos-sheet-actions button.card');
+  buttons.forEach(b=>{b.disabled=true;b.setAttribute('aria-busy','true');});
+  let done;
+  try{done=completeOrderPayment(normalized,null,{masaId:id,desktop:false,mobile:true});}
+  catch(e){console.error('Mobil ödeme başlatma hatası',e);showToast('Ödeme başlatılamadı');done=Promise.reject(e);}
+  return Promise.resolve(done).finally(()=>buttons.forEach(b=>{b.disabled=false;b.removeAttribute('aria-busy');}));
 }
 
 function mposOpenQuickMenu(){if(!hasPatronAccess()){return;}const box=document.getElementById('mpos-quick-actions');box.innerHTML=`<button class="mpos-btn" onclick="mposQuickTool('cash-open')">Kasa Açılış</button><button class="mpos-btn" onclick="mposQuickTool('cash-flow')">Kasa Giriş Çıkış</button><button class="mpos-btn" onclick="mposQuickTool('disabled-products')">Satışa Kapalı Ürünler</button><button class="mpos-btn" onclick="mposQuickTool('table-colors')">Masa Zaman Renkleri</button>`;document.getElementById('mpos-quick-backdrop').classList.add('open');}
@@ -3921,7 +3956,7 @@ setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();els
 // ---------- PWA: service worker kaydı ----------
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    const UI_BUILD='20260818-pos-v11';
+    const UI_BUILD='20260818-pos-v12';
     let needsRefresh=false;
     try{
       needsRefresh=localStorage.getItem('ozarpa-ui-build')!==UI_BUILD;
