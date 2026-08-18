@@ -1512,6 +1512,8 @@ function restoreLoginSession(){
 
   if(!validUser){ clearLoginSession(); return; }
   currentUser=validUser;
+  desktopShellInitialized=false;
+  syncDesktopPatronShell();
   if(validUser.role==='employee' || validUser.role==='manager') startPresence(validUser);
   document.getElementById('login-screen').style.display='none';
   playWelcomeAnimation(validUser.name);
@@ -2147,7 +2149,8 @@ function desktopTopSearch(q){if(desktopCurrentPage==='accounts'){desktopCariSear
 function desktopUpdateTopSearchUi(){const s=document.getElementById('desktop-table-search');if(!s)return;if(desktopCurrentPage==='accounts'){s.placeholder='Cari ara (isim, telefon, kategori)';s.value=desktopCariSearch||'';}else{s.placeholder='Masa ara';s.value=desktopCurrentPage==='masa'?(desktopTableSearch||''):'';}}
 
 function isDesktopPatron(){return !!(hasPatronAccess()&&window.innerWidth>700);}
-function isDesktopPos(){return !!(currentUser&&['admin','manager','employee'].includes(currentUser.role)&&window.matchMedia('(min-width: 701px)').matches);}
+function isDesktopPos(){return !!(currentUser&&currentUser.username&&['admin','manager','employee'].includes(currentUser.role)&&window.innerWidth>700);}
+function isDesktopEmployee(){return !!(isDesktopPos()&&currentUser.role==='employee');}
 function syncDesktopBrandLogo(){
   const source=document.querySelector('#app-screen header .brand .logo-mark img')||document.querySelector('#login-screen .logo-mark img');
   const target=document.querySelector('.desktop-brand-logo');
@@ -2174,6 +2177,9 @@ function syncDesktopPatronShell(){
       const views=['view-accounts','view-active-employees','view-admin','view-special'];
       views.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
       const masaView=document.getElementById('view-masa');if(masaView)masaView.style.display='block';
+      const oldEmpTab=document.getElementById('tab-active-employees');if(oldEmpTab)oldEmpTab.style.display='none';
+      const oldAdminTab=document.getElementById('tab-admin');if(oldAdminTab)oldAdminTab.style.display='none';
+      const oldSpecialTab=document.getElementById('tab-special');if(oldSpecialTab)oldSpecialTab.style.display='none';
     }
     if(!desktopShellInitialized){desktopShellInitialized=true;desktopNavigate('masa',true);}
     else if(employeeOnly){syncDesktopNav('masa');renderDesktopTableFilters();desktopApplyTableFilters();}
@@ -2182,6 +2188,7 @@ function syncDesktopPatronShell(){
     app.classList.remove('desktop-employee');
     const legacyTabs=app.querySelector('header nav.tabs');if(legacyTabs)legacyTabs.style.display='';
     const sidebar=app.querySelector('.desktop-sidebar');if(sidebar)sidebar.style.display='';
+    const oldEmpTab=document.getElementById('tab-active-employees');if(oldEmpTab)oldEmpTab.style.display='';
   }
 }
 function desktopNavigate(page,silent=false){
@@ -2248,6 +2255,8 @@ function tryLogin(){
   else { for(const id in employees){const e=employees[id];if((e.username||'').toLowerCase()===u.toLowerCase()&&e.password===p){user={username:e.username,name:e.name||e.username,role:e.manager?'manager':'employee',id};break;}} }
   if(!user){err.textContent='Kullanıcı adı veya şifre hatalı.';return;}
   currentUser=user;
+  desktopShellInitialized=false;
+  syncDesktopPatronShell();
   saveLoginSession(user);
   sessionRestored=true;
   if(user.role==='employee' || user.role==='manager') startPresence(user);
@@ -2288,12 +2297,15 @@ function playWelcomeAnimation(name,options={}){
       screen.classList.remove('show');
       document.getElementById('app-screen').style.display='flex';
       arpaAppReady=true;
+      // PC rol kabuğu uygulama görünür olur olmaz yeniden uygulanır.
+      // Böylece normal çalışan hesabı eski sekmeli arayüze geri düşemez.
+      syncDesktopPatronShell();
+      syncMobilePosShell();
       if(resume){
-        syncDesktopPatronShell();
-        syncMobilePosShell();
         arpaSetVisibility();
       }else{
         updateRoleUI();
+        syncDesktopPatronShell();
         renderAll();
       }
     },500);
@@ -2317,7 +2329,9 @@ function showWelcomeOnSessionResume(){
 }
 function updateRoleUI(){
   const admin=hasPatronAccess();
-  document.getElementById('tab-active-employees').style.display='';
+  const desktopEmployee=isDesktopEmployee();
+  // Normal çalışan PC'de eski Çalışanlar/Admin sekmelerini hiçbir koşulda görmez.
+  document.getElementById('tab-active-employees').style.display=desktopEmployee?'none':'';
   document.getElementById('tab-admin').style.display=admin?'':'none';
   document.getElementById('tab-special').style.display=admin?'':'none';
   document.getElementById('role-badge').textContent=roleDisplayName();
@@ -2767,6 +2781,8 @@ function renderAdmin(){
 
 function renderAll(){
   arpaSetVisibility();
+  // Firebase/state güncellemelerinde de PC çalışan arayüzünü yeniden zorla.
+  syncDesktopPatronShell();
   syncMobilePosShell();
   renderMasaGrid();
   if(isDesktopOrderOpen())renderDesktopOrderScreen();
