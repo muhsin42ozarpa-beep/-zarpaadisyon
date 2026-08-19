@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ozarpa-cache-v26-branch-sync-integrity';
+const CACHE_NAME = 'ozarpa-cache-v27-no-dark-mode';
 
 const APP_SHELL = [
   './manifest.json',
@@ -52,7 +52,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // Firebase ve diğer harici servis isteklerine
-  // service worker karışmaz.
+  // service worker kesinlikle karışmaz.
   if (url.origin !== self.location.origin) return;
 
   const isNavigation = request.mode === 'navigate';
@@ -71,7 +71,9 @@ self.addEventListener('fetch', (event) => {
 
             caches
               .open(CACHE_NAME)
-              .then((cache) => cache.put('./index.html', copy))
+              .then((cache) => {
+                cache.put('./index.html', copy);
+              })
               .catch(() => {});
           }
 
@@ -83,7 +85,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Diğer aynı-site dosyaları:
+  // Manifest, ikon ve diğer aynı-site dosyaları:
   // önce internet, internet yoksa cache.
   event.respondWith(
     fetch(request, { cache: 'no-cache' })
@@ -93,7 +95,9 @@ self.addEventListener('fetch', (event) => {
 
           caches
             .open(CACHE_NAME)
-            .then((cache) => cache.put(request, copy))
+            .then((cache) => {
+              cache.put(request, copy);
+            })
             .catch(() => {});
         }
 
