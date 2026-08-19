@@ -1439,7 +1439,7 @@
   </div>
 </div>
 
-<div class="branch-banner" id="branch-banner" role="status" aria-live="polite"><div class="bb-icon">✓</div><div><strong id="branch-banner-title">Arlı Şubedesiniz</strong><small id="branch-banner-sub">Şube verileri hazır</small></div></div>
+<div class="branch-banner" id="branch-banner" role="status" aria-live="polite"><div class="bb-icon">✓</div><div><strong id="branch-banner-title">Arlı Şubedesiniz</strong></div></div>
 <div class="toast" id="toast"></div>
 
 
@@ -1541,6 +1541,13 @@ let sharedTableMutationEpoch = 0; // eski/in-flight Firebase snapshot'larının 
 const sharedMetaWriteAt = Object.create(null);
 let lastRemoteState = null;      // Son doğrulanmış ana Firebase state anlık görüntüsü
 let lastRemoteTestState = null;  // Son doğrulanmış test state anlık görüntüsü
+// State kayıtlarını sürümleyerek eski Firebase snapshot'larının yeni kategori/ürün değişikliklerini ezmesini engeller.
+let stateLocalRevision = 0;
+let stateSyncedRevision = 0;
+let stateWriteInFlight = 0;
+let stateSaveChain = Promise.resolve();
+let stateRefreshTimer = null;
+let branchRuntimeEpoch = 0;
 let firstStateLoad = true;
 let authLoaded = false;
 let usersLoaded = false;
@@ -1583,9 +1590,8 @@ function currentOrderTakerName(){return String((currentUser&&(currentUser.name||
 function canSwitchBranch(){return !!(currentUser&&(currentUser.role==='admin'||currentUser.role==='manager'));}
 let branchBannerTimer=null;
 function showBranchBanner(){
-  const box=document.getElementById('branch-banner'),title=document.getElementById('branch-banner-title'),sub=document.getElementById('branch-banner-sub');if(!box)return;
+  const box=document.getElementById('branch-banner'),title=document.getElementById('branch-banner-title');if(!box)return;
   if(title)title.textContent=activeBranchName()+' Şubedesiniz';
-  if(sub)sub.textContent=activeBranch==='arli'?'Ana şube · ':'2. şube · ';
   box.classList.remove('show');void box.offsetWidth;box.classList.add('show');
   if(branchBannerTimer)clearTimeout(branchBannerTimer);branchBannerTimer=setTimeout(()=>box.classList.remove('show'),5000);
 }
@@ -1597,7 +1603,9 @@ function updateBranchUi(){
 }
 function switchBranchFromUi(){if(!canSwitchBranch()){showToast('Şube değiştirme yetkiniz yok');return;}return switchBranch(activeBranch==='arli'?'selim':'arli');}
 function resetBranchRuntimeData(seed=null){
-  state=seed?cloneStateValue(seed):freshBranchState();sales={};financeData={openings:{},movements:{}};financeLoaded=false;financeMigrationAttempted=false;specialOrders={};testSpecialOrders={};testSales={};presence={};testMode=false;testState=null;lastRemoteState=null;lastRemoteTestState=null;remotePrinterStatus={online:false,at:0,printer:'',agent:''};lastLocalEdit=0;realtimeRenderHoldUntil=0;sharedTablePendingOps=0;sharedTableMutationEpoch++;
+  branchRuntimeEpoch++;
+  clearTimeout(saveTimer);saveTimer=null;clearTimeout(stateRefreshTimer);stateRefreshTimer=null;
+  state=seed?cloneStateValue(seed):freshBranchState();sales={};financeData={openings:{},movements:{}};financeLoaded=false;financeMigrationAttempted=false;specialOrders={};testSpecialOrders={};testSales={};presence={};testMode=false;testState=null;lastRemoteState=null;lastRemoteTestState=null;remotePrinterStatus={online:false,at:0,printer:'',agent:''};lastLocalEdit=0;stateLocalRevision=0;stateSyncedRevision=0;stateWriteInFlight=0;stateSaveChain=Promise.resolve();realtimeRenderHoldUntil=0;sharedTablePendingOps=0;sharedTableMutationEpoch++;
 }
 async function switchBranch(target,options={}){
   const next=normalizeBranch(target),force=!!options.force,silent=!!options.silent;
@@ -1605,7 +1613,11 @@ async function switchBranch(target,options={}){
   if(!force&&!canSwitchBranch()){showToast('Şube değiştirme yetkiniz yok');return false;}
   try{
     if(typeof waitForSharedTableIdle==='function')await waitForSharedTableIdle();
-    if(lastLocalEdit){clearTimeout(saveTimer);await Promise.resolve(saveState());}
+    clearTimeout(saveTimer);saveTimer=null;
+    if(hasUnsyncedStateEdits())await Promise.resolve(saveState());
+    await Promise.resolve(stateSaveChain);
+    // İlk kayıt sürerken ikinci bir lokal değişiklik oluştuysa onu da şube değişmeden gönder.
+    if(hasUnsyncedStateEdits()){await Promise.resolve(saveState());await Promise.resolve(stateSaveChain);}
   }catch(e){console.warn('Şube değişmeden önce bekleyen kayıt tamamlanamadı',e);}
   const seed=(activeBranch==='arli'&&next==='selim')?cleanBranchSeedFromCurrent():null;
   try{stopPresence();}catch(e){}
@@ -1621,7 +1633,7 @@ async function switchBranch(target,options={}){
   try{mposPage='tables';mposTableFilter='open';mposOrderMasa=null;mposQuickMode=false;mposAccountMode=false;mposAccountId=null;mposQuickCart={};mposEmployeeDraft={name:'',username:'',password:'',branch:activeBranch};}catch(e){}
   if(currentUser&&(currentUser.role==='employee'||currentUser.role==='manager'))startPresence(currentUser);
   desktopShellInitialized=false;updateBranchUi();syncDesktopPatronShell();forcePcEmployeeModernShell();syncPcEmployeeShell();syncMobilePosShell();renderAll();
-  if(!silent){showToast(activeBranchName()+' Şubeye geçildi',1800);showBranchBanner();}
+  if(!silent)showBranchBanner();
   return true;
 }
 let toastHideTimer=null;
@@ -1677,50 +1689,95 @@ function applyVerifiedRemoteState(val,isTest=false){
     applyRemoteState(cloned);
   }
 }
+function hasUnsyncedStateEdits(){
+  return stateWriteInFlight>0 || stateLocalRevision>stateSyncedRevision || !!lastLocalEdit;
+}
 function refreshStateFromFirebase(ref,isTest=false,opts={}){
   const requestedEpoch=Number(opts.expectedEpoch!=null?opts.expectedEpoch:sharedTableMutationEpoch);
+  const expectedBranch=normalizeBranch(opts.expectedBranch!=null?opts.expectedBranch:activeBranch);
+  const expectedRuntimeEpoch=Number(opts.expectedRuntimeEpoch!=null?opts.expectedRuntimeEpoch:branchRuntimeEpoch);
+  const expectedRevision=Number(opts.expectedRevision!=null?opts.expectedRevision:stateLocalRevision);
+  const expectedTest=!!isTest;
   return ref.once('value').then(snap=>{
-    if(lastLocalEdit)return false;
-    // Bu okuma başladıktan sonra yeni bir ürün/masa mutation'ı başladıysa snapshot artık eskidir.
-    // Eski snapshot'ı uygulamak PC patron sipariş ekranındaki yeni ürünü görünürde siliyordu.
+    // Eski şubenin veya eski bir kayıt turunun cevabı mevcut ekranı asla değiştiremez.
+    if(expectedBranch!==activeBranch || expectedRuntimeEpoch!==branchRuntimeEpoch || expectedTest!==!!testMode)return false;
+    if(hasUnsyncedStateEdits() || expectedRevision!==stateLocalRevision)return false;
     if(sharedTablePendingOps>0 || requestedEpoch!==sharedTableMutationEpoch)return false;
     const val=snap.val();
     if(val){applyVerifiedRemoteState(val,isTest);return true;}
     return false;
   }).catch(e=>{console.error('Firebase yeniden eşitleme hatası',e);return false;});
 }
-function queueSave(){
+function queueSave(delay=350){
+  stateLocalRevision++;
   lastLocalEdit=Date.now();
-  // Kategori/ürün/ayar gibi debounce edilen değişikliklerde tarayıcı hemen kapansa bile
-  // en güncel durumun cihaz yedeğini tıklama/yazma anında koru.
-  try{
-    localStorage.setItem(branchStateLocalKey(testMode),JSON.stringify(cloneStateValue(activeState())));
-  }catch(e){}
+  // Kategori/ürün/ayar gibi değişiklikleri Firebase cevabını beklemeden cihazda koru.
+  try{localStorage.setItem(branchStateLocalKey(testMode),JSON.stringify(cloneStateValue(activeState())));}catch(e){}
   clearTimeout(saveTimer);
-  saveTimer=setTimeout(saveState,350);
+  saveTimer=setTimeout(()=>{saveTimer=null;saveState();},Math.max(0,Number(delay)||0));
 }
 function saveState(){
-  const data=cloneStateValue(activeState());
-  try{
-    localStorage.setItem(branchStateLocalKey(testMode),JSON.stringify(data));
-  }catch(e){}
-  const ref=testMode ? testStateRef : stateRef;
-  const base=testMode?lastRemoteTestState:lastRemoteState;
-  const patch=buildStatePatch(base||{},data);
-  if(!Object.keys(patch).length){lastLocalEdit=0;return Promise.resolve(false);}
-  return ref.update(patch)
-    .then(()=>{
-      if(testMode)lastRemoteTestState=cloneStateValue(data);else lastRemoteState=cloneStateValue(data);
-      lastLocalEdit=0;
-      // Aynı anda başka cihaz farklı masa/ayar güncellediyse en son birleşik Firebase durumunu tekrar al.
-      setTimeout(()=>refreshStateFromFirebase(ref,testMode),80);
-      return true;
-    })
-    .catch(e=>{
-      console.error('Kaydetme hatası',e);
-      showToast('Firebase kaydetme başarısız — cihaz yedeği tutuldu');
+  clearTimeout(saveTimer);saveTimer=null;
+  const expectedBranch=activeBranch;
+  const expectedRuntimeEpoch=branchRuntimeEpoch;
+  const expectedTest=!!testMode;
+  const ref=expectedTest?testStateRef:stateRef;
+
+  const run=()=>{
+    // Bu kayıt eski şube için sıraya alınmışsa yeni şubeye kesinlikle dokunma.
+    if(expectedBranch!==activeBranch || expectedRuntimeEpoch!==branchRuntimeEpoch || expectedTest!==!!testMode)return false;
+    const revision=stateLocalRevision;
+    const data=cloneStateValue(activeState());
+    try{localStorage.setItem(branchStateLocalKey(expectedTest),JSON.stringify(data));}catch(e){}
+    const base=expectedTest?lastRemoteTestState:lastRemoteState;
+    const patch=buildStatePatch(base||{},data);
+    if(!Object.keys(patch).length){
+      stateSyncedRevision=Math.max(stateSyncedRevision,revision);
+      if(stateSyncedRevision>=stateLocalRevision)lastLocalEdit=0;
       return false;
+    }
+    stateWriteInFlight++;
+    let writeSucceeded=false;
+    return ref.update(patch).then(()=>{
+      writeSucceeded=true;
+      if(expectedBranch!==activeBranch || expectedRuntimeEpoch!==branchRuntimeEpoch || expectedTest!==!!testMode)return true;
+      if(expectedTest)lastRemoteTestState=cloneStateValue(data);else lastRemoteState=cloneStateValue(data);
+      stateSyncedRevision=Math.max(stateSyncedRevision,revision);
+      // Daha yeni bir lokal düzenleme varsa ilk kaydın tamamlanması onu "kaydedildi" sayamaz.
+      if(stateSyncedRevision>=stateLocalRevision)lastLocalEdit=0;
+      else lastLocalEdit=Date.now();
+      return true;
+    }).catch(e=>{
+      if(expectedBranch===activeBranch && expectedRuntimeEpoch===branchRuntimeEpoch){
+        lastLocalEdit=Date.now();
+        console.error('Kaydetme hatası',e);
+        showToast('Firebase kaydetme başarısız — değişiklik cihazda korunuyor');
+      }
+      return false;
+    }).finally(()=>{
+      if(expectedBranch===activeBranch && expectedRuntimeEpoch===branchRuntimeEpoch){
+        stateWriteInFlight=Math.max(0,stateWriteInFlight-1);
+        if(writeSucceeded && stateLocalRevision>stateSyncedRevision && !saveTimer){
+          // İlk kayıt sürerken gelen daha yeni kategori/ürün değişikliğini hemen ikinci turda gönder.
+          saveTimer=setTimeout(()=>{saveTimer=null;saveState();},80);
+        }else if(writeSucceeded && !hasUnsyncedStateEdits()){
+          // Kayıt sırasında başka cihazın yaptığı değişiklikleri güvenli biçimde geri birleştir.
+          clearTimeout(stateRefreshTimer);
+          const refreshRevision=stateLocalRevision;
+          stateRefreshTimer=setTimeout(()=>refreshStateFromFirebase(ref,expectedTest,{
+            expectedEpoch:sharedTableMutationEpoch,
+            expectedBranch,
+            expectedRuntimeEpoch,
+            expectedRevision:refreshRevision
+          }),140);
+        }
+      }
     });
+  };
+
+  const task=stateSaveChain.then(run,run);
+  stateSaveChain=task.catch(()=>false);
+  return task;
 }
 function restoreLocalState(){
   try{
@@ -1762,27 +1819,55 @@ restoreLocalState();
 
 
 function unbindBranchDataListeners(){
-  [stateRef,testStateRef,salesRef,financeRef,testSalesRef,specialRef,testSpecialRef,presenceRef,testModeRef,printerStatusRef].forEach(ref=>{try{ref&&ref.off('value');}catch(e){}});
+  [stateRef,testStateRef,salesRef,financeRef,testSalesRef,specialRef,testSpecialRef,presenceRef,testModeRef,printerStatusRef].forEach(ref=>{try{ref&&ref.off();}catch(e){}});
 }
 function bindBranchDataListeners(){
-  stateRef.on('value',snap=>{
+  const boundBranch=activeBranch,boundRuntimeEpoch=branchRuntimeEpoch;
+  const refs={state:stateRef,testState:testStateRef,sales:salesRef,finance:financeRef,testSales:testSalesRef,special:specialRef,testSpecial:testSpecialRef,presence:presenceRef,testMode:testModeRef,printer:printerStatusRef};
+  const stillCurrent=()=>boundBranch===activeBranch&&boundRuntimeEpoch===branchRuntimeEpoch;
+
+  refs.state.on('value',snap=>{
+    if(!stillCurrent())return;
     const val=snap.val();
-    if(!val){const seed=cloneStateValue(state&&typeof state==='object'?state:freshBranchState());stateRef.set(seed).catch(e=>console.error('İlk şube veri kaydı hatası',e));return;}
-    if((lastLocalEdit&&Date.now()-lastLocalEdit<2500)||Date.now()<realtimeRenderHoldUntil)return;
+    if(!val){
+      const seed=cloneStateValue(state&&typeof state==='object'?state:freshBranchState());
+      refs.state.set(seed).catch(e=>console.error('İlk şube veri kaydı hatası',e));
+      return;
+    }
+    // Lokal kategori/ürün/ayar kaydı bitmeden eski realtime snapshot yerel ekranı ezemez.
+    if(hasUnsyncedStateEdits()||Date.now()<realtimeRenderHoldUntil)return;
     lastRemoteState=cloneStateValue(val);applyRemoteState(val);
   });
-  testStateRef.on('value',snap=>{
-    const val=snap.val();if(val){lastRemoteTestState=cloneStateValue(val);testState=Object.assign({masaCount:20,menu:[],categories:[],tables:{}},val);if(testState.tables===null)testState.tables={};if(testState.menu===null)testState.menu=[];if(!testState.categories)testState.categories=[];}
-    if(testMode&&Date.now()>=realtimeRenderHoldUntil&&document.getElementById('app-screen').style.display!=='none')renderAll();
+  refs.testState.on('value',snap=>{
+    if(!stillCurrent())return;
+    const val=snap.val();
+    if(val&&!hasUnsyncedStateEdits()){
+      lastRemoteTestState=cloneStateValue(val);testState=Object.assign({masaCount:20,menu:[],categories:[],tables:{}},val);
+      if(testState.tables===null)testState.tables={};if(testState.menu===null)testState.menu=[];if(!testState.categories)testState.categories=[];
+    }
+    if(testMode&&!hasUnsyncedStateEdits()&&Date.now()>=realtimeRenderHoldUntil&&document.getElementById('app-screen').style.display!=='none')renderAll();
   });
-  salesRef.on('value',snap=>{sales=snap.val()||{};refreshSalesViews();});
-  financeRef.on('value',snap=>{financeData=snap.val()||{openings:{},movements:{}};financeLoaded=true;financeRefreshViews();setTimeout(migrateLegacyFinanceOnce,800);});
-  testSalesRef.on('value',snap=>{testSales=snap.val()||{};if(testMode)refreshSalesViews();});
-  specialRef.on('value',snap=>{specialOrders=snap.val()||{};if(hasPatronAccess()){renderSpecialOrders();renderSpecialSummary();}});
-  testSpecialRef.on('value',snap=>{testSpecialOrders=snap.val()||{};if(testMode&&hasPatronAccess()){renderSpecialOrders();renderSpecialSummary();}});
-  presenceRef.on('value',snap=>{presence=snap.val()||{};renderActiveEmployees();if(document.getElementById('desktop-user-menu')?.classList.contains('open'))renderDesktopUserMenu();},err=>console.error('Aktif çalışanlar Firebase okuma hatası:',err));
-  testModeRef.on('value',snap=>{testMode=!!snap.val();if(testMode){ensureTestState();}updateRoleUI();if(document.getElementById('app-screen').style.display!=='none')renderAll();});
-  if(printingEnabledForBranch())printerStatusRef.on('value',snap=>{const v=snap.val()||{};remotePrinterStatus={online:!!v.online,at:Number(v.at||0),printer:String(v.printer||''),agent:String(v.agent||'')};});
+  refs.sales.on('value',snap=>{if(!stillCurrent())return;sales=snap.val()||{};refreshSalesViews();});
+  refs.finance.on('value',snap=>{
+    if(!stillCurrent())return;
+    financeData=snap.val()||{openings:{},movements:{}};financeLoaded=true;financeRefreshViews();
+    setTimeout(()=>{if(stillCurrent())migrateLegacyFinanceOnce();},800);
+  });
+  refs.testSales.on('value',snap=>{if(!stillCurrent())return;testSales=snap.val()||{};if(testMode)refreshSalesViews();});
+  refs.special.on('value',snap=>{if(!stillCurrent())return;specialOrders=snap.val()||{};if(hasPatronAccess()){renderSpecialOrders();renderSpecialSummary();}});
+  refs.testSpecial.on('value',snap=>{if(!stillCurrent())return;testSpecialOrders=snap.val()||{};if(testMode&&hasPatronAccess()){renderSpecialOrders();renderSpecialSummary();}});
+  refs.presence.on('value',snap=>{if(!stillCurrent())return;presence=snap.val()||{};renderActiveEmployees();if(document.getElementById('desktop-user-menu')?.classList.contains('open'))renderDesktopUserMenu();},err=>console.error('Aktif çalışanlar Firebase okuma hatası:',err));
+  refs.testMode.on('value',snap=>{
+    if(!stillCurrent())return;
+    const next=!!snap.val();
+    if(next!==testMode){
+      testMode=next;
+      // Test modu değişince yeni state alanı için kayıt revizyonları yeniden başlar.
+      stateLocalRevision=0;stateSyncedRevision=0;lastLocalEdit=0;
+    }
+    if(testMode){ensureTestState();}updateRoleUI();if(document.getElementById('app-screen').style.display!=='none')renderAll();
+  });
+  if(printingEnabledForBranch())refs.printer.on('value',snap=>{if(!stillCurrent())return;const v=snap.val()||{};remotePrinterStatus={online:!!v.online,at:Number(v.at||0),printer:String(v.printer||''),agent:String(v.agent||'')};});
   else remotePrinterStatus={online:false,at:0,printer:'',agent:'selim-print-disabled'};
 }
 
@@ -3160,8 +3245,8 @@ function addCategory(){
   if(!data.categories)data.categories=[];
   if(data.categories.some(c=>(c.name||'').toLocaleLowerCase('tr-TR')===name.toLocaleLowerCase('tr-TR'))){showToast('Bu kategori zaten var');return;}
   const scaleMode=window.confirm('Bu kategori TERAZİ / KİLO ile mi çalışsın?\n\nTamam = Terazi Modu (₺/kg)\nİptal = Normal Kategori');
-  data.categories.push({id:'c'+Date.now(),name,scaleMode:!!scaleMode});
-  input.value='';renderCategoryAdmin();renderMenuAdmin();queueSave();showToast(scaleMode?'Terazi kategorisi eklendi · fiyatlar ₺/kg':'Kategori eklendi');
+  data.categories.push({id:'c'+Date.now()+'_'+Math.random().toString(36).slice(2,6),name,scaleMode:!!scaleMode});
+  input.value='';renderCategoryAdmin();renderMenuAdmin();queueSave(20);showToast(scaleMode?'Terazi kategorisi eklendi · fiyatlar ₺/kg':'Kategori eklendi');
 }
 function removeCategory(id){
   const data=activeState();
@@ -3170,7 +3255,7 @@ function removeCategory(id){
   if(!confirm('“'+cat.name+'” kategorisi silinsin mi? Ürünler silinmez.'))return;
   data.categories=(data.categories||[]).filter(c=>c.id!==id);
   (data.menu||[]).forEach(item=>{if(item.categoryId===id)item.categoryId='';});
-  renderCategoryAdmin();renderMenuAdmin();queueSave();
+  renderCategoryAdmin();renderMenuAdmin();queueSave(20);
 }
 function renderMenuAdmin(){
   const list = document.getElementById('menu-admin-list');
@@ -3203,12 +3288,13 @@ function addMenuItem(){
     return;
   }
   const categoryId=categoryInput?categoryInput.value:'';
-  activeState().menu.push({ id: 'm' + Date.now(), name, price, categoryId });
+  const data=activeState();if(!Array.isArray(data.menu))data.menu=[];
+  data.menu.push({ id: 'm' + Date.now()+'_'+Math.random().toString(36).slice(2,6), name, price, categoryId });
   nameInput.value = '';
   priceInput.value = '';
   if(categoryInput)categoryInput.value='';
   renderMenuAdmin();
-  queueSave();
+  queueSave(20);
   showToast(isScaleCategoryId(categoryId)?'Terazi ürünü eklendi · '+fmt(price)+'/kg':'Ürün eklendi ve kaydedildi');
 }
 function updateMenuItem(id, field, value){
@@ -3222,13 +3308,13 @@ function updateMenuItem(id, field, value){
   }else{
     item.name = value;
   }
-  queueSave();
+  queueSave(80);
 }
 function removeMenuItem(id){
   if(!confirm('Bu ürün silinsin mi?'))return;
   activeState().menu = activeState().menu.filter(m=>m.id!==id);
   renderMenuAdmin();
-  queueSave();
+  queueSave(20);
 }
 
 // ---------- admin: kasa ----------
@@ -4398,11 +4484,11 @@ function mposRenderSettings(c){const p=ensurePosAdmin(),u=p.ui||{},admin=hasPatr
 function mposToggleHtml(label,key,on){return `<div class="mpos-toggle-row"><span>${escapeHtml(label)}</span><label class="mpos-switch"><input type="checkbox" ${on?'checked':''} onchange="mposUpdateUi('${key}',this.checked)"><span></span></label></div>`;}
 function mposUpdateUi(key,val){ensurePosAdmin().ui[key]=val;queueSave();mposApplyUiSettings();showToast('Ayar kaydedildi');}
 function mposAdminSettingsHtml(){const d=activeState(),cats=d.categories||[],seatOn=ensurePosAdmin().seatingEnabled&&seatingLayouts().length>0,seatCount=seatingAllTableIds().length;return `<div class="mpos-card"><h3><span>▦</span>İşletme & Masalar</h3><div class="mpos-row"><span>Masa Sayısı</span>${seatOn?`<div><b>${seatCount}</b><small style="display:block;color:#8c97a3">Oturma düzeninden yönetiliyor</small></div>`:`<div><button type="button" class="mpos-btn secondary" onclick="changeMasaCount(-1);mposRender()">−</button> <b style="padding:0 10px">${d.masaCount}</b> <button type="button" class="mpos-btn secondary" onclick="changeMasaCount(1);mposRender()">+</button></div>`}</div><button type="button" class="mpos-btn secondary" style="width:100%;margin-top:8px" onclick="mposNavigate('seating')">▦ Oturma Düzeninden Ayarla</button><button class="mpos-btn secondary" style="width:100%;margin-top:8px" onclick="mposQuickTool('table-colors')">Masa Zaman Renkleri</button></div><div class="mpos-card"><h3><span>▣</span>Kategoriler</h3><div style="display:flex;gap:7px"><input id="mpos-new-cat" class="mpos-field" value="${escapeHtml(mposSettingsDraft.categoryName)}" autocomplete="off" placeholder="Yeni kategori" oninput="mposSettingsDraftSet('categoryName',this.value)"><button type="button" class="mpos-btn" onclick="mposAddCategory()">Ekle</button></div><div>${cats.map(x=>`<span class="mpos-category-chip">${escapeHtml(x.name)}${x.scaleMode?' · ⚖ kg':''} <button onclick="mposRemoveCategory('${x.id}')">×</button></span>`).join('')}</div></div><div class="mpos-card"><h3><span>🍽</span>Ürün Yönetimi</h3><input id="mpos-new-product" class="mpos-field" value="${escapeHtml(mposSettingsDraft.productName)}" autocomplete="off" placeholder="Ürün adı" oninput="mposSettingsDraftSet('productName',this.value)"><input id="mpos-new-price" class="mpos-field" type="number" inputmode="decimal" value="${escapeHtml(mposSettingsDraft.productPrice)}" placeholder="Fiyat (Terazi kategorisinde ₺/kg)" oninput="mposSettingsDraftSet('productPrice',this.value)"><select id="mpos-new-prod-cat" class="mpos-select" onchange="mposSettingsDraftSet('productCategoryId',this.value)"><option value="">Kategori seç</option>${cats.map(x=>`<option value="${x.id}" ${String(mposSettingsDraft.productCategoryId)===String(x.id)?'selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select><button type="button" class="mpos-btn" style="width:100%;margin:9px 0 14px" onclick="mposAddProduct()">Yeni Ürün Ekle</button>${(d.menu||[]).map(it=>`<div class="mpos-product-admin"><input class="mpos-field" value="${escapeHtml(it.name)}" onchange="mposEditProduct('${it.id}','name',this.value)"><input class="mpos-field" type="number" value="${Number(it.price)||0}" onchange="mposEditProduct('${it.id}','price',this.value)"><select class="mpos-select wide" onchange="mposEditProduct('${it.id}','categoryId',this.value)"><option value="">Kategori yok</option>${cats.map(x=>`<option value="${x.id}" ${String(it.categoryId||'')===String(x.id)?'selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select><button class="mpos-btn danger wide" onclick="mposRemoveProduct('${it.id}')">Ürünü Sil</button></div>`).join('')}</div><div class="mpos-card"><h3><span>•••</span>Diğer</h3><button class="mpos-btn secondary" style="width:100%;margin-bottom:8px" onclick="location.reload()">Force Update</button><button class="mpos-btn secondary" style="width:100%" onclick="location.reload()">ReConnect</button></div>`;}
-function mposAddCategory(){const inp=document.getElementById('mpos-new-cat'),name=String(inp?.value??mposSettingsDraft.categoryName).trim();if(!name)return;const d=activeState();if(!d.categories)d.categories=[];if(d.categories.some(c=>(c.name||'').toLocaleLowerCase('tr-TR')===name.toLocaleLowerCase('tr-TR'))){showToast('Kategori zaten var');return;}const scaleMode=window.confirm('Bu kategori TERAZİ / KİLO ile mi çalışsın?\n\nTamam = Terazi Modu (₺/kg)\nİptal = Normal Kategori');d.categories.push({id:'c'+Date.now(),name,scaleMode:!!scaleMode});mposSettingsDraft.categoryName='';if(inp)inp.value='';queueSave();mposRender();showToast(scaleMode?'Terazi kategorisi eklendi · fiyatlar ₺/kg':'Kategori eklendi');}
-function mposRemoveCategory(id){if(!confirm('Kategori silinsin mi? Ürünler silinmez.'))return;const d=activeState();d.categories=(d.categories||[]).filter(c=>c.id!==id);d.menu.forEach(x=>{if(x.categoryId===id)x.categoryId=''});queueSave();mposRender();}
-function mposAddProduct(){const name=String(document.getElementById('mpos-new-product')?.value??mposSettingsDraft.productName).trim(),priceRaw=String(document.getElementById('mpos-new-price')?.value??mposSettingsDraft.productPrice).replace(',','.'),price=Number(priceRaw),categoryId=String((document.getElementById('mpos-new-prod-cat')?.value??mposSettingsDraft.productCategoryId)||'');if(!name||!Number.isFinite(price)||price<0){showToast('Ürün adı ve fiyat gerekli');return;}activeState().menu.push({id:'m'+Date.now(),name,price,categoryId});mposSettingsDraft.productName='';mposSettingsDraft.productPrice='';mposSettingsDraft.productCategoryId='';queueSave();mposRender();showToast(isScaleCategoryId(categoryId)?'Terazi ürünü eklendi · '+fmt(price)+'/kg':'Ürün eklendi');}
-function mposEditProduct(id,field,val){const it=activeState().menu.find(x=>x.id===id);if(!it)return;if(field==='price'){const n=Number(val);if(!Number.isFinite(n)||n<0)return;it.price=n}else it[field]=val;queueSave();}
-function mposRemoveProduct(id){if(!confirm('Ürün silinsin mi?'))return;const d=activeState();d.menu=d.menu.filter(x=>x.id!==id);Object.values(d.tables||{}).forEach(o=>delete o[id]);delete ensurePosAdmin().disabledProducts[id];queueSave();mposRender();}
+function mposAddCategory(){const inp=document.getElementById('mpos-new-cat'),name=String(inp?.value??mposSettingsDraft.categoryName).trim();if(!name)return;const d=activeState();if(!Array.isArray(d.categories))d.categories=[];if(d.categories.some(c=>(c.name||'').toLocaleLowerCase('tr-TR')===name.toLocaleLowerCase('tr-TR'))){showToast('Kategori zaten var');return;}const scaleMode=window.confirm('Bu kategori TERAZİ / KİLO ile mi çalışsın?\n\nTamam = Terazi Modu (₺/kg)\nİptal = Normal Kategori');d.categories.push({id:'c'+Date.now()+'_'+Math.random().toString(36).slice(2,6),name,scaleMode:!!scaleMode});mposSettingsDraft.categoryName='';if(inp)inp.value='';queueSave(20);mposRender();showToast(scaleMode?'Terazi kategorisi eklendi · fiyatlar ₺/kg':'Kategori eklendi');}
+function mposRemoveCategory(id){if(!confirm('Kategori silinsin mi? Ürünler silinmez.'))return;const d=activeState();d.categories=(d.categories||[]).filter(c=>c.id!==id);(d.menu||[]).forEach(x=>{if(x.categoryId===id)x.categoryId=''});queueSave(20);mposRender();}
+function mposAddProduct(){const name=String(document.getElementById('mpos-new-product')?.value??mposSettingsDraft.productName).trim(),priceRaw=String(document.getElementById('mpos-new-price')?.value??mposSettingsDraft.productPrice).replace(',','.'),price=Number(priceRaw),categoryId=String((document.getElementById('mpos-new-prod-cat')?.value??mposSettingsDraft.productCategoryId)||'');if(!name||!Number.isFinite(price)||price<0){showToast('Ürün adı ve fiyat gerekli');return;}const d=activeState();if(!Array.isArray(d.menu))d.menu=[];d.menu.push({id:'m'+Date.now()+'_'+Math.random().toString(36).slice(2,6),name,price,categoryId});mposSettingsDraft.productName='';mposSettingsDraft.productPrice='';mposSettingsDraft.productCategoryId='';queueSave(20);mposRender();showToast(isScaleCategoryId(categoryId)?'Terazi ürünü eklendi · '+fmt(price)+'/kg':'Ürün eklendi');}
+function mposEditProduct(id,field,val){const it=(activeState().menu||[]).find(x=>x.id===id);if(!it)return;if(field==='price'){const n=Number(val);if(!Number.isFinite(n)||n<0)return;it.price=n}else it[field]=val;queueSave(80);}
+function mposRemoveProduct(id){if(!confirm('Ürün silinsin mi?'))return;const d=activeState();d.menu=(d.menu||[]).filter(x=>x.id!==id);Object.values(d.tables||{}).forEach(o=>{if(o)delete o[id];});delete ensurePosAdmin().disabledProducts[id];queueSave(20);mposRender();}
 
 
 function mposRenderSeating(c){
@@ -4493,7 +4579,7 @@ setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();els
 // ---------- PWA: service worker kaydı ----------
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    const UI_BUILD='20260819-pos-v25-two-branch-arli-selim';
+    const UI_BUILD='20260819-pos-v26-branch-sync-integrity';
     let needsRefresh=false;
     try{
       needsRefresh=localStorage.getItem('ozarpa-ui-build')!==UI_BUILD;
