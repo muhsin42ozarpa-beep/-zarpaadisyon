@@ -347,6 +347,11 @@
     opacity:0;pointer-events:none;transition:opacity .25s, bottom .25s;z-index:50000;
   }
   .toast.show{opacity:1;bottom:30px;}
+  .branch-banner{position:fixed;left:50%;top:16px;transform:translate(-50%,-24px) scale(.96);display:flex;align-items:center;gap:11px;min-width:260px;max-width:calc(100vw - 28px);padding:13px 18px;border-radius:16px;background:linear-gradient(135deg,#21b87f,#128d68);color:#fff;box-shadow:0 15px 38px rgba(9,95,67,.32);opacity:0;pointer-events:none;z-index:60000;transition:opacity .28s ease,transform .34s cubic-bezier(.2,.8,.2,1)}
+  .branch-banner.show{opacity:1;transform:translate(-50%,0) scale(1)}
+  .branch-banner .bb-icon{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 auto}
+  .branch-banner strong{display:block;font-size:14px;line-height:1.2;letter-spacing:.15px}.branch-banner small{display:block;margin-top:3px;color:rgba(255,255,255,.84);font-size:10px;font-weight:700}
+  .branch-tag{display:inline-flex;align-items:center;width:max-content;padding:3px 7px;border-radius:999px;background:rgba(33,184,127,.12);border:1px solid rgba(33,184,127,.35);color:#36c994!important;font-size:10px!important;font-weight:800;letter-spacing:.2px}
   .save-hint{
     font-family:'Brush Script MT', 'Segoe Script', cursive;
     font-size:20px;
@@ -441,6 +446,8 @@
   }
   .desktop-sidebar-nav button:hover{background:#303944}
   .desktop-sidebar-nav button.active{background:#ff9d0a;color:#fff;box-shadow:0 7px 20px rgba(255,157,10,.22)}
+  .desktop-sidebar-nav button.branch-switch-nav{background:rgba(33,184,127,.12);border:1px solid rgba(72,211,162,.25);color:#dff9ef}
+  .desktop-sidebar-nav button.branch-switch-nav:hover{background:rgba(33,184,127,.22)}
   .desktop-sidebar-nav .nav-ico{width:22px;text-align:center;font-size:16px}
 
   #app-screen.desktop-patron > header{
@@ -745,7 +752,7 @@
   .mpos-drawer-backdrop{display:none;position:fixed;inset:0;z-index:9020;background:rgba(20,28,38,.35)}.mpos-drawer-backdrop.open{display:block}
   .mpos-drawer{position:absolute;left:0;top:0;bottom:0;width:min(88vw,380px);background:#fff;box-shadow:18px 0 46px rgba(29,38,47,.16);padding:24px 16px 18px;display:flex;flex-direction:column;overflow:auto}
   .mpos-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:3px 8px 22px;border-bottom:1px solid #eceff2}.mpos-drawer-brand{display:flex;align-items:center;gap:9px}.mpos-drawer-brand img{width:52px;height:52px;border-radius:14px;object-fit:contain}.mpos-drawer-brand strong{font-size:16px;color:#202733}.mpos-drawer-close{width:44px;height:44px;border:1px solid #e2e5e9;background:#f7f8f9;border-radius:14px;font-size:25px;color:#5c6876}
-  .mpos-drawer-label{font-size:12px;letter-spacing:2px;color:#9aa2ab;margin:24px 12px 8px;text-transform:uppercase}.mpos-drawer-nav{display:flex;flex-direction:column;gap:5px}.mpos-drawer-item{display:flex;align-items:center;gap:13px;width:100%;border:0;background:transparent;color:#596576;padding:14px 16px;border-radius:17px;text-align:left;font-size:17px;font-weight:700}.mpos-drawer-item.active{background:#fff3dc;color:#bd481b;border:1px solid #f6c66d;box-shadow:0 7px 18px rgba(247,173,43,.15)}.mpos-drawer-item .ico{width:27px;text-align:center;font-size:20px}
+  .mpos-drawer-label{font-size:12px;letter-spacing:2px;color:#9aa2ab;margin:24px 12px 8px;text-transform:uppercase}.mpos-drawer-nav{display:flex;flex-direction:column;gap:5px}.mpos-drawer-item{display:flex;align-items:center;gap:13px;width:100%;border:0;background:transparent;color:#596576;padding:14px 16px;border-radius:17px;text-align:left;font-size:17px;font-weight:700}.mpos-drawer-item.active{background:#fff3dc;color:#bd481b;border:1px solid #f6c66d;box-shadow:0 7px 18px rgba(247,173,43,.15)}.mpos-drawer-item.branch-switch{background:#eaf9f3;color:#16835f;border:1px solid #bcebd9}.mpos-drawer-item .ico{width:27px;text-align:center;font-size:20px}
   .mpos-user-foot{margin-top:auto;padding-top:18px}.mpos-user-card{display:flex;align-items:center;gap:12px;border:1px solid #e3e6ea;border-radius:18px;padding:12px}.mpos-user-card .avatar{width:45px;height:45px;border-radius:14px;background:#ff9d0a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900}.mpos-user-card button{margin-left:auto;border:0;background:#f1f3f5;border-radius:12px;padding:9px;color:#d44b45}
   .mpos-page-title{font-size:23px;margin:0 0 14px;color:#202733}.mpos-page-sub{color:#84909c;font-size:13px;margin:-6px 0 16px}
   .mpos-list-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e3e6ea;border-radius:16px;padding:13px;margin-bottom:9px;flex-wrap:wrap}.mpos-list-item>.mpos-btn{flex:0 0 auto;padding:9px 10px;font-size:11px}.mpos-list-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#edf0f3;color:#3b4858;font-weight:900}.mpos-list-main{flex:1;min-width:0}.mpos-list-main strong{display:block;color:#27323e}.mpos-list-main small{display:block;color:#89939c;font-size:11px;margin-top:3px}
@@ -992,6 +999,7 @@
       <button id="desktop-nav-masa" class="active" onclick="desktopNavigate('masa')"><span class="nav-ico">▦</span>Masalar</button>
       <button id="desktop-nav-quick" onclick="desktopStartQuickOrder()"><span class="nav-ico">🛒</span>Hızlı Sipariş</button>
       <button id="desktop-nav-accounts" onclick="desktopNavigate('accounts')"><span class="nav-ico">▣</span>Cari Hesaplar</button>
+      <button id="desktop-nav-branch" class="branch-switch-nav" onclick="switchBranchFromUi()"><span class="nav-ico">⇄</span><span id="desktop-branch-switch-text">Selim Şubeye Git</span></button>
       <button id="desktop-nav-settings" onclick="desktopNavigate('settings')"><span class="nav-ico">⚙</span>Ayarlar</button>
     </div>
   </aside>
@@ -1143,6 +1151,7 @@
           <input id="emp-name" placeholder="Personel adı">
           <input id="emp-username" placeholder="Kullanıcı adı">
           <input id="emp-password" type="password" placeholder="Şifre">
+          <select id="emp-branch" aria-label="Çalışanın şubesi" onchange="this.dataset.touched='1'"><option value="arli">Arlı Şube</option><option value="selim">Selim Şube</option></select>
           <button class="btn btn-primary" style="width:auto" onclick="createEmployee()">Çalışan Oluştur</button>
         </div>
         <div id="employee-list" style="margin-top:10px"></div>
@@ -1430,6 +1439,7 @@
   </div>
 </div>
 
+<div class="branch-banner" id="branch-banner" role="status" aria-live="polite"><div class="bb-icon">✓</div><div><strong id="branch-banner-title">Arlı Şubedesiniz</strong><small id="branch-banner-sub">Şube verileri hazır</small></div></div>
 <div class="toast" id="toast"></div>
 
 
@@ -1457,21 +1467,31 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const stateRef = db.ref('ozarpa-state');
 const authRef = db.ref('ozarpa-auth');
 const usersRef = db.ref('ozarpa-users');
-const salesRef = db.ref('ozarpa-sales');
-const financeRef = db.ref('ozarpa-finance');
-const printQueueRef = db.ref('ozarpa-print-queue');
-const printCounterRef = db.ref('ozarpa-print-counter');
-const printerStatusRef = db.ref('ozarpa-printer-status/pos80c-main');
-const orderAlertsRef = db.ref('ozarpa-order-alerts');
-const specialRef = db.ref('ozarpa-special-orders');
-const testStateRef = db.ref('ozarpa-test-state');
-const testModeRef = db.ref('ozarpa-test-mode');
-const presenceRef = db.ref('ozarpa-presence');
-const testSalesRef = db.ref('ozarpa-test-sales');
-const testSpecialRef = db.ref('ozarpa-test-special-orders');
+const BRANCH_DEFS=Object.freeze({arli:{name:'Arlı',suffix:''},selim:{name:'Selim',suffix:'-selim'}});
+const ACTIVE_BRANCH_KEY='ozarpa-active-branch';
+let activeBranch='arli';
+let stateRef,salesRef,financeRef,printQueueRef,printCounterRef,printerStatusRef,orderAlertsRef,specialRef,testStateRef,testModeRef,presenceRef,testSalesRef,testSpecialRef;
+function normalizeBranch(v){return String(v||'').toLowerCase()==='selim'?'selim':'arli';}
+function branchFirebasePath(base,branch=activeBranch){const b=normalizeBranch(branch);return base+(BRANCH_DEFS[b]?.suffix||'');}
+function configureBranchRefs(branch){
+  activeBranch=normalizeBranch(branch);
+  stateRef=db.ref(branchFirebasePath('ozarpa-state'));
+  salesRef=db.ref(branchFirebasePath('ozarpa-sales'));
+  financeRef=db.ref(branchFirebasePath('ozarpa-finance'));
+  printQueueRef=db.ref(branchFirebasePath('ozarpa-print-queue'));
+  printCounterRef=db.ref(branchFirebasePath('ozarpa-print-counter'));
+  printerStatusRef=db.ref(activeBranch==='arli'?'ozarpa-printer-status/pos80c-main':'ozarpa-printer-status-selim/pos80c-main');
+  orderAlertsRef=db.ref(branchFirebasePath('ozarpa-order-alerts'));
+  specialRef=db.ref(branchFirebasePath('ozarpa-special-orders'));
+  testStateRef=db.ref(branchFirebasePath('ozarpa-test-state'));
+  testModeRef=db.ref(branchFirebasePath('ozarpa-test-mode'));
+  presenceRef=db.ref(branchFirebasePath('ozarpa-presence'));
+  testSalesRef=db.ref(branchFirebasePath('ozarpa-test-sales'));
+  testSpecialRef=db.ref(branchFirebasePath('ozarpa-test-special-orders'));
+}
+configureBranchRefs('arli');
 
 let state = {
   masaCount: 20,
@@ -1491,6 +1511,7 @@ let state = {
   categories: [],
   tables: {}      // { "5": { "m1": 2, "m4": 1 } }
 };
+const DEFAULT_BRANCH_STATE=JSON.parse(JSON.stringify(state));
 let credentials = { username: 'özarpa', password: 'özarpa' };
 let employees = {};
 let sales = {};
@@ -1510,7 +1531,6 @@ let presenceHeartbeat = null;
 const LOGIN_SESSION_KEY = 'ozarpa-login-session';
 let selectedPaymentMethod = null;
 let currentMasa = null;
-printerStatusRef.on('value',snap=>{const v=snap.val()||{};remotePrinterStatus={online:!!v.online,at:Number(v.at||0),printer:String(v.printer||''),agent:String(v.agent||'')};});
 const paymentInFlight = new Set();
 let saveTimer = null;
 let lastLocalEdit = 0;   // bu cihazda son değişiklik yapılan an
@@ -1533,6 +1553,19 @@ let lastWelcomeShownAt = 0;
 function activeState(){ return testMode ? testState : state; }
 function activeSpecialOrders(){ return testMode ? testSpecialOrders : specialOrders; }
 function activeSales(){ return testMode ? testSales : sales; }
+function activeBranchName(){return BRANCH_DEFS[activeBranch]?.name||'Arlı';}
+function employeeAssignedBranch(emp){return normalizeBranch(emp&&emp.branch);}
+function branchStateLocalKey(isTest=testMode){if(isTest)return activeBranch==='arli'?'ozarpa-test-state-local':'ozarpa-test-state-local-selim';return activeBranch==='arli'?'ozarpa-state-local':'ozarpa-state-local-selim';}
+function freshBranchState(){return JSON.parse(JSON.stringify(DEFAULT_BRANCH_STATE));}
+function cleanBranchSeedFromCurrent(){
+  const src=cloneStateValue(activeState&&activeState()||state)||freshBranchState(),out={masaCount:Math.max(1,Number(src.masaCount)||20),menu:cloneStateValue(src.menu||[]),categories:cloneStateValue(src.categories||[]),tables:{}};
+  const p=src.posAdmin&&typeof src.posAdmin==='object'?src.posAdmin:null;if(p){out.posAdmin={};['ui','tableTimeRules','disabledProducts','seatingEnabled','tableLabels','seatingLayouts'].forEach(k=>{if(p[k]!=null)out.posAdmin[k]=cloneStateValue(p[k]);});}
+  return out;
+}
+function activeStateRootPath(){return testMode?branchFirebasePath('ozarpa-test-state'):branchFirebasePath('ozarpa-state');}
+function activeSalesRootPath(){return testMode?branchFirebasePath('ozarpa-test-sales'):branchFirebasePath('ozarpa-sales');}
+function paymentLocksRootPath(){return branchFirebasePath('ozarpa-payment-locks');}
+function printingEnabledForBranch(){return activeBranch==='arli';}
 function saleTimestamp(s){return Number(s&&((s.serverAt!=null?s.serverAt:s.at)))||Number(s&&s.at)||0;}
 function financeDayKey(d=new Date()){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function financeRefreshViews(){if(isDesktopPos()&&hasPatronAccess()&&desktopCurrentPage==='finance')renderDesktopFinance();if(isDesktopPos()&&hasPatronAccess()&&desktopCurrentPage==='reports')renderEarnings();if(isMobilePos()&&['finance','reports'].includes(mposPage))mposRender();}
@@ -1540,13 +1573,57 @@ function legacyFinanceSnapshot(){const p=ensurePosAdmin(),out={openings:{},movem
 function migrateLegacyFinanceOnce(){if(financeMigrationAttempted||testMode)return;financeMigrationAttempted=true;financeRef.child('_initialized').transaction(cur=>cur?undefined:{at:Date.now()},(err,committed)=>{if(err||!committed)return;const legacy=legacyFinanceSnapshot(),updates={};Object.entries(legacy.openings).forEach(([k,v])=>updates['openings/'+k]=v);Object.entries(legacy.movements).forEach(([k,v])=>updates['movements/'+k]=v);if(Object.keys(updates).length)financeRef.update(updates).catch(e=>console.error('Finans geçiş hatası',e));},false);}
 function currentFinanceOpening(now=new Date()){const row=(financeData.openings||{})[financeDayKey(now)];if(row)return Math.max(0,Number(row.amount)||0);const p=ensurePosAdmin(),at=Number(p.cashOpeningAt)||0;return at&&financeDayKey(new Date(at))===financeDayKey(now)?Math.max(0,Number(p.cashOpening)||0):0;}
 function currentFinanceMovements(now=new Date()){const day=startOfDay(now),remote=Object.values(financeData.movements||{}).filter(x=>Number(x&&x.at)>=day);if(remote.length)return remote;return (ensurePosAdmin().cashMovements||[]).filter(x=>Number(x&&x.at)>=day);}
-function pushUnifiedSale(payload){const sale=Object.assign({},payload);sale.amount=Math.max(0,Number(sale.amount)||0);sale.at=Number(sale.at)||Date.now();sale.paymentMethod=normalizedPaymentMethod(sale);sale.by=sale.by||currentUser.name||currentUser.username||'Kullanıcı';const ref=testMode?testSalesRef:salesRef,node=ref.push(),id=node.key,local=Object.assign({},sale,{serverAt:sale.at});if(testMode)testSales[id]=local;else sales[id]=local;refreshSalesViews();const remote=Object.assign({},sale,{serverAt:firebase.database.ServerValue.TIMESTAMP});return node.set(remote).then(()=>id).catch(e=>{if(testMode)delete testSales[id];else delete sales[id];refreshSalesViews();throw e;});}
-function acquirePaymentLock(kind,id){if(testMode)return Promise.resolve(()=>Promise.resolve());const key=String(kind)+'_'+String(id),token=(currentUser.id||currentUser.username||'u')+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),lock=db.ref('ozarpa-payment-locks/'+key);return new Promise((resolve,reject)=>{lock.transaction(cur=>{const now=Date.now();if(cur&&now-Number(cur.at||0)<120000)return;return{token,at:now,by:currentUser.name||currentUser.username||''};},(err,committed)=>{if(err)return reject(err);if(!committed)return reject(new Error('PAYMENT_LOCKED'));resolve(()=>lock.remove().catch(()=>{}));},false);});}
+function pushUnifiedSale(payload){const sale=Object.assign({},payload);sale.amount=Math.max(0,Number(sale.amount)||0);sale.at=Number(sale.at)||Date.now();sale.paymentMethod=normalizedPaymentMethod(sale);sale.by=sale.by||currentUser.name||currentUser.username||'Kullanıcı';sale.branch=activeBranch;const ref=testMode?testSalesRef:salesRef,node=ref.push(),id=node.key,local=Object.assign({},sale,{serverAt:sale.at});if(testMode)testSales[id]=local;else sales[id]=local;refreshSalesViews();const remote=Object.assign({},sale,{serverAt:firebase.database.ServerValue.TIMESTAMP});return node.set(remote).then(()=>id).catch(e=>{if(testMode)delete testSales[id];else delete sales[id];refreshSalesViews();throw e;});}
+function acquirePaymentLock(kind,id){if(testMode)return Promise.resolve(()=>Promise.resolve());const key=String(kind)+'_'+String(id),token=(currentUser.id||currentUser.username||'u')+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),lock=db.ref(paymentLocksRootPath()+'/'+key);return new Promise((resolve,reject)=>{lock.transaction(cur=>{const now=Date.now();if(cur&&now-Number(cur.at||0)<120000)return;return{token,at:now,by:currentUser.name||currentUser.username||''};},(err,committed)=>{if(err)return reject(err);if(!committed)return reject(new Error('PAYMENT_LOCKED'));resolve(()=>lock.remove().catch(()=>{}));},false);});}
 function isOwnerAdmin(){ return !!(currentUser && currentUser.role==='admin'); }
 function hasPatronAccess(){ return !!(currentUser && (currentUser.role==='admin' || currentUser.role==='manager')); }
 function isStaffAccount(){ return !!(currentUser && (currentUser.role==='employee' || currentUser.role==='manager')); }
 function roleDisplayName(){ return currentUser.role==='admin'?'Patron / Admin':(currentUser.role==='manager'?'Yönetici':'Çalışan'); }
 function currentOrderTakerName(){return String((currentUser&&(currentUser.name||currentUser.username))||'Bilinmiyor').trim()||'Bilinmiyor';}
+function canSwitchBranch(){return !!(currentUser&&(currentUser.role==='admin'||currentUser.role==='manager'));}
+let branchBannerTimer=null;
+function showBranchBanner(){
+  const box=document.getElementById('branch-banner'),title=document.getElementById('branch-banner-title'),sub=document.getElementById('branch-banner-sub');if(!box)return;
+  if(title)title.textContent=activeBranchName()+' Şubedesiniz';
+  if(sub)sub.textContent=activeBranch==='arli'?'Ana şube · veriler senkronize':'2. şube · ayrı Firebase verileri';
+  box.classList.remove('show');void box.offsetWidth;box.classList.add('show');
+  if(branchBannerTimer)clearTimeout(branchBannerTimer);branchBannerTimer=setTimeout(()=>box.classList.remove('show'),5000);
+}
+function updateBranchUi(){
+  const target=activeBranch==='arli'?'Selim':'Arlı',btn=document.getElementById('desktop-nav-branch'),txt=document.getElementById('desktop-branch-switch-text');
+  if(btn)btn.style.display=canSwitchBranch()?'flex':'none';if(txt)txt.textContent=target+' Şubeye Git';
+  const dPrint=document.getElementById('desktop-order-print-btn');if(dPrint)dPrint.textContent=printingEnabledForBranch()?'🖨 Fiş Yazdır':'🖨 Yazdırma Kapalı';
+  const mPrint=document.querySelector('#mpos-order-screen .mpos-order-print');if(mPrint)mPrint.textContent=printingEnabledForBranch()?'🖨 Yazdır':'🖨 Kapalı';
+}
+function switchBranchFromUi(){if(!canSwitchBranch()){showToast('Şube değiştirme yetkiniz yok');return;}return switchBranch(activeBranch==='arli'?'selim':'arli');}
+function resetBranchRuntimeData(seed=null){
+  state=seed?cloneStateValue(seed):freshBranchState();sales={};financeData={openings:{},movements:{}};financeLoaded=false;financeMigrationAttempted=false;specialOrders={};testSpecialOrders={};testSales={};presence={};testMode=false;testState=null;lastRemoteState=null;lastRemoteTestState=null;remotePrinterStatus={online:false,at:0,printer:'',agent:''};lastLocalEdit=0;realtimeRenderHoldUntil=0;sharedTablePendingOps=0;sharedTableMutationEpoch++;
+}
+async function switchBranch(target,options={}){
+  const next=normalizeBranch(target),force=!!options.force,silent=!!options.silent;
+  if(next===activeBranch){updateBranchUi();if(!silent)showBranchBanner();return true;}
+  if(!force&&!canSwitchBranch()){showToast('Şube değiştirme yetkiniz yok');return false;}
+  try{
+    if(typeof waitForSharedTableIdle==='function')await waitForSharedTableIdle();
+    if(lastLocalEdit){clearTimeout(saveTimer);await Promise.resolve(saveState());}
+  }catch(e){console.warn('Şube değişmeden önce bekleyen kayıt tamamlanamadı',e);}
+  const seed=(activeBranch==='arli'&&next==='selim')?cleanBranchSeedFromCurrent():null;
+  try{stopPresence();}catch(e){}
+  try{unbindOrderAlertListener();}catch(e){}
+  unbindBranchDataListeners();
+  configureBranchRefs(next);resetBranchRuntimeData(seed);restoreLocalState();bindBranchDataListeners();
+  try{bindOrderAlertListener();}catch(e){}
+  try{localStorage.setItem(ACTIVE_BRANCH_KEY,activeBranch);}catch(e){}
+  if(currentUser&&currentUser.username){currentUser.activeBranch=activeBranch;saveLoginSession(currentUser);}
+  try{closeDesktopPaymentPanel(false);}catch(e){}try{if(isDesktopOrderOpen())closeDesktopOrderScreen(false);}catch(e){}
+  try{mposClosePayment();mposCloseOrder();}catch(e){}currentMasa=null;
+  try{desktopCurrentPage='masa';desktopQuickMode=false;desktopAccountMode=false;desktopAccountId=null;desktopQuickCart={};}catch(e){}
+  try{mposPage='tables';mposTableFilter='open';mposOrderMasa=null;mposQuickMode=false;mposAccountMode=false;mposAccountId=null;mposQuickCart={};mposEmployeeDraft={name:'',username:'',password:'',branch:activeBranch};}catch(e){}
+  if(currentUser&&(currentUser.role==='employee'||currentUser.role==='manager'))startPresence(currentUser);
+  desktopShellInitialized=false;updateBranchUi();syncDesktopPatronShell();forcePcEmployeeModernShell();syncPcEmployeeShell();syncMobilePosShell();renderAll();
+  if(!silent){showToast(activeBranchName()+' Şubeye geçildi',1800);showBranchBanner();}
+  return true;
+}
 let toastHideTimer=null;
 function showToast(message,duration=2200){
   const el=document.getElementById('toast');
@@ -1617,7 +1694,7 @@ function queueSave(){
   // Kategori/ürün/ayar gibi debounce edilen değişikliklerde tarayıcı hemen kapansa bile
   // en güncel durumun cihaz yedeğini tıklama/yazma anında koru.
   try{
-    localStorage.setItem(testMode?'ozarpa-test-state-local':'ozarpa-state-local',JSON.stringify(cloneStateValue(activeState())));
+    localStorage.setItem(branchStateLocalKey(testMode),JSON.stringify(cloneStateValue(activeState())));
   }catch(e){}
   clearTimeout(saveTimer);
   saveTimer=setTimeout(saveState,350);
@@ -1625,27 +1702,29 @@ function queueSave(){
 function saveState(){
   const data=cloneStateValue(activeState());
   try{
-    localStorage.setItem(testMode?'ozarpa-test-state-local':'ozarpa-state-local',JSON.stringify(data));
+    localStorage.setItem(branchStateLocalKey(testMode),JSON.stringify(data));
   }catch(e){}
   const ref=testMode ? testStateRef : stateRef;
   const base=testMode?lastRemoteTestState:lastRemoteState;
   const patch=buildStatePatch(base||{},data);
-  if(!Object.keys(patch).length){lastLocalEdit=0;return;}
-  ref.update(patch)
+  if(!Object.keys(patch).length){lastLocalEdit=0;return Promise.resolve(false);}
+  return ref.update(patch)
     .then(()=>{
       if(testMode)lastRemoteTestState=cloneStateValue(data);else lastRemoteState=cloneStateValue(data);
       lastLocalEdit=0;
       // Aynı anda başka cihaz farklı masa/ayar güncellediyse en son birleşik Firebase durumunu tekrar al.
       setTimeout(()=>refreshStateFromFirebase(ref,testMode),80);
+      return true;
     })
     .catch(e=>{
       console.error('Kaydetme hatası',e);
       showToast('Firebase kaydetme başarısız — cihaz yedeği tutuldu');
+      return false;
     });
 }
 function restoreLocalState(){
   try{
-    const key=testMode?'ozarpa-test-state-local':'ozarpa-state-local';
+    const key=branchStateLocalKey(testMode);
     const raw=localStorage.getItem(key);
     if(!raw)return;
     const val=JSON.parse(raw);
@@ -1681,53 +1760,50 @@ function applyRemoteState(val){
 }
 restoreLocalState();
 
-stateRef.on('value',snap=>{
-  const val=snap.val();
-  if(!val){ stateRef.set(state).catch(e=>console.error('İlk veri kaydı hatası',e)); return; }
-  // Yerel düzenleme sürerken gelen kendi yankımızı/başka cihaz güncellemesini ezmeyelim.
-  // saveState sonrasında Firebase'in birleşik halini yeniden okuyacağız.
-  if((lastLocalEdit && Date.now()-lastLocalEdit<2500) || Date.now()<realtimeRenderHoldUntil)return;
-  lastRemoteState=cloneStateValue(val);
-  applyRemoteState(val);
-});
-testStateRef.on('value',snap=>{
-  const val=snap.val();
-  if(val){
-    lastRemoteTestState=cloneStateValue(val);
-    testState=Object.assign({masaCount:20,menu:[],categories:[],tables:{}},val);
-    if(testState.tables===null)testState.tables={};if(testState.menu===null)testState.menu=[];if(!testState.categories)testState.categories=[];
-  }
-  if(testMode&&Date.now()>=realtimeRenderHoldUntil&&document.getElementById('app-screen').style.display!=='none')renderAll();
-});
+
+function unbindBranchDataListeners(){
+  [stateRef,testStateRef,salesRef,financeRef,testSalesRef,specialRef,testSpecialRef,presenceRef,testModeRef,printerStatusRef].forEach(ref=>{try{ref&&ref.off('value');}catch(e){}});
+}
+function bindBranchDataListeners(){
+  stateRef.on('value',snap=>{
+    const val=snap.val();
+    if(!val){const seed=cloneStateValue(state&&typeof state==='object'?state:freshBranchState());stateRef.set(seed).catch(e=>console.error('İlk şube veri kaydı hatası',e));return;}
+    if((lastLocalEdit&&Date.now()-lastLocalEdit<2500)||Date.now()<realtimeRenderHoldUntil)return;
+    lastRemoteState=cloneStateValue(val);applyRemoteState(val);
+  });
+  testStateRef.on('value',snap=>{
+    const val=snap.val();if(val){lastRemoteTestState=cloneStateValue(val);testState=Object.assign({masaCount:20,menu:[],categories:[],tables:{}},val);if(testState.tables===null)testState.tables={};if(testState.menu===null)testState.menu=[];if(!testState.categories)testState.categories=[];}
+    if(testMode&&Date.now()>=realtimeRenderHoldUntil&&document.getElementById('app-screen').style.display!=='none')renderAll();
+  });
+  salesRef.on('value',snap=>{sales=snap.val()||{};refreshSalesViews();});
+  financeRef.on('value',snap=>{financeData=snap.val()||{openings:{},movements:{}};financeLoaded=true;financeRefreshViews();setTimeout(migrateLegacyFinanceOnce,800);});
+  testSalesRef.on('value',snap=>{testSales=snap.val()||{};if(testMode)refreshSalesViews();});
+  specialRef.on('value',snap=>{specialOrders=snap.val()||{};if(hasPatronAccess()){renderSpecialOrders();renderSpecialSummary();}});
+  testSpecialRef.on('value',snap=>{testSpecialOrders=snap.val()||{};if(testMode&&hasPatronAccess()){renderSpecialOrders();renderSpecialSummary();}});
+  presenceRef.on('value',snap=>{presence=snap.val()||{};renderActiveEmployees();if(document.getElementById('desktop-user-menu')?.classList.contains('open'))renderDesktopUserMenu();},err=>console.error('Aktif çalışanlar Firebase okuma hatası:',err));
+  testModeRef.on('value',snap=>{testMode=!!snap.val();if(testMode){ensureTestState();}updateRoleUI();if(document.getElementById('app-screen').style.display!=='none')renderAll();});
+  if(printingEnabledForBranch())printerStatusRef.on('value',snap=>{const v=snap.val()||{};remotePrinterStatus={online:!!v.online,at:Number(v.at||0),printer:String(v.printer||''),agent:String(v.agent||'')};});
+  else remotePrinterStatus={online:false,at:0,printer:'',agent:'selim-print-disabled'};
+}
+
 authRef.on('value',snap=>{
   const val=snap.val();
   if(!val){authRef.set(credentials);return;}
-  credentials=val;
-  authLoaded=true;
-  restoreLoginSession();
+  credentials=val;authLoaded=true;restoreLoginSession();
 });
 usersRef.on('value',snap=>{
-  employees=snap.val()||{};
-  usersLoaded=true;
-  // Çalışan yönetici yapılır/kaldırılırsa açık oturumda yetki anında güncellensin.
-  if(currentUser && currentUser.id){
+  employees=snap.val()||{};usersLoaded=true;
+  if(currentUser&&currentUser.id){
     const self=employees[currentUser.id];
-    if(!self){
-      if(currentUser.role!=='guest')setTimeout(()=>logout(),0);
-    }else{
-      const nextRole=self.manager?'manager':'employee';
-      if(currentUser.role!==nextRole){
-        currentUser={username:self.username,name:self.name||self.username,role:nextRole,id:currentUser.id};
-        saveLoginSession(currentUser);
-        if(document.getElementById('app-screen')?.style.display!=='none'){
-          desktopShellInitialized=false;
-          syncDesktopPatronShell();
-          updateRoleUI();
-          renderAll();
-          requestAnimationFrame(()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();syncPcEmployeeShell();});
-          setTimeout(()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();syncPcEmployeeShell();},60);
-          showToast(nextRole==='manager'?'Yönetici yetkisi aktif':'Yönetici yetkisi kaldırıldı');
-        }
+    if(!self){if(currentUser.role!=='guest')setTimeout(()=>logout(),0);}
+    else{
+      const nextRole=self.manager?'manager':'employee',assigned=employeeAssignedBranch(self),roleChanged=currentUser.role!==nextRole,branchChanged=currentUser.branch!==assigned;
+      currentUser={username:self.username,name:self.name||self.username,role:nextRole,id:currentUser.id,branch:assigned,activeBranch};saveLoginSession(currentUser);
+      if(nextRole==='employee'&&activeBranch!==assigned){switchBranch(assigned,{force:true,silent:false});}
+      else if((roleChanged||branchChanged)&&document.getElementById('app-screen')?.style.display!=='none'){
+        desktopShellInitialized=false;syncDesktopPatronShell();updateRoleUI();renderAll();requestAnimationFrame(()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();syncPcEmployeeShell();updateBranchUi();});
+        setTimeout(()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();syncPcEmployeeShell();updateBranchUi();},60);
+        if(roleChanged)showToast(nextRole==='manager'?'Yönetici yetkisi aktif':'Yönetici yetkisi kaldırıldı');
       }
     }
   }
@@ -1740,23 +1816,13 @@ function refreshSalesViews(){
   if(isDesktopPos()&&hasPatronAccess()&&desktopCurrentPage==='reports')renderEarnings();
   if(isDesktopPos()&&hasPatronAccess()&&desktopCurrentPage==='finance')renderDesktopFinance();
 }
-salesRef.on('value',snap=>{sales=snap.val()||{};refreshSalesViews();});
-financeRef.on('value',snap=>{financeData=snap.val()||{openings:{},movements:{}};financeLoaded=true;financeRefreshViews();setTimeout(migrateLegacyFinanceOnce,800);});
-testSalesRef.on('value',snap=>{testSales=snap.val()||{};if(testMode)refreshSalesViews();});
-specialRef.on('value',snap=>{specialOrders=snap.val()||{};if(hasPatronAccess()){renderSpecialOrders();renderSpecialSummary();}});
-testSpecialRef.on('value',snap=>{testSpecialOrders=snap.val()||{};if(testMode&&hasPatronAccess()){renderSpecialOrders();renderSpecialSummary();}});
-presenceRef.on('value',snap=>{
-  presence=snap.val()||{};
-  renderActiveEmployees();
-  if(document.getElementById('desktop-user-menu')?.classList.contains('open'))renderDesktopUserMenu();
-},err=>{
-  console.error('Aktif çalışanlar Firebase okuma hatası:',err);
-});
-testModeRef.on('value',snap=>{testMode=!!snap.val(); if(testMode){ensureTestState();} updateRoleUI(); if(document.getElementById('app-screen').style.display!=='none')renderAll();});
+bindBranchDataListeners();
+
 
 function saveLoginSession(user){
-  try{ sessionStorage.setItem(LOGIN_SESSION_KEY, JSON.stringify(user)); }catch(e){}
-  try{ localStorage.setItem(LOGIN_SESSION_KEY, JSON.stringify(user)); }catch(e){}
+  const payload=Object.assign({},user||{},{activeBranch});
+  try{ sessionStorage.setItem(LOGIN_SESSION_KEY, JSON.stringify(payload)); }catch(e){}
+  try{ localStorage.setItem(LOGIN_SESSION_KEY, JSON.stringify(payload)); }catch(e){}
 }
 function clearLoginSession(){
   try{ sessionStorage.removeItem(LOGIN_SESSION_KEY); }catch(e){}
@@ -1774,21 +1840,18 @@ function restoreLoginSession(){
   let validUser=null;
   if(saved.role==='admin' &&
      (saved.username||'').toLowerCase()===(credentials.username||'').toLowerCase()){
-    validUser={username:credentials.username,name:'Patron',role:'admin'};
+    validUser={username:credentials.username,name:'Patron',role:'admin',branch:'arli'};
   }else if(saved.id && employees[saved.id] &&
            (employees[saved.id].username||'').toLowerCase()===(saved.username||'').toLowerCase()){
     const e=employees[saved.id];
-    validUser={username:e.username,name:e.name||e.username,role:e.manager?'manager':'employee',id:saved.id};
+    validUser={username:e.username,name:e.name||e.username,role:e.manager?'manager':'employee',id:saved.id,branch:employeeAssignedBranch(e)};
   }
 
   if(!validUser){ clearLoginSession(); return; }
   currentUser=validUser;
-  desktopShellInitialized=false;
-  syncDesktopPatronShell();
-  forcePcEmployeeModernShell();
-  if(validUser.role==='employee' || validUser.role==='manager') startPresence(validUser);
-  document.getElementById('login-screen').style.display='none';
-  playWelcomeAnimation(validUser.name);
+  const assigned=validUser.role==='admin'?'arli':normalizeBranch(validUser.branch),resumeBranch=(validUser.role==='admin'||validUser.role==='manager')?normalizeBranch(saved.activeBranch||assigned):assigned;
+  const enter=()=>{desktopShellInitialized=false;syncDesktopPatronShell();forcePcEmployeeModernShell();if(validUser.role==='employee'||validUser.role==='manager')startPresence(validUser);document.getElementById('login-screen').style.display='none';playWelcomeAnimation(validUser.name);};
+  if(resumeBranch!==activeBranch)switchBranch(resumeBranch,{force:true,silent:true}).then(enter);else{currentUser.activeBranch=activeBranch;saveLoginSession(currentUser);enter();}
 }
 setInterval(()=>{
   if(document.getElementById('active-employee-list')) renderActiveEmployees();
@@ -2447,7 +2510,7 @@ function desktopOrderTakePayment(){
   if(isDesktopEmployee()){
     const snapshot=cloneStateValue(activeState().tables[masaId]||{}),tableName=seatingTableLabel(masaId),printJob=buildReceiptPrintJob({source:'pc-calisan-siparis-kaydet',title:tableName,tableId:masaId,tableName,order:snapshot});
     saveAndConfirmTableOrder(masaId,{emitAlert:false}).catch(e=>console.error('PC çalışan sipariş kaydı hatası',e));
-    closeDesktopOrderScreen(true);desktopCurrentPage='masa';switchTab('masa');forcePcEmployeeModernShell();renderMasaGrid();renderDesktopTableFilters();desktopApplyTableFilters();window.scrollTo({top:0,behavior:'auto'});showToast('Sipariş kaydedildi · fiş yazdırılıyor…');enqueueReceiptPrint(printJob,null);return;
+    closeDesktopOrderScreen(true);desktopCurrentPage='masa';switchTab('masa');forcePcEmployeeModernShell();renderMasaGrid();renderDesktopTableFilters();desktopApplyTableFilters();window.scrollTo({top:0,behavior:'auto'});showToast(printingEnabledForBranch()?'Sipariş kaydedildi · fiş yazdırılıyor…':'Sipariş kaydedildi · yazdırma kapalı');enqueueReceiptPrint(printJob,null);return;
   }
   const order=activeState().tables[masaId]||{},stage=tableOrderWorkflowStage(masaId,order);
   if(stage==='dirty'){
@@ -2519,7 +2582,7 @@ function syncDesktopBrandLogo(){
   if(source&&target&&!target.src)target.src=source.src;
 }
 function clearPcEmployeeInlineGuards(){
-  ['desktop-nav-reports','desktop-nav-finance','desktop-nav-accounts','desktop-nav-settings','desktop-nav-masa','view-accounts','view-active-employees','view-admin','view-special','view-masa','tab-active-employees','tab-admin','tab-special'].forEach(id=>{
+  ['desktop-nav-reports','desktop-nav-finance','desktop-nav-accounts','desktop-nav-settings','desktop-nav-branch','desktop-nav-masa','view-accounts','view-active-employees','view-admin','view-special','view-masa','tab-active-employees','tab-admin','tab-special'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.removeProperty('display');
   });
   const quick=document.querySelector('#app-screen .desktop-top-search .menu-square');if(quick)quick.style.removeProperty('display');
@@ -2552,7 +2615,7 @@ function syncDesktopPatronShell(){
 
   if(employeeOnly){
     desktopCurrentPage='masa';
-    ['desktop-nav-reports','desktop-nav-finance','desktop-nav-accounts','desktop-nav-settings'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
+    ['desktop-nav-reports','desktop-nav-finance','desktop-nav-accounts','desktop-nav-settings','desktop-nav-branch'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
     const masaNav=document.getElementById('desktop-nav-masa');if(masaNav)masaNav.style.setProperty('display','flex','important');
     ['view-accounts','view-active-employees','view-admin','view-special'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
     const masaView=document.getElementById('view-masa');if(masaView)masaView.style.setProperty('display','block','important');
@@ -2589,7 +2652,7 @@ function forcePcEmployeeModernShell(){
   const sidebar=document.getElementById('desktop-sidebar');if(sidebar)sidebar.style.setProperty('display','flex','important');
   const legacyTabs=app.querySelector('header nav.tabs');if(legacyTabs)legacyTabs.style.setProperty('display','none','important');
   const brand=app.querySelector('header .brand');if(brand)brand.style.setProperty('display','none','important');
-  ['desktop-nav-reports','desktop-nav-finance','desktop-nav-accounts','desktop-nav-settings'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
+  ['desktop-nav-reports','desktop-nav-finance','desktop-nav-accounts','desktop-nav-settings','desktop-nav-branch'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
   const masaNav=document.getElementById('desktop-nav-masa');if(masaNav)masaNav.style.setProperty('display','flex','important');
   ['view-accounts','view-active-employees','view-admin','view-special'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important');});
   const masaView=document.getElementById('view-masa');if(masaView)masaView.style.setProperty('display','block','important');
@@ -2722,18 +2785,13 @@ function tryLogin(){
     return;
   }
   let user=null;
-  if(u.toLowerCase()===(credentials.username||'').toLowerCase() && p===credentials.password) user={username:credentials.username,name:'Patron',role:'admin'};
-  else { for(const id in employees){const e=employees[id];if((e.username||'').toLowerCase()===u.toLowerCase()&&e.password===p){user={username:e.username,name:e.name||e.username,role:e.manager?'manager':'employee',id};break;}} }
+  if(u.toLowerCase()===(credentials.username||'').toLowerCase() && p===credentials.password) user={username:credentials.username,name:'Patron',role:'admin',branch:'arli'};
+  else { for(const id in employees){const e=employees[id];if((e.username||'').toLowerCase()===u.toLowerCase()&&e.password===p){user={username:e.username,name:e.name||e.username,role:e.manager?'manager':'employee',id,branch:employeeAssignedBranch(e)};break;}} }
   if(!user){err.textContent='Kullanıcı adı veya şifre hatalı.';return;}
-  currentUser=user;
-  if(window.innerWidth>700&&!hasPatronAccess())document.body.classList.add('pc-employee-modern');
-  desktopShellInitialized=false;
-  syncDesktopPatronShell();
-  forcePcEmployeeModernShell();
-  saveLoginSession(user);
-  sessionRestored=true;
-  if(user.role==='employee' || user.role==='manager') startPresence(user);
-  err.textContent='';document.getElementById('login-screen').style.display='none';playWelcomeAnimation(user.name);
+  currentUser=user;sessionRestored=true;err.textContent='';
+  const target=user.role==='admin'?'arli':normalizeBranch(user.branch);
+  const enter=()=>{if(window.innerWidth>700&&!hasPatronAccess())document.body.classList.add('pc-employee-modern');desktopShellInitialized=false;syncDesktopPatronShell();forcePcEmployeeModernShell();saveLoginSession(user);if(user.role==='employee'||user.role==='manager')startPresence(user);document.getElementById('login-screen').style.display='none';playWelcomeAnimation(user.name);};
+  if(target!==activeBranch)switchBranch(target,{force:true,silent:true}).then(enter);else{currentUser.activeBranch=activeBranch;enter();}
 }
 function applyWelcomeTheme(){
   const screen=document.getElementById('welcome-screen');
@@ -2783,6 +2841,8 @@ function playWelcomeAnimation(name,options={}){
         syncDesktopPatronShell();
         renderAll();
       }
+      updateBranchUi();
+      setTimeout(showBranchBanner,180);
     },500);
   }
   function next(){
@@ -2815,6 +2875,7 @@ function updateRoleUI(){
   forcePcEmployeeModernShell();
   syncPcEmployeeShell();
   syncMobilePosShell();
+  updateBranchUi();
 }
 function toggleTestMode(){
   if(!hasPatronAccess())return;
@@ -2984,7 +3045,7 @@ function updateSharedTableItem(masaId,itemId,delta){
   const ref=testMode?testStateRef:stateRef,itemRef=ref.child('tables/'+id+'/'+pid);
   beginSharedTableMutation();
   const run=()=>ensureSharedTableMetaThrottled(id).then(()=>itemRef.transaction(cur=>{const n=roundOrderQty((Number(cur)||0)+change);return n<=0?null:n;},null,false));
-  const guarded=testMode?run():db.ref('ozarpa-payment-locks/masa_'+id).once('value').then(lockSnap=>{const lock=lockSnap.val();if(lock&&Date.now()-Number(lock.at||0)<120000)throw new Error('PAYMENT_IN_PROGRESS');return run();});
+  const guarded=testMode?run():db.ref(paymentLocksRootPath()+'/masa_'+id).once('value').then(lockSnap=>{const lock=lockSnap.val();if(lock&&Date.now()-Number(lock.at||0)<120000)throw new Error('PAYMENT_IN_PROGRESS');return run();});
   return guarded.catch(e=>{
     rollbackLocalTableDelta(id,pid,change);
     if(e&&e.message==='PAYMENT_IN_PROGRESS')showToast('Bu masa şu anda ödeme işleminde');
@@ -2992,7 +3053,7 @@ function updateSharedTableItem(masaId,itemId,delta){
     refreshOpenOrderSurfacesFast();
   }).finally(()=>finishSharedTableMutation(ref,testMode));
 }
-function clearSharedTable(masaId){const id=String(masaId||'');if(!id)return Promise.resolve();clearOrderWorkflowUiOverride(id);const d=activeState(),stateBase=testMode?'ozarpa-test-state':'ozarpa-state',updates={};updates[stateBase+'/tables/'+id]=null;updates[stateBase+'/posAdmin/tableActivity/'+id]=null;updates[stateBase+'/posAdmin/tableOrderMeta/'+id]=null;updates[stateBase+'/posAdmin/tableOrderFlow/'+id]=null;delete d.tables[id];mposClearTableActivity(id);refreshOpenOrderSurfaces();return db.ref().update(updates).catch(e=>{console.error('Masa temizleme hatası',e);showToast('Masa temizlenemedi');refreshStateFromFirebase(testMode?testStateRef:stateRef,testMode);});}
+function clearSharedTable(masaId){const id=String(masaId||'');if(!id)return Promise.resolve();clearOrderWorkflowUiOverride(id);const d=activeState(),stateBase=activeStateRootPath(),updates={};updates[stateBase+'/tables/'+id]=null;updates[stateBase+'/posAdmin/tableActivity/'+id]=null;updates[stateBase+'/posAdmin/tableOrderMeta/'+id]=null;updates[stateBase+'/posAdmin/tableOrderFlow/'+id]=null;delete d.tables[id];mposClearTableActivity(id);refreshOpenOrderSurfaces();return db.ref().update(updates).catch(e=>{console.error('Masa temizleme hatası',e);showToast('Masa temizlenemedi');refreshStateFromFirebase(testMode?testStateRef:stateRef,testMode);});}
 
 // ---------- order modal ----------
 function openOrder(masaId){
@@ -3050,13 +3111,13 @@ function completeOrderPayment(method,amountOverride=null,meta={}){
   if(!hasPatronAccess())return;
   const masaId=String(meta.masaId||currentMasa||'');if(!masaId)return;
   const flightKey='masa:'+masaId;if(paymentInFlight.has(flightKey)){showToast('Bu masa için ödeme zaten işleniyor');return;}paymentInFlight.add(flightKey);
-  const stateBase=testMode?'ozarpa-test-state':'ozarpa-state',salesBase=testMode?'ozarpa-test-sales':'ozarpa-sales',tablePath=stateBase+'/tables/'+masaId;let releaseLock=()=>Promise.resolve();showToast('Ödeme kaydediliyor…');
+  const stateBase=activeStateRootPath(),salesBase=activeSalesRootPath(),tablePath=stateBase+'/tables/'+masaId;let releaseLock=()=>Promise.resolve();showToast('Ödeme kaydediliyor…');
   // Onaydan hemen sonra ödeme alınırsa, onay/ürün transaction'ları masayı kapatma işlemiyle yarışmasın.
   return Promise.all([waitForSharedTableIdle(),waitForOrderWorkflowRemote(masaId)]).then(()=>acquirePaymentLock('masa',masaId)).then(release=>{releaseLock=release;return db.ref(tablePath).once('value');}).then(snap=>{
     const remoteOrder=snap.val();if(!remoteOrder||typeof remoteOrder!=='object'||!Object.keys(remoteOrder).length)throw new Error('TABLE_ALREADY_CLOSED');
     const menu=activeState().menu||[],originalTotal=Object.entries(remoteOrder).reduce((sum,[itemId,q])=>{const it=menu.find(x=>String(x.id)===String(itemId));return sum+(Number(q)||0)*(Number(it?.price)||0);},0);if(originalTotal<=0)throw new Error('EMPTY_TOTAL');
     const pct=Math.max(0,Math.min(100,Number(meta.discountPercent)||0)),disc=Math.max(0,Number(meta.discountAmount)||0);let total=originalTotal;if(pct>0)total=Math.max(0,originalTotal*(1-pct/100));else if(disc>0)total=Math.max(0,originalTotal-disc);else if(amountOverride!==null&&Number.isFinite(Number(amountOverride)))total=Math.max(0,Number(amountOverride));total=Math.round((total+Number.EPSILON)*100)/100;
-    const orderMeta=mposTableOrderMeta(masaId),now=Date.now(),sale={amount:total,at:now,by:currentUser.name||currentUser.username,paymentMethod:method==='kart'?'kart':'nakit',source:'masa-odemesi',masaId,masaName:seatingTableLabel(masaId),orderTakenBy:String(orderMeta?.openedBy||''),orderOpenedAt:Number(orderMeta?.openedAt||0)};if(meta.description)sale.description=meta.description;if(originalTotal>total){sale.originalAmount=originalTotal;sale.discountAmount=Math.round((originalTotal-total)*100)/100;}if(pct>0)sale.discountPercent=pct;if(Number(meta.splitCount)>1)sale.splitCount=Number(meta.splitCount);
+    const orderMeta=mposTableOrderMeta(masaId),now=Date.now(),sale={amount:total,at:now,by:currentUser.name||currentUser.username,paymentMethod:method==='kart'?'kart':'nakit',source:'masa-odemesi',masaId,masaName:seatingTableLabel(masaId),orderTakenBy:String(orderMeta?.openedBy||''),orderOpenedAt:Number(orderMeta?.openedAt||0),branch:activeBranch};if(meta.description)sale.description=meta.description;if(originalTotal>total){sale.originalAmount=originalTotal;sale.discountAmount=Math.round((originalTotal-total)*100)/100;}if(pct>0)sale.discountPercent=pct;if(Number(meta.splitCount)>1)sale.splitCount=Number(meta.splitCount);
     const saleId=(testMode?testSalesRef:salesRef).push().key,updates={};updates[salesBase+'/'+saleId]=Object.assign({},sale,{serverAt:firebase.database.ServerValue.TIMESTAMP});updates[tablePath]=null;updates[stateBase+'/posAdmin/tableActivity/'+masaId]=null;updates[stateBase+'/posAdmin/tableOrderMeta/'+masaId]=null;updates[stateBase+'/posAdmin/tableOrderFlow/'+masaId]=null;return db.ref().update(updates).then(()=>({saleId,sale}));
   }).then(({saleId,sale})=>{const localSale=Object.assign({},sale,{serverAt:sale.at});if(testMode)testSales[saleId]=localSale;else sales[saleId]=localSale;const data=activeState();delete data.tables[masaId];mposClearTableActivity(masaId);refreshSalesViews();renderMasaGrid();mposRefreshPrepareIfVisible();if(meta.desktop){closeDesktopPaymentPanel(false);if(isDesktopOrderOpen())closeDesktopOrderScreen(false);currentMasa=null;}else if(meta.mobile)mposFinishPaidTableUi();else closeOrder();showToast((sale.paymentMethod==='kart'?'Kart':'Nakit')+' ödendi: '+fmt(sale.amount));
   }).catch(e=>{if(e&&e.message==='PAYMENT_LOCKED')showToast('Bu masa başka cihazda ödeniyor. Birkaç saniye sonra tekrar deneyin.');else if(e&&e.message==='TABLE_ALREADY_CLOSED'){showToast('Bu masa başka cihazda zaten kapatılmış');refreshStateFromFirebase(testMode?testStateRef:stateRef,testMode);}else if(e&&e.message==='EMPTY_TOTAL')showToast('Bu masada ödenecek tutar yok');else{console.error('Ödeme kaydetme hatası',e);showToast('Ödeme kaydedilemedi — masa açık bırakıldı');}}).finally(()=>{paymentInFlight.delete(flightKey);Promise.resolve(releaseLock()).catch(()=>{});});
@@ -3218,6 +3279,7 @@ function startPresence(user){
     employeeId:user.id,
     name:user.name||user.username,
     username:user.username,
+    branch:activeBranch,
     at:now,
     lastSeen:now
   }).then(()=>ref.onDisconnect().remove())
@@ -3314,16 +3376,19 @@ function renderAll(){
   else if(document.getElementById('view-admin').style.display !== 'none' && hasPatronAccess()) renderEmployees();
   if(document.getElementById('view-accounts')?.style.display !== 'none') renderDesktopCariAccounts();
   if(isMobilePos() && !mobileFormEditing)mposRender();
+  const empBranch=document.getElementById('emp-branch');if(empBranch&&!empBranch.dataset.touched)empBranch.value=activeBranch;
+  updateBranchUi();
 }
 
 
 // ---------- employees / earnings / special orders ----------
-function createEmployee(){if(!hasPatronAccess())return;const name=document.getElementById('emp-name').value.trim(),username=document.getElementById('emp-username').value.trim(),password=document.getElementById('emp-password').value.trim();if(!name||!username||!password){showToast('Personel adı, kullanıcı adı ve şifre gerekli');return;}if(username.toLowerCase()===(credentials.username||'').toLowerCase()||Object.values(employees).some(e=>(e.username||'').toLowerCase()===username.toLowerCase())){showToast('Bu kullanıcı adı zaten kullanılıyor');return;}usersRef.push({name,username,password,createdAt:Date.now(),manager:false}).then(()=>{document.getElementById('emp-name').value='';document.getElementById('emp-username').value='';document.getElementById('emp-password').value='';showToast(name+' oluşturuldu');}).catch(e=>{console.error('Çalışan oluşturma hatası',e);showToast('Çalışan oluşturulamadı');});}
+function createEmployee(){if(!hasPatronAccess())return;const name=document.getElementById('emp-name').value.trim(),username=document.getElementById('emp-username').value.trim(),password=document.getElementById('emp-password').value.trim(),branch=normalizeBranch(document.getElementById('emp-branch')?.value||activeBranch);if(!name||!username||!password){showToast('Personel adı, kullanıcı adı ve şifre gerekli');return;}if(username.toLowerCase()===(credentials.username||'').toLowerCase()||Object.values(employees).some(e=>(e.username||'').toLowerCase()===username.toLowerCase())){showToast('Bu kullanıcı adı zaten kullanılıyor');return;}usersRef.push({name,username,password,branch,createdAt:Date.now(),manager:false}).then(()=>{document.getElementById('emp-name').value='';document.getElementById('emp-username').value='';document.getElementById('emp-password').value='';const sel=document.getElementById('emp-branch');if(sel)sel.value=activeBranch;showToast(name+' · '+BRANCH_DEFS[branch].name+' Şube oluşturuldu');}).catch(e=>{console.error('Çalışan oluşturma hatası',e);showToast('Çalışan oluşturulamadı');});}
 function renderEmployees(){
   const el=document.getElementById('employee-list');if(!el)return;
   const vals=Object.entries(employees);
-  el.innerHTML=vals.length?vals.map(([id,e])=>`<div class="employee-row"><div class="employee-info"><strong>${escapeHtml(e.name||e.username)}</strong><small>Kullanıcı adı: ${escapeHtml(e.username||'')}</small>${e.manager?'<span class="manager-tag">★ YÖNETİCİ</span>':''}</div><div class="employee-actions">${isOwnerAdmin()?`<button class="btn manager-toggle ${e.manager?'active':''}" onclick="toggleEmployeeManager('${id}')">${e.manager?'Yöneticiliği Kaldır':'Yönetici Yap'}</button>`:''}<button class="btn danger" onclick="fireEmployee('${id}')">Kov</button></div></div>`).join(''):'<div class="empty-note">Henüz çalışan yok.</div>';
+  el.innerHTML=vals.length?vals.map(([id,e])=>{const eb=employeeAssignedBranch(e);return `<div class="employee-row"><div class="employee-info"><strong>${escapeHtml(e.name||e.username)}</strong><small>Kullanıcı adı: ${escapeHtml(e.username||'')}</small><span class="branch-tag">${escapeHtml(BRANCH_DEFS[eb].name)} Şube</span>${e.manager?'<span class="manager-tag">★ YÖNETİCİ</span>':''}</div><div class="employee-actions"><select aria-label="Şube ata" onchange="assignEmployeeBranch('${id}',this.value)"><option value="arli" ${eb==='arli'?'selected':''}>Arlı Şube</option><option value="selim" ${eb==='selim'?'selected':''}>Selim Şube</option></select>${isOwnerAdmin()?`<button class="btn manager-toggle ${e.manager?'active':''}" onclick="toggleEmployeeManager('${id}')">${e.manager?'Yöneticiliği Kaldır':'Yönetici Yap'}</button>`:''}<button class="btn danger" onclick="fireEmployee('${id}')">Kov</button></div></div>`;}).join(''):'<div class="empty-note">Henüz çalışan yok.</div>';
 }
+function assignEmployeeBranch(id,branch){if(!hasPatronAccess())return;const e=employees[id];if(!e)return;const next=normalizeBranch(branch);usersRef.child(id).update({branch:next}).then(()=>showToast((e.name||e.username)+' → '+BRANCH_DEFS[next].name+' Şube')).catch(err=>{console.error('Şube atama hatası',err);showToast('Şube ataması değiştirilemedi');});}
 function toggleEmployeeManager(id){
   if(!isOwnerAdmin()){showToast('Yönetici yetkisini yalnızca patron değiştirebilir');return;}
   const e=employees[id];if(!e)return;
@@ -3556,15 +3621,15 @@ function saveCariEditor(){
 }
 function deleteCariFromEditor(){if(cariEditorCurrentId)deleteCari(cariEditorCurrentId);}
 function deleteCari(id){if(!hasPatronAccess())return;const a=cariAccountById(id);if(!a)return;const debt=cariAccountTotal(a);if(!confirm((a.name||'Cari')+' silinsin mi?'+(debt>0?' Açık borç '+fmt(debt)+' da silinecek.':'')))return;delete cariAccounts()[String(id)];queueSave();closeCariEditor();renderCariViews();showToast('Cari silindi');}
-function cariChangeQty(id,itemId,delta){const a=cariAccountById(id);if(!a)return;if(delta>0&&mposIsProductDisabled(itemId)){showToast('Bu ürün satışa kapalı');return;}const cid=String(id),pid=String(itemId),ref=testMode?testStateRef:stateRef,base='posAdmin/currentAccounts/'+cid,menuItem=(activeState().menu||[]).find(x=>String(x.id)===pid),price=Number(a.itemPrices&&a.itemPrices[pid]);const snapPrice=Number.isFinite(price)?price:(Number(menuItem?.price)||0),snapName=(a.itemNames&&a.itemNames[pid])||menuItem?.name||'Ürün';if(!a.items)a.items={};if(!a.itemPrices)a.itemPrices={};if(!a.itemNames)a.itemNames={};const next=(Number(a.items[pid])||0)+Number(delta||0);if(next<=0){delete a.items[pid];delete a.itemPrices[pid];delete a.itemNames[pid];}else{a.items[pid]=next;a.itemPrices[pid]=snapPrice;a.itemNames[pid]=snapName;}a.updatedAt=Date.now();renderCariViews();const run=()=>ref.child(base+'/items/'+pid).transaction(cur=>{const n=(Number(cur)||0)+Number(delta||0);return n<=0?null:n;},null,false).then(res=>{const n=Number(res.snapshot.val())||0;const updates={};updates[base+'/updatedAt']=firebase.database.ServerValue.TIMESTAMP;if(n>0){updates[base+'/itemPrices/'+pid]=snapPrice;updates[base+'/itemNames/'+pid]=snapName;}else{updates[base+'/itemPrices/'+pid]=null;updates[base+'/itemNames/'+pid]=null;}return ref.update(updates);}).then(()=>ref.child(base).once('value')).then(snap=>{const remote=snap.val();if(remote)cariAccounts()[cid]=remote;renderCariViews();if(mposAccountMode&&mposAccountId===cid)mposRenderOrder();if(desktopAccountMode&&desktopAccountId===cid)renderDesktopOrderScreen();});const guarded=testMode?run():db.ref('ozarpa-payment-locks/cari_'+cid).once('value').then(lockSnap=>{const lock=lockSnap.val();if(lock&&Date.now()-Number(lock.at||0)<120000)throw new Error('PAYMENT_IN_PROGRESS');return run();});guarded.catch(e=>{if(e&&e.message==='PAYMENT_IN_PROGRESS')showToast('Bu cari şu anda tahsilat işleminde');else{console.error('Cari ürün eşitleme hatası',e);showToast('Cari hesabı eşitlenemedi');}refreshStateFromFirebase(ref,testMode);});}
+function cariChangeQty(id,itemId,delta){const a=cariAccountById(id);if(!a)return;if(delta>0&&mposIsProductDisabled(itemId)){showToast('Bu ürün satışa kapalı');return;}const cid=String(id),pid=String(itemId),ref=testMode?testStateRef:stateRef,base='posAdmin/currentAccounts/'+cid,menuItem=(activeState().menu||[]).find(x=>String(x.id)===pid),price=Number(a.itemPrices&&a.itemPrices[pid]);const snapPrice=Number.isFinite(price)?price:(Number(menuItem?.price)||0),snapName=(a.itemNames&&a.itemNames[pid])||menuItem?.name||'Ürün';if(!a.items)a.items={};if(!a.itemPrices)a.itemPrices={};if(!a.itemNames)a.itemNames={};const next=(Number(a.items[pid])||0)+Number(delta||0);if(next<=0){delete a.items[pid];delete a.itemPrices[pid];delete a.itemNames[pid];}else{a.items[pid]=next;a.itemPrices[pid]=snapPrice;a.itemNames[pid]=snapName;}a.updatedAt=Date.now();renderCariViews();const run=()=>ref.child(base+'/items/'+pid).transaction(cur=>{const n=(Number(cur)||0)+Number(delta||0);return n<=0?null:n;},null,false).then(res=>{const n=Number(res.snapshot.val())||0;const updates={};updates[base+'/updatedAt']=firebase.database.ServerValue.TIMESTAMP;if(n>0){updates[base+'/itemPrices/'+pid]=snapPrice;updates[base+'/itemNames/'+pid]=snapName;}else{updates[base+'/itemPrices/'+pid]=null;updates[base+'/itemNames/'+pid]=null;}return ref.update(updates);}).then(()=>ref.child(base).once('value')).then(snap=>{const remote=snap.val();if(remote)cariAccounts()[cid]=remote;renderCariViews();if(mposAccountMode&&mposAccountId===cid)mposRenderOrder();if(desktopAccountMode&&desktopAccountId===cid)renderDesktopOrderScreen();});const guarded=testMode?run():db.ref(paymentLocksRootPath()+'/cari_'+cid).once('value').then(lockSnap=>{const lock=lockSnap.val();if(lock&&Date.now()-Number(lock.at||0)<120000)throw new Error('PAYMENT_IN_PROGRESS');return run();});guarded.catch(e=>{if(e&&e.message==='PAYMENT_IN_PROGRESS')showToast('Bu cari şu anda tahsilat işleminde');else{console.error('Cari ürün eşitleme hatası',e);showToast('Cari hesabı eşitlenemedi');}refreshStateFromFirebase(ref,testMode);});}
 function cariClearDebt(id){const a=cariAccountById(id);if(!a)return;if(!confirm((a.name||'Cari')+' hesabındaki tüm açık ürünler temizlensin mi?'))return;a.items={};a.itemPrices={};a.itemNames={};a.updatedAt=Date.now();queueSave();renderCariViews();}
 function renderCariViews(){if(isDesktopPatron()&&desktopCurrentPage==='accounts')renderDesktopCariAccounts();if(isMobilePos()&&mposPage==='accounts')mposRender();}
 function completeCariPayment(cariId,method,amountOverride=null,meta={}){
   if(!hasPatronAccess())return;const id=String(cariId||'');if(!id)return;const flightKey='cari:'+id;if(paymentInFlight.has(flightKey)){showToast('Bu cari tahsilatı zaten işleniyor');return;}paymentInFlight.add(flightKey);
-  const stateBase=testMode?'ozarpa-test-state':'ozarpa-state',salesBase=testMode?'ozarpa-test-sales':'ozarpa-sales',accountPath=stateBase+'/posAdmin/currentAccounts/'+id;let releaseLock=()=>Promise.resolve();
+  const stateBase=activeStateRootPath(),salesBase=activeSalesRootPath(),accountPath=stateBase+'/posAdmin/currentAccounts/'+id;let releaseLock=()=>Promise.resolve();
   acquirePaymentLock('cari',id).then(release=>{releaseLock=release;return db.ref(accountPath).once('value');}).then(snap=>{const remote=snap.val();if(!remote)throw new Error('CARI_NOT_FOUND');const original=Object.entries(remote.items||{}).reduce((sum,[itemId,q])=>{const price=remote.itemPrices&&Number.isFinite(Number(remote.itemPrices[itemId]))?Number(remote.itemPrices[itemId]):Number((activeState().menu||[]).find(x=>String(x.id)===String(itemId))?.price)||0;return sum+(Number(q)||0)*price;},0);if(original<=0)throw new Error('CARI_ALREADY_PAID');
     const pct=Math.max(0,Math.min(100,Number(meta.discountPercent)||0)),disc=Math.max(0,Number(meta.discountAmount)||0);let amount=original;if(pct>0)amount=Math.max(0,original*(1-pct/100));else if(disc>0)amount=Math.max(0,original-disc);else if(amountOverride!==null&&Number.isFinite(Number(amountOverride)))amount=Math.max(0,Number(amountOverride));amount=Math.round((amount+Number.EPSILON)*100)/100;if(amount<=0)throw new Error('INVALID_AMOUNT');
-    const at=Date.now(),by=currentUser.name||currentUser.username,sale={amount,at,by,paymentMethod:method==='kart'?'kart':'nakit',source:'cari-tahsilat',cariId:id,cariName:remote.name||'Cari',originalAmount:original};if(meta.description)sale.description=meta.description;if(original>amount)sale.discountAmount=Math.round((original-amount)*100)/100;if(pct>0)sale.discountPercent=pct;const updated=JSON.parse(JSON.stringify(remote));updated.items={};updated.itemPrices={};updated.itemNames={};if(!Array.isArray(updated.payments))updated.payments=[];updated.payments.push({amount,method:sale.paymentMethod,at,by});updated.updatedAt=at;
+    const at=Date.now(),by=currentUser.name||currentUser.username,sale={amount,at,by,paymentMethod:method==='kart'?'kart':'nakit',source:'cari-tahsilat',cariId:id,cariName:remote.name||'Cari',originalAmount:original,branch:activeBranch};if(meta.description)sale.description=meta.description;if(original>amount)sale.discountAmount=Math.round((original-amount)*100)/100;if(pct>0)sale.discountPercent=pct;const updated=JSON.parse(JSON.stringify(remote));updated.items={};updated.itemPrices={};updated.itemNames={};if(!Array.isArray(updated.payments))updated.payments=[];updated.payments.push({amount,method:sale.paymentMethod,at,by});updated.updatedAt=at;
     const saleId=(testMode?testSalesRef:salesRef).push().key,updates={};updates[salesBase+'/'+saleId]=Object.assign({},sale,{serverAt:firebase.database.ServerValue.TIMESTAMP});updates[accountPath]=updated;return db.ref().update(updates).then(()=>({saleId,sale,updated}));
   }).then(({saleId,sale,updated})=>{const localSale=Object.assign({},sale,{serverAt:sale.at});if(testMode)testSales[saleId]=localSale;else sales[saleId]=localSale;cariAccounts()[id]=updated;refreshSalesViews();renderCariViews();if(meta.desktop){closeDesktopPaymentPanel(false);closeDesktopOrderScreen();desktopNavigate('accounts',true);}else if(meta.mobile){mposClosePayment();const os=document.getElementById('mpos-order-screen');if(os){os.classList.remove('open');os.setAttribute('aria-hidden','true');}mposAccountMode=false;mposAccountId=null;mposOrderMasa=null;mposPage='accounts';mposRender();}showToast('Cari tahsilatı: '+fmt(sale.amount));
   }).catch(e=>{if(e&&e.message==='PAYMENT_LOCKED')showToast('Bu cari başka cihazda tahsil ediliyor');else if(e&&e.message==='CARI_ALREADY_PAID')showToast('Bu cari başka cihazda zaten kapatılmış');else{console.error('Cari tahsilat hatası',e);showToast('Cari tahsilatı kaydedilemedi');}}).finally(()=>{paymentInFlight.delete(flightKey);Promise.resolve(releaseLock()).catch(()=>{});});
@@ -3850,12 +3915,17 @@ function playOrderSaveSound(){
 }
 document.addEventListener('pointerdown',unlockOrderSaveSound,{passive:true});
 document.addEventListener('keydown',unlockOrderSaveSound,{passive:true});
-orderAlertsRef.limitToLast(1).on('child_added',snap=>{
-  const row=snap.val()||{},at=Number(row.serverAt||row.at||0);
-  if(String(row.kind||'')!=='saved'||!currentUser||!currentUser.username||window.innerWidth<=700||!at||at<orderAlertListenerStartedAt-1000||Date.now()-at>30000)return;
-  const soundAgentOnline=!!remotePrinterStatus.online&&Date.now()-Number(remotePrinterStatus.at||0)<15000&&String(remotePrinterStatus.agent||'').includes('v3-sound');
-  if(!soundAgentOnline)playOrderSaveSound();
-});
+let orderAlertQuery=null,orderAlertHandler=null;
+function unbindOrderAlertListener(){if(orderAlertQuery&&orderAlertHandler){try{orderAlertQuery.off('child_added',orderAlertHandler);}catch(e){}}orderAlertQuery=null;orderAlertHandler=null;}
+function bindOrderAlertListener(){
+  unbindOrderAlertListener();orderAlertQuery=orderAlertsRef.limitToLast(1);orderAlertHandler=snap=>{
+    const row=snap.val()||{},at=Number(row.serverAt||row.at||0);
+    if(String(row.kind||'')!=='saved'||!currentUser||!currentUser.username||window.innerWidth<=700||!at||at<orderAlertListenerStartedAt-1000||Date.now()-at>30000)return;
+    const soundAgentOnline=activeBranch==='arli'&&!!remotePrinterStatus.online&&Date.now()-Number(remotePrinterStatus.at||0)<15000&&String(remotePrinterStatus.agent||'').includes('v3-sound');
+    if(!soundAgentOnline)playOrderSaveSound();
+  };orderAlertQuery.on('child_added',orderAlertHandler);
+}
+bindOrderAlertListener();
 
 let tableMoveSource='',tableMoveOrigin='';
 function closeTableMoveDialog(){document.getElementById('table-move-overlay')?.classList.remove('open');tableMoveSource='';tableMoveOrigin='';}
@@ -4013,7 +4083,8 @@ function mposRenderDrawer(){
   const adminItems=[['reports','▥','Raporlar'],['tables','▦','Masalar'],['quick','🛒','Hızlı Sipariş'],['prepare','◉','Hazırlanacaklar'],['deliver','🚚','Teslim Edilecekler'],['calls','☎','Aramalar'],['accounts','▣','Cari Hesaplar'],['finance','💵','Finans'],['personnel','👥','Personel Yönetimi'],['closed','▤','Kapanan Masalar'],['logs','☷','Logs'],['settings','⚙','Ayarlar']];
   const empItems=[['tables','▦','Masalar'],['quick','🛒','Hızlı Sipariş'],['prepare','◉','Hazırlanacaklar'],['personnel','👥','Personel Yönetimi'],['settings','⚙','Ayarlar']];
   const items=admin?adminItems:empItems;
-  nav.innerHTML='<div class="mpos-drawer-label">Genel</div><div class="mpos-drawer-nav">'+items.map(([id,ic,n])=>`<button class="mpos-drawer-item ${mposPage===id?'active':''}" onclick="mposNavigate('${id}')"><span class="ico">${ic}</span>${n}</button>`).join('')+'</div>';
+  const branchButton=canSwitchBranch()?`<button class="mpos-drawer-item branch-switch" onclick="switchBranchFromUi();mposToggleDrawer(false)"><span class="ico">⇄</span>${activeBranch==='arli'?'Selim':'Arlı'} Şubeye Git</button>`:'';
+  nav.innerHTML='<div class="mpos-drawer-label">Genel</div><div class="mpos-drawer-nav">'+items.map(([id,ic,n])=>(id==='settings'?branchButton:'')+`<button class="mpos-drawer-item ${mposPage===id?'active':''}" onclick="mposNavigate('${id}')"><span class="ico">${ic}</span>${n}</button>`).join('')+'</div>';
 }
 function mposNavigate(page){if(!hasPatronAccess()&&!['tables','quick','prepare','personnel','settings'].includes(page))page='tables';const prev=mposPage;if(page!=='seating'||prev!=='seating'){mposSeatingEditId=null;mposSeatingDraft={labels:[]};}mposPage=page;mposToggleDrawer(false);mposSearch='';const s=document.getElementById('mpos-global-search');if(s){s.value='';s.placeholder=page==='accounts'?'Cari ara':'Ara';}mposRender();}
 function mposOpenAccount(){mposToggleDrawer(true);}
@@ -4117,6 +4188,7 @@ function buildReceiptPrintJob(opts={}){
   return {
     status:'pending',
     source:String(opts.source||'adisyon'),
+    branch:activeBranch,
     title:String(opts.title||'Sipariş'),
     tableId:opts.tableId==null?'':String(opts.tableId),
     tableName:String(opts.tableName||opts.title||''),
@@ -4155,6 +4227,7 @@ function nextReceiptNo(){
   });
 }
 function enqueueReceiptPrint(job,button=null){
+  if(!printingEnabledForBranch()){showToast('Selim Şube · yazdırma bu şubede kapalı',2600);setReceiptPrintButtonState(button,false);return Promise.resolve(false);}
   if(!job){showToast('Yazdırılacak sipariş yok');setReceiptPrintButtonState(button,false);return Promise.resolve(false);}
   setReceiptPrintButtonState(button,true);
   showToast('Fiş yazdırma isteği gönderiliyor…',1800);
@@ -4194,6 +4267,7 @@ function desktopPrintReceipt(button=null){
   return enqueueReceiptPrint(job,button);
 }
 function browserPrintCurrentReceipt(){
+  if(!printingEnabledForBranch()){showToast('Selim Şube · yazdırma bu şubede kapalı',2600);return;}
   const root=document.getElementById('receipt-print-root');if(!root)return;
   let order={},account=null,title='Sipariş';
   if(isDesktopOrderOpen()){
@@ -4261,7 +4335,7 @@ function mposSaveStaffOrder(){
   if(hasPatronAccess()||mposQuickMode||mposAccountMode)return;
   const masa=String(mposOrderMasa||''),total=mposOrderTotal();if(!masa||total<=0){showToast('Kaydedilecek sipariş yok');return;}
   const returnFilter=mposOrderReturnFilter||mposTableFilter||'open',orderSnapshot=cloneStateValue(activeState().tables[masa]||{}),tableName=mposDisplayTableLabel(masa),printJob=buildReceiptPrintJob({source:'mobil-calisan-siparis-kaydet',title:tableName,tableId:masa,tableName,order:orderSnapshot});
-  saveAndConfirmTableOrder(masa,{emitAlert:false}).catch(e=>console.error('Mobil çalışan sipariş kaydı hatası',e));mposReturnStaffToTables(returnFilter);showToast('Sipariş kaydedildi · fiş yazdırılıyor…',1800);enqueueReceiptPrint(printJob,null);
+  saveAndConfirmTableOrder(masa,{emitAlert:false}).catch(e=>console.error('Mobil çalışan sipariş kaydı hatası',e));mposReturnStaffToTables(returnFilter);showToast(printingEnabledForBranch()?'Sipariş kaydedildi · fiş yazdırılıyor…':'Sipariş kaydedildi · yazdırma kapalı',1800);enqueueReceiptPrint(printJob,null);
 }
 function mposPrimaryOrderAction(){
   if(mposOrderTotal()<=0)return;
@@ -4303,20 +4377,21 @@ function mposQuickTool(action){mposCloseQuickMenu();if(window.innerWidth>700)ope
 function mposRenderReports(c){const m=mposMetrics();c.innerHTML=`<h2 class="mpos-page-title">Raporlar</h2><div class="mpos-page-sub">Finansal özet ve satış görünümü</div><div class="mpos-kpis"><div class="mpos-kpi hero"><span>Bugünkü Kazanç</span><strong>${fmt(m.day)}</strong><div class="mpos-kpi-payments"><div class="mpos-kpi-payment"><span>Nakit</span><strong>${fmt(m.cash)}</strong></div><div class="mpos-kpi-payment"><span>Kart</span><strong>${fmt(m.card)}</strong></div></div></div><div class="mpos-kpi"><span>Bu Hafta</span><strong>${fmt(m.week)}</strong></div><div class="mpos-kpi"><span>Bu Ay</span><strong>${fmt(m.month)}</strong></div><div class="mpos-kpi"><span>Bu Yıl</span><strong>${fmt(m.year)}</strong></div></div>`;}
 function mposMetrics(){return calculateSalesMetrics(new Date());}
 function mposRenderFinance(c){const m=calculateFinanceMetrics(new Date()),rows=(m.movements||[]).slice().reverse().slice(0,12);c.innerHTML=`<h2 class="mpos-page-title">Finans</h2><div class="mpos-page-sub">PC ve mobil aynı Firebase finans verisini kullanır</div><div class="mpos-card"><h3><span>💵</span>Kasa</h3><div class="mpos-kpis"><div class="mpos-kpi"><span>Kasa Açılış</span><strong>${fmt(m.opening)}</strong></div><div class="mpos-kpi"><span>Bugünkü Giriş / Çıkış Net</span><strong>${fmt(m.movementNet)}</strong></div><div class="mpos-kpi hero"><span>Bugünkü Tahsilat</span><strong>${fmt(m.day)}</strong></div><div class="mpos-kpi"><span>Beklenen Nakit Kasa</span><strong>${fmt(m.cashBalance)}</strong></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button class="mpos-btn" onclick="mposQuickTool('cash-open')">Kasa Açılışı</button><button class="mpos-btn secondary" onclick="mposQuickTool('cash-flow')">Giriş / Çıkış</button></div></div><div class="mpos-card"><h3><span>▦</span>Ödeme Dağılımı</h3><div class="mpos-row"><span>Nakit</span><b>${fmt(m.cash)}</b></div><div class="mpos-row"><span>Kart</span><b>${fmt(m.card)}</b></div></div><div class="mpos-card"><h3><span>▥</span>Dönem Toplamları</h3><div class="mpos-row"><span>Bu Hafta</span><b>${fmt(m.week)}</b></div><div class="mpos-row"><span>Bu Ay</span><b>${fmt(m.month)}</b></div><div class="mpos-row"><span>Bu Yıl</span><b>${fmt(m.year)}</b></div></div><div class="mpos-card"><h3><span>⇄</span>Bugünkü Kasa Hareketleri</h3>${rows.length?rows.map(x=>`<div class="mpos-row"><span><b>${x.type==='out'?'Çıkış':'Giriş'}</b><small>${escapeHtml(x.note||'')} · ${new Date(Number(x.at)||Date.now()).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}</small></span><strong>${x.type==='out'?'-':'+'}${fmt(Math.abs(Number(x.amount)||0))}</strong></div>`).join(''):'<div class="mpos-empty">Bugün kasa hareketi yok.</div>'}</div>`;}
-let mposEmployeeDraft={name:'',username:'',password:''};
+let mposEmployeeDraft={name:'',username:'',password:'',branch:activeBranch};
 function mposEmployeeDraftSet(field,value){if(Object.prototype.hasOwnProperty.call(mposEmployeeDraft,field))mposEmployeeDraft[field]=String(value??'');}
 let mposSettingsDraft={categoryName:'',productName:'',productPrice:'',productCategoryId:''};
 function mposSettingsDraftSet(field,value){if(Object.prototype.hasOwnProperty.call(mposSettingsDraft,field))mposSettingsDraft[field]=String(value??'');}
 function mposRenderPersonnel(c){
   if(hasPatronAccess()){
+    if(!mposEmployeeDraft.branch)mposEmployeeDraft.branch=activeBranch;
     const vals=Object.entries(employees);
-    c.innerHTML=`<h2 class="mpos-page-title">Personel Yönetimi</h2><div class="mpos-card"><h3><span>＋</span>Yeni Çalışan</h3><input id="mpos-emp-name" class="mpos-field" value="${escapeHtml(mposEmployeeDraft.name)}" autocomplete="name" placeholder="Çalışan adı" oninput="mposEmployeeDraftSet('name',this.value)"><input id="mpos-emp-user" class="mpos-field" value="${escapeHtml(mposEmployeeDraft.username)}" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Kullanıcı adı" oninput="mposEmployeeDraftSet('username',this.value)"><input id="mpos-emp-pass" class="mpos-field" value="${escapeHtml(mposEmployeeDraft.password)}" type="password" autocomplete="new-password" placeholder="Şifre" oninput="mposEmployeeDraftSet('password',this.value)"><button type="button" class="mpos-btn" style="width:100%;margin-top:7px" onclick="mposCreateEmployee()">Kaydet</button></div><div class="mpos-card"><h3><span>👥</span>Çalışanlar</h3>${vals.length?vals.map(([id,e])=>`<div class="mpos-list-item"><div class="mpos-list-avatar">${escapeHtml((e.name||e.username||'?')[0].toUpperCase())}</div><div class="mpos-list-main"><strong>${escapeHtml(e.name||e.username)}</strong><small>@${escapeHtml(e.username||'')}${e.manager?' · Yönetici':''}</small></div>${isOwnerAdmin()?`<button type="button" class="mpos-btn secondary" style="padding:9px 10px" onclick="toggleEmployeeManager('${id}');setTimeout(()=>mposRender(),120)">${e.manager?'Yetkiyi Kaldır':'Yönetici'}</button>`:''}<button type="button" class="mpos-btn danger" onclick="mposFireEmployee('${id}')">Kov</button></div>`).join(''):'<div class="mpos-empty">Çalışan yok.</div>'}</div>`;
+    c.innerHTML=`<h2 class="mpos-page-title">Personel Yönetimi</h2><div class="mpos-card"><h3><span>＋</span>Yeni Çalışan</h3><input id="mpos-emp-name" class="mpos-field" value="${escapeHtml(mposEmployeeDraft.name)}" autocomplete="name" placeholder="Çalışan adı" oninput="mposEmployeeDraftSet('name',this.value)"><input id="mpos-emp-user" class="mpos-field" value="${escapeHtml(mposEmployeeDraft.username)}" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Kullanıcı adı" oninput="mposEmployeeDraftSet('username',this.value)"><input id="mpos-emp-pass" class="mpos-field" value="${escapeHtml(mposEmployeeDraft.password)}" type="password" autocomplete="new-password" placeholder="Şifre" oninput="mposEmployeeDraftSet('password',this.value)"><select id="mpos-emp-branch" class="mpos-select" onchange="mposEmployeeDraftSet('branch',this.value)"><option value="arli" ${normalizeBranch(mposEmployeeDraft.branch)==='arli'?'selected':''}>Arlı Şube</option><option value="selim" ${normalizeBranch(mposEmployeeDraft.branch)==='selim'?'selected':''}>Selim Şube</option></select><button type="button" class="mpos-btn" style="width:100%;margin-top:7px" onclick="mposCreateEmployee()">Kaydet</button></div><div class="mpos-card"><h3><span>👥</span>Çalışanlar</h3>${vals.length?vals.map(([id,e])=>{const eb=employeeAssignedBranch(e);return `<div class="mpos-list-item"><div class="mpos-list-avatar">${escapeHtml((e.name||e.username||'?')[0].toUpperCase())}</div><div class="mpos-list-main"><strong>${escapeHtml(e.name||e.username)}</strong><small>@${escapeHtml(e.username||'')}${e.manager?' · Yönetici':''} · ${escapeHtml(BRANCH_DEFS[eb].name)} Şube</small><select class="mpos-select" style="margin-top:6px;height:38px" onchange="assignEmployeeBranch('${id}',this.value)"><option value="arli" ${eb==='arli'?'selected':''}>Arlı Şube</option><option value="selim" ${eb==='selim'?'selected':''}>Selim Şube</option></select></div>${isOwnerAdmin()?`<button type="button" class="mpos-btn secondary" style="padding:9px 10px" onclick="toggleEmployeeManager('${id}');setTimeout(()=>mposRender(),120)">${e.manager?'Yetkiyi Kaldır':'Yönetici'}</button>`:''}<button type="button" class="mpos-btn danger" onclick="mposFireEmployee('${id}')">Kov</button></div>`;}).join(''):'<div class="mpos-empty">Çalışan yok.</div>'}</div>`;
   }else{
     const now=Date.now(),fresh=Object.values(presence||{}).filter(e=>now-Number(e.lastSeen||e.at||0)<45000);
     c.innerHTML=`<h2 class="mpos-page-title">Personel</h2><div class="mpos-card"><h3><span>●</span>Aktif Çalışanlar</h3>${fresh.length?fresh.map(e=>`<div class="mpos-list-item"><div class="mpos-list-avatar">${escapeHtml((e.name||e.username||'?')[0].toUpperCase())}</div><div class="mpos-list-main"><strong>${escapeHtml(e.name||e.username)}</strong><small>Çevrimiçi</small></div></div>`).join(''):'<div class="mpos-empty">Aktif çalışan yok.</div>'}</div>`;
   }
 }
-function mposCreateEmployee(){if(!hasPatronAccess())return;const name=(document.getElementById('mpos-emp-name')?.value??mposEmployeeDraft.name).trim(),username=(document.getElementById('mpos-emp-user')?.value??mposEmployeeDraft.username).trim(),password=(document.getElementById('mpos-emp-pass')?.value??mposEmployeeDraft.password).trim();if(!name||!username||!password){showToast('Tüm alanları doldurun');return;}if(username.toLowerCase()===(credentials.username||'').toLowerCase()||Object.values(employees).some(e=>(e.username||'').toLowerCase()===username.toLowerCase())){showToast('Kullanıcı adı kullanılıyor');return;}usersRef.push({name,username,password,createdAt:Date.now(),manager:false}).then(()=>{mposEmployeeDraft={name:'',username:'',password:''};showToast('Çalışan oluşturuldu');mposRender();}).catch(e=>{console.error('Mobil çalışan oluşturma hatası',e);showToast('Çalışan oluşturulamadı');});}
+function mposCreateEmployee(){if(!hasPatronAccess())return;const name=(document.getElementById('mpos-emp-name')?.value??mposEmployeeDraft.name).trim(),username=(document.getElementById('mpos-emp-user')?.value??mposEmployeeDraft.username).trim(),password=(document.getElementById('mpos-emp-pass')?.value??mposEmployeeDraft.password).trim(),branch=normalizeBranch(document.getElementById('mpos-emp-branch')?.value||mposEmployeeDraft.branch||activeBranch);if(!name||!username||!password){showToast('Tüm alanları doldurun');return;}if(username.toLowerCase()===(credentials.username||'').toLowerCase()||Object.values(employees).some(e=>(e.username||'').toLowerCase()===username.toLowerCase())){showToast('Kullanıcı adı kullanılıyor');return;}usersRef.push({name,username,password,branch,createdAt:Date.now(),manager:false}).then(()=>{mposEmployeeDraft={name:'',username:'',password:'',branch:activeBranch};showToast('Çalışan oluşturuldu · '+BRANCH_DEFS[branch].name+' Şube');mposRender();}).catch(e=>{console.error('Mobil çalışan oluşturma hatası',e);showToast('Çalışan oluşturulamadı');});}
 function mposFireEmployee(id){fireEmployee(id);setTimeout(()=>mposRender(),150);}
 
 function mposRenderSettings(c){const p=ensurePosAdmin(),u=p.ui||{},admin=hasPatronAccess();c.innerHTML=`<h2 class="mpos-page-title">Genel Ayarlar</h2><div class="mpos-card"><h3><span>🎨</span>Görünüm</h3>${mposToggleHtml('Karanlık Mod','darkMode',!!u.darkMode)}${mposToggleHtml('Renkli Ürünler','coloredProducts',u.coloredProducts!==false)}${mposToggleHtml('Animasyonlar','animations',u.animations!==false)}<div class="mpos-row"><span>Yazı Boyutu</span><select class="mpos-select" style="width:125px" onchange="mposUpdateUi('fontScale',Number(this.value))"><option value="90" ${u.fontScale==90?'selected':''}>%90</option><option value="100" ${!u.fontScale||u.fontScale==100?'selected':''}>%100</option><option value="110" ${u.fontScale==110?'selected':''}>%110</option><option value="120" ${u.fontScale==120?'selected':''}>%120</option></select></div></div><div class="mpos-card"><h3><span>🛒</span>Sipariş Ayarları</h3>${mposToggleHtml('Sipariş sonrası masalara geri dön','autoReturnTables',u.autoReturnTables!==false)}${mposToggleHtml('Hızlı Siparişte Kişi Sayısı Sor','quickAskPeople',u.quickAskPeople!==false)}${mposToggleHtml('Masaları Ödemeden Sonra Otomatik Kapat','autoCloseAfterPay',u.autoCloseAfterPay!==false)}</div>${admin?mposAdminSettingsHtml():''}`;}
@@ -4418,7 +4493,7 @@ setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();els
 // ---------- PWA: service worker kaydı ----------
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    const UI_BUILD='20260819-pos-v24-patron-confirm-stale-snapshot-fix';
+    const UI_BUILD='20260819-pos-v25-two-branch-arli-selim';
     let needsRefresh=false;
     try{
       needsRefresh=localStorage.getItem('ozarpa-ui-build')!==UI_BUILD;
