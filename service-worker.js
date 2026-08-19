@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ozarpa-cache-v10';
+const CACHE_NAME = 'ozarpa-cache-v25-two-branch';
 
 const APP_SHELL = [
   './manifest.json',
@@ -10,9 +10,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) =>
       Promise.all(
-        APP_SHELL.map((url) =>
-          cache.add(url).catch(() => null)
-        )
+        APP_SHELL.map((url) => cache.add(url).catch(() => null))
       )
     )
   );
@@ -23,58 +21,81 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => key !== CACHE_NAME)
-            .map((key) => caches.delete(key))
-        )
-      )
+      .then((keys) => Promise.all(
+        keys
+          .filter((key) =>
+            key.startsWith('ozarpa-cache') &&
+            key !== CACHE_NAME
+          )
+          .map((key) => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  const url = event.request.url;
-
-  // Firebase verilerine dokunma
-  if (
-    url.includes('firebaseio.com') ||
-    url.includes('googleapis.com')
-  ) {
-    return;
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
+});
 
-  // index.html her zaman güncel olarak internetten gelsin.
-  // Eski PC / mobil arayüz cache'de kalmasın.
-  if (
-    event.request.mode === 'navigate' ||
-    url.includes('index.html')
-  ) {
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+
+  // Firebase ve diğer harici servis isteklerine
+  // service worker kesinlikle dokunmaz.
+  if (url.origin !== self.location.origin) return;
+
+  const isNavigation = request.mode === 'navigate';
+
+  const isIndex =
+    /\/index\.html$/i.test(url.pathname) ||
+    url.pathname.endsWith('/');
+
+  // Ana uygulama her zaman önce internetten güncel gelsin.
+  if (isNavigation || isIndex) {
     event.respondWith(
-      fetch(event.request, { cache: 'no-store' })
+      fetch(request, { cache: 'no-store' })
+        .then((response) => {
+          if (response && response.ok) {
+            const copy = response.clone();
+
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put('./index.html', copy);
+              })
+              .catch(() => {});
+          }
+
+          return response;
+        })
         .catch(() => caches.match('./index.html'))
     );
 
     return;
   }
 
-  // Diğer dosyalarda önce internet,
-  // internet yoksa cache kullan.
+  // Manifest, ikon ve aynı siteye ait diğer dosyalar:
+  // önce internet, internet yoksa cache.
   event.respondWith(
-    fetch(event.request, { cache: 'no-cache' })
+    fetch(request, { cache: 'no-cache' })
       .then((response) => {
         if (response && response.ok) {
           const copy = response.clone();
 
-          caches
-            .open(CACHE_NAME)
-            .then((cache) => cache.put(event.request, copy))
+          caches.open(CACHE_NAME)
+            .then((cache) => {
+              cache.put(request, copy);
+            })
             .catch(() => {});
         }
 
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(request))
   );
 });
