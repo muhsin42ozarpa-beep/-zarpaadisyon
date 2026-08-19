@@ -1608,6 +1608,11 @@ function refreshStateFromFirebase(ref,isTest=false){
 }
 function queueSave(){
   lastLocalEdit=Date.now();
+  // Kategori/ürün/ayar gibi debounce edilen değişikliklerde tarayıcı hemen kapansa bile
+  // en güncel durumun cihaz yedeğini tıklama/yazma anında koru.
+  try{
+    localStorage.setItem(testMode?'ozarpa-test-state-local':'ozarpa-state-local',JSON.stringify(cloneStateValue(activeState())));
+  }catch(e){}
   clearTimeout(saveTimer);
   saveTimer=setTimeout(saveState,350);
 }
@@ -3008,7 +3013,8 @@ function completeOrderPayment(method,amountOverride=null,meta={}){
   const masaId=String(meta.masaId||currentMasa||'');if(!masaId)return;
   const flightKey='masa:'+masaId;if(paymentInFlight.has(flightKey)){showToast('Bu masa için ödeme zaten işleniyor');return;}paymentInFlight.add(flightKey);
   const stateBase=testMode?'ozarpa-test-state':'ozarpa-state',salesBase=testMode?'ozarpa-test-sales':'ozarpa-sales',tablePath=stateBase+'/tables/'+masaId;let releaseLock=()=>Promise.resolve();showToast('Ödeme kaydediliyor…');
-  return acquirePaymentLock('masa',masaId).then(release=>{releaseLock=release;return db.ref(tablePath).once('value');}).then(snap=>{
+  // Onaydan hemen sonra ödeme alınırsa, onay/ürün transaction'ları masayı kapatma işlemiyle yarışmasın.
+  return Promise.all([waitForSharedTableIdle(),waitForOrderWorkflowRemote(masaId)]).then(()=>acquirePaymentLock('masa',masaId)).then(release=>{releaseLock=release;return db.ref(tablePath).once('value');}).then(snap=>{
     const remoteOrder=snap.val();if(!remoteOrder||typeof remoteOrder!=='object'||!Object.keys(remoteOrder).length)throw new Error('TABLE_ALREADY_CLOSED');
     const menu=activeState().menu||[],originalTotal=Object.entries(remoteOrder).reduce((sum,[itemId,q])=>{const it=menu.find(x=>String(x.id)===String(itemId));return sum+(Number(q)||0)*(Number(it?.price)||0);},0);if(originalTotal<=0)throw new Error('EMPTY_TOTAL');
     const pct=Math.max(0,Math.min(100,Number(meta.discountPercent)||0)),disc=Math.max(0,Number(meta.discountAmount)||0);let total=originalTotal;if(pct>0)total=Math.max(0,originalTotal*(1-pct/100));else if(disc>0)total=Math.max(0,originalTotal-disc);else if(amountOverride!==null&&Number.isFinite(Number(amountOverride)))total=Math.max(0,Number(amountOverride));total=Math.round((total+Number.EPSILON)*100)/100;
@@ -3578,7 +3584,7 @@ function seatingDeleteLayout(id){
   if(open.length){showToast('Bu bölümde açık hesap var. Önce masaları kapatın.');return;}
   if(!confirm('"'+l.name+'" oturma düzeni silinsin mi? Masalar görünümden kaldırılacak.'))return;
   p.seatingLayouts=(p.seatingLayouts||[]).filter(x=>String(x.id)!==String(id));
-  (l.tableIds||[]).forEach(t=>{delete p.tableLabels[String(t)];delete p.tableActivity[String(t)];if(p.tableOrderMeta)delete p.tableOrderMeta[String(t)];});
+  (l.tableIds||[]).forEach(t=>{const key=String(t);delete activeState().tables[key];delete p.tableLabels[key];delete p.tableActivity[key];if(p.tableOrderMeta)delete p.tableOrderMeta[key];if(p.tableOrderFlow)delete p.tableOrderFlow[key];});
   if(desktopSeatingEditId===String(id))desktopSeatingEditId=null;
   if(typeof mposSeatingEditId!=='undefined'&&mposSeatingEditId===String(id)){mposSeatingEditId=null;mposSeatingDraft={labels:[]};}
   seatingNormalizeMasaCount();queueSave();renderSeatingManager();renderMasaGrid();if(isMobilePos()){mposTableFilter='open';mposRender();}
@@ -3632,7 +3638,7 @@ function seatingSaveLayout(){
     if(v.count<ids.length){
       const removing=ids.slice(v.count),open=removing.filter(t=>tableTotal(t)>0);
       if(open.length){showToast('Kaldırılacak masalarda açık hesap var: '+open.map(seatingTableLabel).join(', '));return;}
-      removing.forEach(t=>{delete p.tableLabels[t];delete p.tableActivity[t];if(p.tableOrderMeta)delete p.tableOrderMeta[t];});ids=ids.slice(0,v.count);
+      removing.forEach(t=>{delete activeState().tables[String(t)];delete p.tableLabels[t];delete p.tableActivity[t];if(p.tableOrderMeta)delete p.tableOrderMeta[t];if(p.tableOrderFlow)delete p.tableOrderFlow[t];});ids=ids.slice(0,v.count);
     }else if(v.count>ids.length)ids=ids.concat(seatingNextTableIds(v.count-ids.length));
     l.name=v.name;l.cols=v.cols;l.rows=v.rows;l.tableIds=ids;
   }else{
@@ -3657,6 +3663,30 @@ function renderSeatingManager(){
   seatingBuildPreview();
 }
 
+const orderWorkflowRemoteQueues=Object.create(null);
+function queueOrderWorkflowRemote(key,task){
+  key=String(key||'');
+  const prev=orderWorkflowRemoteQueues[key]||Promise.resolve();
+  const current=prev.catch(()=>{}).then(task);
+  orderWorkflowRemoteQueues[key]=current;
+  current.finally(()=>{if(orderWorkflowRemoteQueues[key]===current)delete orderWorkflowRemoteQueues[key];}).catch(()=>{});
+  return current;
+}
+function waitForOrderWorkflowRemote(key){
+  const pending=orderWorkflowRemoteQueues[String(key||'')];
+  return pending?pending.catch(()=>{}):Promise.resolve();
+}
+function waitForSharedTableIdle(timeoutMs=6500){
+  const started=Date.now();
+  return new Promise(resolve=>{
+    const tick=()=>{
+      if(sharedTablePendingOps<=0||Date.now()-started>=timeoutMs){resolve();return;}
+      setTimeout(tick,35);
+    };
+    tick();
+  });
+}
+
 function orderSnapshotSignature(order){
   return Object.entries(order||{}).filter(([,q])=>Number(q)>0).map(([id,q])=>[String(id),Number(q)]).sort((a,b)=>a[0].localeCompare(b[0])).map(([id,q])=>id+':'+q).join('|');
 }
@@ -3666,9 +3696,11 @@ function tableOrderWorkflowStage(id,order=null){
   const flow=tableOrderWorkflow(key);if(String(flow.confirmedSignature||'')===sig)return'confirmed';if(String(flow.savedSignature||'')===sig)return'saved';return'dirty';
 }
 function refreshOrderWorkflowUi(){
-  // Kaydet / Onayla durumunu Firebase cevabını beklemeden tüm açık POS yüzeylerine yansıt.
+  // Kaydet / Onayla durumunu Firebase cevabını beklemeden açık sipariş yüzeyine yansıt.
+  // Sipariş ekranı açıkken arkadaki tüm masa gridini yeniden çizmek PC'de gereksiz yük ve tıklama yarışı oluşturuyordu.
+  const desktopOrderOpen=isDesktopOrderOpen();
   refreshOpenOrderSurfacesFast();
-  if(isDesktopPos()){
+  if(isDesktopPos()&&!desktopOrderOpen){
     renderMasaGrid();
     if(isDesktopEmployee())renderPcEmployeeShell();
   }
@@ -3682,7 +3714,7 @@ function saveTableOrderWorkflow(id){
   // State listener'ın eski Firebase anlık görüntüsüyle bu lokal aşamayı geri çevirmesini engelle.
   beginSharedTableMutation();
   refreshOrderWorkflowUi();
-  return ref.child('posAdmin/tableOrderFlow/'+key).update({draftAt:Number(prevRaw.draftAt)||now,draftBy:who,draftByUsername:username,savedSignature:sig,savedAt:firebase.database.ServerValue.TIMESTAMP,savedBy:who,savedByUsername:username}).then(()=>{
+  return queueOrderWorkflowRemote(key,()=>ref.child('posAdmin/tableOrderFlow/'+key).update({draftAt:Number(prevRaw.draftAt)||now,draftBy:who,draftByUsername:username,savedSignature:sig,savedAt:firebase.database.ServerValue.TIMESTAMP,savedBy:who,savedByUsername:username})).then(()=>{
     refreshOrderWorkflowUi();
     if(testMode)return true;
     const node=orderAlertsRef.push();
@@ -3706,7 +3738,7 @@ function confirmTableOrderWorkflow(id,opts={}){
   const updates={savedSignature:sig,savedBy:next.savedBy,savedByUsername:next.savedByUsername,confirmedSignature:sig,confirmedAt:firebase.database.ServerValue.TIMESTAMP,confirmedBy:who,confirmedByUsername:username,confirmedItems:order};if(!prevRaw.savedAt)updates.savedAt=firebase.database.ServerValue.TIMESTAMP;
   beginSharedTableMutation();
   refreshOrderWorkflowUi();
-  return ref.child('posAdmin/tableOrderFlow/'+key).update(updates).then(()=>{
+  return queueOrderWorkflowRemote(key,()=>ref.child('posAdmin/tableOrderFlow/'+key).update(updates)).then(()=>{
     refreshOrderWorkflowUi();
     if(opts.emitAlert===true){const node=orderAlertsRef.push();return node.set({kind:'confirmed',at:now,serverAt:firebase.database.ServerValue.TIMESTAMP,tableId:key,tableName:seatingTableLabel(key),by:who}).then(()=>true);}return true;
   }).catch(e=>{
@@ -4264,7 +4296,7 @@ function mposSaveSeatingLayout(){
   const p=ensurePosAdmin();let l=mposSeatingEditId==='__new__'?null:seatingLayoutById(mposSeatingEditId),ids=[];
   if(l){
     ids=(l.tableIds||[]).map(String);
-    if(v.count<ids.length){const removing=ids.slice(v.count),open=removing.filter(t=>tableTotal(t)>0);if(open.length){showToast('Kaldırılacak masalarda açık hesap var: '+open.map(seatingTableLabel).join(', '));return;}removing.forEach(t=>{delete p.tableLabels[t];delete p.tableActivity[t];if(p.tableOrderMeta)delete p.tableOrderMeta[t];});ids=ids.slice(0,v.count);}
+    if(v.count<ids.length){const removing=ids.slice(v.count),open=removing.filter(t=>tableTotal(t)>0);if(open.length){showToast('Kaldırılacak masalarda açık hesap var: '+open.map(seatingTableLabel).join(', '));return;}removing.forEach(t=>{delete activeState().tables[String(t)];delete p.tableLabels[t];delete p.tableActivity[t];if(p.tableOrderMeta)delete p.tableOrderMeta[t];if(p.tableOrderFlow)delete p.tableOrderFlow[t];});ids=ids.slice(0,v.count);}
     else if(v.count>ids.length)ids=ids.concat(seatingNextTableIds(v.count-ids.length));
     l.name=v.name;l.cols=v.cols;l.rows=v.rows;l.tableIds=ids;
   }else{
@@ -4312,7 +4344,7 @@ setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();els
 // ---------- PWA: service worker kaydı ----------
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    const UI_BUILD='20260819-pos-v20-instant-order-workflow';
+    const UI_BUILD='20260819-pos-v22-patron-workflow-stability';
     let needsRefresh=false;
     try{
       needsRefresh=localStorage.getItem('ozarpa-ui-build')!==UI_BUILD;
