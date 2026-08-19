@@ -2430,8 +2430,21 @@ function desktopOrderTakePayment(){
     closeDesktopOrderScreen(true);desktopCurrentPage='masa';switchTab('masa');forcePcEmployeeModernShell();renderMasaGrid();renderDesktopTableFilters();desktopApplyTableFilters();window.scrollTo({top:0,behavior:'auto'});showToast('Sipariş kaydedildi · fiş yazdırılıyor…');enqueueReceiptPrint(printJob,null);return;
   }
   const order=activeState().tables[masaId]||{},stage=tableOrderWorkflowStage(masaId,order);
-  if(stage==='dirty'){showToast('Sipariş kaydediliyor…',900);saveTableOrderWorkflow(masaId).then(ok=>{if(ok)showToast('Sipariş kaydedildi');});return;}
-  if(stage==='saved'){showToast('Sipariş onaylanıyor…',900);confirmTableOrderWorkflow(masaId).then(ok=>{if(ok)showToast('Sipariş onaylandı');});return;}
+  if(stage==='dirty'){
+    showToast('Sipariş kaydediliyor…',900);
+    const job=saveTableOrderWorkflow(masaId);
+    // Buton lokal override ile aynı event döngüsünde Onayla'ya geçsin.
+    renderDesktopOrderCartOnly();
+    job.then(ok=>{if(ok){renderDesktopOrderCartOnly();showToast('Sipariş kaydedildi');}}).catch(e=>{console.error('PC patron Siparişi Kaydet hatası',e);renderDesktopOrderCartOnly();showToast('Sipariş kaydedilemedi');});
+    return;
+  }
+  if(stage==='saved'){
+    showToast('Sipariş onaylanıyor…',900);
+    const job=confirmTableOrderWorkflow(masaId);
+    renderDesktopOrderCartOnly();
+    job.then(ok=>{if(ok){renderDesktopOrderCartOnly();showToast('Sipariş onaylandı');}}).catch(e=>{console.error('PC patron Siparişi Onayla hatası',e);renderDesktopOrderCartOnly();showToast('Sipariş onaylanamadı');});
+    return;
+  }
   openDesktopPaymentPanel(masaId);
 }
 
@@ -2954,7 +2967,7 @@ function updateSharedTableItem(masaId,itemId,delta){
     refreshOpenOrderSurfacesFast();
   }).finally(()=>finishSharedTableMutation(ref,testMode));
 }
-function clearSharedTable(masaId){const id=String(masaId||'');if(!id)return Promise.resolve();const d=activeState(),stateBase=testMode?'ozarpa-test-state':'ozarpa-state',updates={};updates[stateBase+'/tables/'+id]=null;updates[stateBase+'/posAdmin/tableActivity/'+id]=null;updates[stateBase+'/posAdmin/tableOrderMeta/'+id]=null;updates[stateBase+'/posAdmin/tableOrderFlow/'+id]=null;delete d.tables[id];mposClearTableActivity(id);refreshOpenOrderSurfaces();return db.ref().update(updates).catch(e=>{console.error('Masa temizleme hatası',e);showToast('Masa temizlenemedi');refreshStateFromFirebase(testMode?testStateRef:stateRef,testMode);});}
+function clearSharedTable(masaId){const id=String(masaId||'');if(!id)return Promise.resolve();clearOrderWorkflowUiOverride(id);const d=activeState(),stateBase=testMode?'ozarpa-test-state':'ozarpa-state',updates={};updates[stateBase+'/tables/'+id]=null;updates[stateBase+'/posAdmin/tableActivity/'+id]=null;updates[stateBase+'/posAdmin/tableOrderMeta/'+id]=null;updates[stateBase+'/posAdmin/tableOrderFlow/'+id]=null;delete d.tables[id];mposClearTableActivity(id);refreshOpenOrderSurfaces();return db.ref().update(updates).catch(e=>{console.error('Masa temizleme hatası',e);showToast('Masa temizlenemedi');refreshStateFromFirebase(testMode?testStateRef:stateRef,testMode);});}
 
 // ---------- order modal ----------
 function openOrder(masaId){
@@ -3664,6 +3677,17 @@ function renderSeatingManager(){
 }
 
 const orderWorkflowRemoteQueues=Object.create(null);
+// PC/mobil Kaydet→Onayla geçişinde Firebase'in gecikmiş snapshot'ı butonu eski aşamaya döndürmesin.
+// Bu override yalnız aynı sipariş imzası için geçerlidir; ürün değişirse otomatik hükümsüz kalır.
+const orderWorkflowUiOverrides=Object.create(null);
+function setOrderWorkflowUiOverride(id,stage,sig){
+  const key=String(id||'');if(!key||!sig)return;
+  orderWorkflowUiOverrides[key]={stage:String(stage||''),sig:String(sig),at:Date.now()};
+}
+function clearOrderWorkflowUiOverride(id,sig=''){
+  const key=String(id||''),cur=orderWorkflowUiOverrides[key];if(!cur)return;
+  if(!sig||String(cur.sig||'')===String(sig))delete orderWorkflowUiOverrides[key];
+}
 function queueOrderWorkflowRemote(key,task){
   key=String(key||'');
   const prev=orderWorkflowRemoteQueues[key]||Promise.resolve();
@@ -3692,7 +3716,14 @@ function orderSnapshotSignature(order){
 }
 function tableOrderWorkflow(id){const p=ensurePosAdmin();return (p.tableOrderFlow&&p.tableOrderFlow[String(id)])||{};}
 function tableOrderWorkflowStage(id,order=null){
-  const key=String(id||''),actual=order||activeState().tables[key]||{},sig=orderSnapshotSignature(actual);if(!sig)return'empty';
+  const key=String(id||''),actual=order||activeState().tables[key]||{},sig=orderSnapshotSignature(actual);if(!sig){clearOrderWorkflowUiOverride(key);return'empty';}
+  const forced=orderWorkflowUiOverrides[key];
+  if(forced){
+    // Farklı ürün/adet imzasında eski UI aşamasını asla kullanma.
+    if(String(forced.sig||'')!==sig)delete orderWorkflowUiOverrides[key];
+    else if(Date.now()-Number(forced.at||0)<20000&&['saved','confirmed'].includes(forced.stage))return forced.stage;
+    else delete orderWorkflowUiOverrides[key];
+  }
   const flow=tableOrderWorkflow(key);if(String(flow.confirmedSignature||'')===sig)return'confirmed';if(String(flow.savedSignature||'')===sig)return'saved';return'dirty';
 }
 function refreshOrderWorkflowUi(){
@@ -3709,44 +3740,62 @@ function refreshOrderWorkflowUi(){
 function saveTableOrderWorkflow(id){
   const key=String(id||''),order=cloneStateValue(activeState().tables[key]||{}),sig=orderSnapshotSignature(order);if(!key||!sig){showToast('Kaydedilecek sipariş yok');return Promise.resolve(false);}
   const p=ensurePosAdmin(),prevRaw=p.tableOrderFlow[key]&&typeof p.tableOrderFlow[key]==='object'?p.tableOrderFlow[key]:{},prev=cloneStateValue(prevRaw),now=Date.now(),who=currentOrderTakerName(),username=String(currentUser?.username||'');
+  // UI'yi Firebase cevabını beklemeden kesin olarak bir sonraki aşamaya geçir.
   p.tableOrderFlow[key]=Object.assign({},prevRaw,{draftAt:Number(prevRaw.draftAt)||now,draftBy:who,draftByUsername:username,savedSignature:sig,savedAt:now,savedBy:who,savedByUsername:username});
-  const ref=testMode?testStateRef:stateRef;
-  // State listener'ın eski Firebase anlık görüntüsüyle bu lokal aşamayı geri çevirmesini engelle.
-  beginSharedTableMutation();
+  setOrderWorkflowUiOverride(key,'saved',sig);
   refreshOrderWorkflowUi();
-  return queueOrderWorkflowRemote(key,()=>ref.child('posAdmin/tableOrderFlow/'+key).update({draftAt:Number(prevRaw.draftAt)||now,draftBy:who,draftByUsername:username,savedSignature:sig,savedAt:firebase.database.ServerValue.TIMESTAMP,savedBy:who,savedByUsername:username})).then(()=>{
-    refreshOrderWorkflowUi();
-    if(testMode)return true;
-    const node=orderAlertsRef.push();
-    return node.set({kind:'saved',at:now,serverAt:firebase.database.ServerValue.TIMESTAMP,tableId:key,tableName:seatingTableLabel(key),by:who,username}).then(()=>true).catch(e=>{console.warn('Sipariş ses bildirimi gönderilemedi',e);return true;});
-  }).catch(e=>{
-    console.error('Sipariş kaydetme aşaması hatası',e);
-    const cur=p.tableOrderFlow[key]||{};
-    // Kullanıcı bu sırada bir sonraki aşamaya geçtiyse daha yeni lokal durumu geri alma.
-    if(String(cur.savedSignature||'')===sig&&String(cur.confirmedSignature||'')!==sig){
-      if(Object.keys(prev).length)p.tableOrderFlow[key]=prev;else delete p.tableOrderFlow[key];
+  const ref=testMode?testStateRef:stateRef;
+  // Ürün transaction'ları henüz bitmediyse kısa süre onları bekle; ekrandaki Onayla butonu bu sırada aktif kalır.
+  return waitForSharedTableIdle(2400).then(()=>{
+    beginSharedTableMutation();
+    return queueOrderWorkflowRemote(key,()=>ref.child('posAdmin/tableOrderFlow/'+key).update({
+      draftAt:Number(prevRaw.draftAt)||now,draftBy:who,draftByUsername:username,
+      savedSignature:sig,savedAt:firebase.database.ServerValue.TIMESTAMP,savedBy:who,savedByUsername:username
+    })).then(()=>{
+      // Gecikmiş bir Firebase snapshot'ı lokal flow'u silmiş olsa bile başarılı kaydı tekrar lokal duruma yerleştir.
+      const local=ensurePosAdmin(),cur=local.tableOrderFlow[key]&&typeof local.tableOrderFlow[key]==='object'?local.tableOrderFlow[key]:{};
+      local.tableOrderFlow[key]=Object.assign({},cur,{draftAt:Number(cur.draftAt)||now,draftBy:cur.draftBy||who,draftByUsername:cur.draftByUsername||username,savedSignature:sig,savedAt:Number(cur.savedAt)||now,savedBy:who,savedByUsername:username});
+      clearOrderWorkflowUiOverride(key,sig);
       refreshOrderWorkflowUi();
-    }
-    showToast('Sipariş durumu kaydedilemedi');return false;
-  }).finally(()=>finishSharedTableMutation(ref,testMode));
+      if(testMode)return true;
+      const node=orderAlertsRef.push();
+      // Ses bildirimi başarısız olsa bile sipariş kaydını başarısız sayma.
+      node.set({kind:'saved',at:now,serverAt:firebase.database.ServerValue.TIMESTAMP,tableId:key,tableName:seatingTableLabel(key),by:who,username}).catch(e=>console.warn('Sipariş ses bildirimi gönderilemedi',e));
+      return true;
+    }).catch(e=>{
+      console.error('Sipariş kaydetme aşaması hatası',e);
+      clearOrderWorkflowUiOverride(key,sig);
+      const cur=p.tableOrderFlow[key]||{};
+      if(String(cur.savedSignature||'')===sig&&String(cur.confirmedSignature||'')!==sig){if(Object.keys(prev).length)p.tableOrderFlow[key]=prev;else delete p.tableOrderFlow[key];}
+      refreshOrderWorkflowUi();showToast('Sipariş durumu kaydedilemedi');return false;
+    }).finally(()=>finishSharedTableMutation(ref,testMode));
+  });
 }
 function confirmTableOrderWorkflow(id,opts={}){
   const key=String(id||''),order=cloneStateValue(activeState().tables[key]||{}),sig=orderSnapshotSignature(order);if(!key||!sig){showToast('Onaylanacak sipariş yok');return Promise.resolve(false);}
   const p=ensurePosAdmin(),prevRaw=p.tableOrderFlow[key]&&typeof p.tableOrderFlow[key]==='object'?p.tableOrderFlow[key]:{},prev=cloneStateValue(prevRaw),now=Date.now(),who=currentOrderTakerName(),username=String(currentUser?.username||'');
-  const next=Object.assign({},prevRaw,{draftAt:Number(prevRaw.draftAt)||now,draftBy:prevRaw.draftBy||who,draftByUsername:prevRaw.draftByUsername||username,savedSignature:sig,savedAt:Number(prevRaw.savedAt)||now,savedBy:prevRaw.savedBy||who,savedByUsername:prevRaw.savedByUsername||username,confirmedSignature:sig,confirmedAt:now,confirmedBy:who,confirmedByUsername:username,confirmedItems:order});p.tableOrderFlow[key]=next;
+  const next=Object.assign({},prevRaw,{draftAt:Number(prevRaw.draftAt)||now,draftBy:prevRaw.draftBy||who,draftByUsername:prevRaw.draftByUsername||username,savedSignature:sig,savedAt:Number(prevRaw.savedAt)||now,savedBy:prevRaw.savedBy||who,savedByUsername:prevRaw.savedByUsername||username,confirmedSignature:sig,confirmedAt:now,confirmedBy:who,confirmedByUsername:username,confirmedItems:order});
+  p.tableOrderFlow[key]=next;
+  setOrderWorkflowUiOverride(key,'confirmed',sig);
+  refreshOrderWorkflowUi();
   const ref=testMode?testStateRef:stateRef;
   const updates={savedSignature:sig,savedBy:next.savedBy,savedByUsername:next.savedByUsername,confirmedSignature:sig,confirmedAt:firebase.database.ServerValue.TIMESTAMP,confirmedBy:who,confirmedByUsername:username,confirmedItems:order};if(!prevRaw.savedAt)updates.savedAt=firebase.database.ServerValue.TIMESTAMP;
-  beginSharedTableMutation();
-  refreshOrderWorkflowUi();
-  return queueOrderWorkflowRemote(key,()=>ref.child('posAdmin/tableOrderFlow/'+key).update(updates)).then(()=>{
-    refreshOrderWorkflowUi();
-    if(opts.emitAlert===true){const node=orderAlertsRef.push();return node.set({kind:'confirmed',at:now,serverAt:firebase.database.ServerValue.TIMESTAMP,tableId:key,tableName:seatingTableLabel(key),by:who}).then(()=>true);}return true;
-  }).catch(e=>{
-    console.error('Sipariş onaylama hatası',e);
-    const cur=p.tableOrderFlow[key]||{};
-    if(String(cur.confirmedSignature||'')===sig){p.tableOrderFlow[key]=prev;refreshOrderWorkflowUi();}
-    showToast('Sipariş onaylanamadı');return false;
-  }).finally(()=>finishSharedTableMutation(ref,testMode));
+  return waitForSharedTableIdle(2400).then(()=>{
+    beginSharedTableMutation();
+    return queueOrderWorkflowRemote(key,()=>ref.child('posAdmin/tableOrderFlow/'+key).update(updates)).then(()=>{
+      const local=ensurePosAdmin(),cur=local.tableOrderFlow[key]&&typeof local.tableOrderFlow[key]==='object'?local.tableOrderFlow[key]:{};
+      local.tableOrderFlow[key]=Object.assign({},cur,next,{confirmedAt:Number(cur.confirmedAt)||now,confirmedItems:order});
+      clearOrderWorkflowUiOverride(key,sig);
+      refreshOrderWorkflowUi();
+      if(opts.emitAlert===true){const node=orderAlertsRef.push();node.set({kind:'confirmed',at:now,serverAt:firebase.database.ServerValue.TIMESTAMP,tableId:key,tableName:seatingTableLabel(key),by:who}).catch(e=>console.warn('Onay bildirimi gönderilemedi',e));}
+      return true;
+    }).catch(e=>{
+      console.error('Sipariş onaylama hatası',e);
+      clearOrderWorkflowUiOverride(key,sig);
+      const cur=p.tableOrderFlow[key]||{};if(String(cur.confirmedSignature||'')===sig)p.tableOrderFlow[key]=prev;
+      refreshOrderWorkflowUi();showToast('Sipariş onaylanamadı');return false;
+    }).finally(()=>finishSharedTableMutation(ref,testMode));
+  });
 }
 function saveAndConfirmTableOrder(id,opts={}){return saveTableOrderWorkflow(id).then(ok=>ok?confirmTableOrderWorkflow(id,opts):false);}
 
@@ -4344,7 +4393,7 @@ setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();els
 // ---------- PWA: service worker kaydı ----------
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    const UI_BUILD='20260819-pos-v22-patron-workflow-stability';
+    const UI_BUILD='20260819-pos-v23-patron-save-live-fix';
     let needsRefresh=false;
     try{
       needsRefresh=localStorage.getItem('ozarpa-ui-build')!==UI_BUILD;
