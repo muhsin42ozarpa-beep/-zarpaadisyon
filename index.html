@@ -1517,6 +1517,7 @@ let lastLocalEdit = 0;   // bu cihazda son değişiklik yapılan an
 let realtimeRenderHoldUntil = 0; // hızlı sipariş/masa dokunuşlarında Firebase yankısının ekranı tekrar tekrar çizmesini engeller
 let sharedTablePendingOps = 0;
 let sharedTableSyncTimer = null;
+let sharedTableMutationEpoch = 0; // eski/in-flight Firebase snapshot'larının yeni masa tıklamalarını ezmesini engeller
 const sharedMetaWriteAt = Object.create(null);
 let lastRemoteState = null;      // Son doğrulanmış ana Firebase state anlık görüntüsü
 let lastRemoteTestState = null;  // Son doğrulanmış test state anlık görüntüsü
@@ -1599,12 +1600,17 @@ function applyVerifiedRemoteState(val,isTest=false){
     applyRemoteState(cloned);
   }
 }
-function refreshStateFromFirebase(ref,isTest=false){
+function refreshStateFromFirebase(ref,isTest=false,opts={}){
+  const requestedEpoch=Number(opts.expectedEpoch!=null?opts.expectedEpoch:sharedTableMutationEpoch);
   return ref.once('value').then(snap=>{
-    if(lastLocalEdit)return;
+    if(lastLocalEdit)return false;
+    // Bu okuma başladıktan sonra yeni bir ürün/masa mutation'ı başladıysa snapshot artık eskidir.
+    // Eski snapshot'ı uygulamak PC patron sipariş ekranındaki yeni ürünü görünürde siliyordu.
+    if(sharedTablePendingOps>0 || requestedEpoch!==sharedTableMutationEpoch)return false;
     const val=snap.val();
-    if(val)applyVerifiedRemoteState(val,isTest);
-  }).catch(e=>console.error('Firebase yeniden eşitleme hatası',e));
+    if(val){applyVerifiedRemoteState(val,isTest);return true;}
+    return false;
+  }).catch(e=>{console.error('Firebase yeniden eşitleme hatası',e);return false;});
 }
 function queueSave(){
   lastLocalEdit=Date.now();
@@ -1655,9 +1661,23 @@ function ensureTestState(){
 }
 function applyRemoteState(val){
   if(!val)return;
+  const beforeMenuSig=JSON.stringify((state.menu||[]).map(x=>[x.id,x.name,x.price,x.categoryId,x.disabled]));
+  const beforeCatSig=JSON.stringify((state.categories||[]).map(x=>[x.id,x.name,!!x.scaleMode]));
   state=Object.assign({masaCount:20,menu:[],categories:[],tables:{}},val);
   if(!state.tables)state.tables={}; if(!state.menu)state.menu=[]; if(!state.categories)state.categories=[];
-  if(!testMode && document.getElementById('app-screen').style.display!=='none')renderAll();
+  if(!testMode && document.getElementById('app-screen').style.display!=='none'){
+    // Açık sipariş ekranını her Firebase yankısında baştan kurmak ürün tıklamasını kaçırabiliyordu.
+    // Menü/kategori gerçekten değişmediyse sadece sepeti güncelle.
+    if(isDesktopOrderOpen()){
+      const afterMenuSig=JSON.stringify((state.menu||[]).map(x=>[x.id,x.name,x.price,x.categoryId,x.disabled]));
+      const afterCatSig=JSON.stringify((state.categories||[]).map(x=>[x.id,x.name,!!x.scaleMode]));
+      if(beforeMenuSig!==afterMenuSig||beforeCatSig!==afterCatSig)renderDesktopOrderScreen();
+      else renderDesktopOrderCartOnly();
+      mposRefreshPrepareIfVisible();
+    }else if(isMobilePos()&&document.getElementById('mpos-order-screen')?.classList.contains('open')){
+      mposRenderCart();mposRefreshPrepareIfVisible();
+    }else renderAll();
+  }
 }
 restoreLocalState();
 
@@ -2931,6 +2951,7 @@ function ensureSharedTableMetaThrottled(masaId){
   return ensureSharedTableMeta(id);
 }
 function beginSharedTableMutation(){
+  sharedTableMutationEpoch++;
   sharedTablePendingOps++;
   realtimeRenderHoldUntil=Math.max(realtimeRenderHoldUntil,Date.now()+4000);
   if(sharedTableSyncTimer){clearTimeout(sharedTableSyncTimer);sharedTableSyncTimer=null;}
@@ -2939,10 +2960,14 @@ function finishSharedTableMutation(ref,isTest){
   sharedTablePendingOps=Math.max(0,sharedTablePendingOps-1);
   if(sharedTablePendingOps>0)return;
   if(sharedTableSyncTimer)clearTimeout(sharedTableSyncTimer);
+  const settledEpoch=sharedTableMutationEpoch;
   sharedTableSyncTimer=setTimeout(()=>{
-    realtimeRenderHoldUntil=0;
-    refreshStateFromFirebase(ref,isTest).catch(()=>{});
-  },160);
+    if(sharedTablePendingOps>0||settledEpoch!==sharedTableMutationEpoch)return;
+    // Sadece bu mutation kuşağı hâlâ güncelse Firebase'i uygula. Yeni tıklama başladıysa eski okuma iptal sayılır.
+    refreshStateFromFirebase(ref,isTest,{expectedEpoch:settledEpoch,allowDuringHold:true}).finally(()=>{
+      if(sharedTablePendingOps===0&&settledEpoch===sharedTableMutationEpoch)realtimeRenderHoldUntil=0;
+    });
+  },220);
 }
 function rollbackLocalTableDelta(id,pid,delta){
   const d=activeState();if(!d.tables[id])d.tables[id]={};const order=d.tables[id];
@@ -4393,7 +4418,7 @@ setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();els
 // ---------- PWA: service worker kaydı ----------
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    const UI_BUILD='20260819-pos-v23-patron-save-live-fix';
+    const UI_BUILD='20260819-pos-v24-patron-confirm-stale-snapshot-fix';
     let needsRefresh=false;
     try{
       needsRefresh=localStorage.getItem('ozarpa-ui-build')!==UI_BUILD;
