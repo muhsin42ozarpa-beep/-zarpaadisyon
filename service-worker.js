@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ozarpa-cache-v27-no-dark-mode';
+const CACHE_NAME = 'ozarpa-cache-v29-pc-desktop-stability';
 
 const APP_SHELL = [
   './manifest.json',
@@ -52,7 +52,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // Firebase ve diğer harici servis isteklerine
-  // service worker kesinlikle karışmaz.
+  // service worker karışmaz.
   if (url.origin !== self.location.origin) return;
 
   const isNavigation = request.mode === 'navigate';
@@ -61,7 +61,7 @@ self.addEventListener('fetch', (event) => {
     /\/index\.html$/i.test(url.pathname) ||
     url.pathname.endsWith('/');
 
-  // index.html her zaman önce internetten güncel alınır.
+  // index.html her zaman önce internetten güncel gelir.
   if (isNavigation || isIndex) {
     event.respondWith(
       fetch(request, { cache: 'no-store' })
@@ -71,21 +71,23 @@ self.addEventListener('fetch', (event) => {
 
             caches
               .open(CACHE_NAME)
-              .then((cache) => {
-                cache.put('./index.html', copy);
-              })
+              .then((cache) =>
+                cache.put('./index.html', copy)
+              )
               .catch(() => {});
           }
 
           return response;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() =>
+          caches.match('./index.html')
+        )
     );
 
     return;
   }
 
-  // Manifest, ikon ve diğer aynı-site dosyaları:
+  // Aynı siteye ait statik dosyalarda:
   // önce internet, internet yoksa cache.
   event.respondWith(
     fetch(request, { cache: 'no-cache' })
@@ -95,14 +97,16 @@ self.addEventListener('fetch', (event) => {
 
           caches
             .open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(request, copy);
-            })
+            .then((cache) =>
+              cache.put(request, copy)
+            )
             .catch(() => {});
         }
 
         return response;
       })
-      .catch(() => caches.match(request))
+      .catch(() =>
+        caches.match(request)
+      )
   );
 });
