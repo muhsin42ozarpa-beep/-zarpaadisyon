@@ -634,7 +634,8 @@
 /* ---------- PC PATRON: TAM EKRAN ADİSYON ---------- */
 .desktop-order-screen{display:none}
 @media(min-width:701px){
-  .desktop-order-screen.open{display:grid;position:fixed;inset:0;z-index:10010;background:#1f252b;color:#fff;grid-template-rows:72px minmax(0,1fr)}
+  .desktop-order-screen.open{display:grid;position:fixed;inset:0;z-index:10010;background:#1f252b;color:#fff;grid-template-rows:72px minmax(0,1fr);pointer-events:auto!important}
+  .desktop-order-screen.open button,.desktop-order-screen.open input,.desktop-order-screen.open .desktop-order-products,.desktop-order-screen.open .desktop-order-cart{pointer-events:auto!important}
   .desktop-order-top{display:grid;grid-template-columns:auto 120px minmax(240px,1fr) auto;align-items:center;gap:10px;padding:10px 12px;background:#20262d;border-bottom:1px solid #3e4852}
   .desktop-order-back{width:42px;height:42px;border:0;border-radius:7px;background:#303943;color:#fff;font-size:23px;cursor:pointer}
   .desktop-order-brand{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden}
@@ -2472,8 +2473,22 @@ function desktopCategoryInitials(name){
   const parts=String(name||'').trim().split(/\s+/).filter(Boolean);
   return (parts.length>1?(parts[0][0]+parts[1][0]):String(name||'??').slice(0,2)).toLocaleUpperCase('tr-TR');
 }
+function resetDesktopInteractionLayersForOrder(){
+  // PC patron/çalışan fark etmeksizin yeni sipariş yüzeyi açılırken geçmişten kalan
+  // sabit katmanların tıklamaları yakalamasına izin verme. Burada callback/render
+  // çağırmıyoruz; sadece artık geçerli olmayan katmanları ve geçici ödeme state'ini temizliyoruz.
+  document.getElementById('desktop-payment-overlay')?.classList.remove('open');
+  document.getElementById('table-move-overlay')?.classList.remove('open');
+  document.getElementById('desktop-quick-overlay')?.classList.remove('open');
+  document.getElementById('desktop-user-menu')?.classList.remove('open');
+  const patronOverlay=document.getElementById('patron-tool-overlay');if(patronOverlay)patronOverlay.style.display='none';
+  const legacyOrder=document.getElementById('order-overlay');if(legacyOrder)legacyOrder.classList.remove('open');
+  desktopPaymentMasa=null;desktopPaymentCari=null;desktopPaymentQuick=false;
+  desktopPaymentDiscountAmountValue=0;desktopPaymentDiscountPercentValue=0;desktopPaymentSplitCount=1;
+}
 function openDesktopOrderScreen(masaId){
   if(!isDesktopPos()){openOrder(masaId);return;}
+  resetDesktopInteractionLayersForOrder();
   desktopAccountMode=false;desktopAccountId=null;desktopQuickMode=false;desktopQuickCart={};
   currentMasa=String(masaId);
   desktopOrderCategory='all';desktopOrderSearch='';
@@ -2487,6 +2502,7 @@ function openDesktopOrderScreen(masaId){
 }
 function openDesktopCariOrder(cariId){
   if(!isDesktopPatron())return;const a=cariAccountById(cariId);if(!a)return;
+  resetDesktopInteractionLayersForOrder();
   desktopAccountMode=true;desktopAccountId=String(cariId);desktopQuickMode=false;desktopQuickCart={};currentMasa=null;desktopOrderCategory='all';desktopOrderSearch='';
   const input=document.getElementById('desktop-order-product-search');if(input)input.value='';syncDesktopBrandLogo();const source=document.querySelector('.desktop-brand-logo'),target=document.querySelector('.desktop-order-brand-logo');if(source&&target)target.src=source.src;
   const screen=document.getElementById('desktop-order-screen');if(screen){screen.classList.add('open','cari-mode');screen.setAttribute('aria-hidden','false');}document.body.style.overflow='hidden';closeDesktopUserMenu();renderDesktopOrderScreen();
@@ -2496,6 +2512,7 @@ function desktopQuickOrderTotal(){
 }
 function desktopStartQuickOrder(){
   if(!isDesktopPos())return;
+  resetDesktopInteractionLayersForOrder();
   desktopAccountMode=false;desktopAccountId=null;desktopQuickMode=true;desktopQuickCart={};currentMasa=null;desktopOrderCategory='all';desktopOrderSearch='';
   const input=document.getElementById('desktop-order-product-search');if(input)input.value='';syncDesktopBrandLogo();const source=document.querySelector('.desktop-brand-logo'),target=document.querySelector('.desktop-order-brand-logo');if(source&&target)target.src=source.src;
   const screen=document.getElementById('desktop-order-screen');if(screen){screen.classList.remove('cari-mode');screen.classList.add('open');screen.setAttribute('aria-hidden','false');}
@@ -2582,8 +2599,8 @@ function desktopOrderChangeQty(itemId,delta){
   const change=resolveOrderDelta(itemId,delta);if(change===null||!Number(change))return;
   if(desktopAccountMode){if(!desktopAccountId)return;cariChangeQty(desktopAccountId,itemId,change);renderDesktopOrderCartOnly();return;}
   if(desktopQuickMode){const n=roundOrderQty((Number(desktopQuickCart[itemId])||0)+Number(change||0));if(n<=0)delete desktopQuickCart[itemId];else desktopQuickCart[itemId]=n;renderDesktopOrderCartOnly();return;}
-  if(!currentMasa)return;
-  updateSharedTableItem(currentMasa,itemId,change);
+  const targetMasa=String(currentMasa||'');if(!targetMasa)return;
+  return updateSharedTableItem(targetMasa,itemId,change);
 }
 function desktopOrderClear(){if(isDesktopEmployee()&&!desktopAccountMode&&!desktopQuickMode){showToast('Çalışan masayı topluca temizleyemez');return;}if(desktopAccountMode){if(desktopAccountId)cariClearDebt(desktopAccountId);renderDesktopOrderScreen();return;}if(desktopQuickMode){desktopQuickCart={};renderDesktopOrderCartOnly();showToast('Hızlı sipariş sepeti temizlendi');return;}if(!currentMasa||!activeState().tables[currentMasa])return;if(!confirm('Bu masadaki tüm siparişler temizlensin mi?'))return;const id=currentMasa;clearSharedTable(id).then(()=>{renderDesktopOrderScreen();showToast('Masa temizlendi');});}
 function desktopOrderTakePayment(){
@@ -2706,10 +2723,15 @@ function syncDesktopPatronShell(){
     const quick=document.querySelector('#app-screen .desktop-top-search .menu-square');if(quick)quick.style.setProperty('display','none','important');
     const users=document.getElementById('desktop-user-wrap');if(users)users.style.setProperty('display','none','important');
     const head=document.querySelector('#view-masa .desktop-page-head small');if(head)head.textContent='Masa ve sipariş yönetimi';
+    // Açık sipariş ekranında arka plandaki masa filtrelerini yeniden çizme; hızlı ürün tıklamalarını bozabiliyordu.
+    if(isDesktopOrderOpen()){syncDesktopNav('masa');return;}
   }else{
     // Sadece çalışan modundan yönetim moduna geçerken çalışan için konan !important kilitlerini temizle.
     if(wasEmployee)clearPcEmployeeInlineGuards();
     const head=document.querySelector('#view-masa .desktop-page-head small');if(head)head.textContent='Salon masa ve adisyon yönetimi';
+    // PC patron tam ekran siparişteyken Firebase/rol senkronizasyonu arka sayfayı
+    // yeniden yönlendirmesin. Sipariş ekranının DOM'u ve tıklama hedefleri sabit kalır.
+    if(isDesktopOrderOpen()){syncDesktopNav(desktopQuickMode?'quick':'masa');return;}
   }
 
   if(!desktopShellInitialized){desktopShellInitialized=true;desktopNavigate('masa',true);}
@@ -2743,6 +2765,9 @@ function forcePcEmployeeModernShell(){
   const quick=document.querySelector('#app-screen .desktop-top-search .menu-square');if(quick)quick.style.setProperty('display','none','important');
   const users=document.getElementById('desktop-user-wrap');if(users)users.style.setProperty('display','none','important');
   syncDesktopNav('masa');
+  // Sipariş ekranı açıksa hiçbir masa/filter DOM'unu yeniden üretme. Bu fonksiyon geçmişte
+  // watchdog tarafından saniyede birkaç kez çağrıldığı için PC çalışanda tıklama kaybı/donma yaratabiliyordu.
+  if(isDesktopOrderOpen())return true;
   renderDesktopTableFilters();
   desktopApplyTableFilters();
   return true;
@@ -2803,14 +2828,7 @@ function desktopSearchTables(q){
 }
 
 window.addEventListener('resize',()=>{syncDesktopPatronShell();forcePcEmployeeModernShell();syncPcEmployeeShell();syncMobilePosShell();if(isDesktopPos())desktopFilterTables(desktopTableFilter);else{closeDesktopPaymentPanel();closeDesktopUserMenu();if(isDesktopOrderOpen())closeDesktopOrderScreen();}if(isMobilePos())mposRender();});
-// PC çalışan arayüz koruması: Firebase/render yarışları eski sekmeli görünümü geri getirmesin.
-setInterval(()=>{
-  if(currentUser&&currentUser.username&&currentUser.role!=='guest'&&window.innerWidth>700&&!hasPatronAccess()){
-    syncDesktopPatronShell();
-    forcePcEmployeeModernShell();
-    syncPcEmployeeShell();
-  }
-},1200);
+// PC çalışan arayüzü artık sürekli DOM yeniden çizimiyle değil, aşağıdaki hafif sağlık kontrolüyle korunur.
 
 
 
@@ -2838,7 +2856,7 @@ function syncPcEmployeeShell(){
     app.style.removeProperty('visibility');
     app.style.removeProperty('pointer-events');
   }
-  if(isDesktopEmployee())forcePcEmployeeModernShell();
+  if(isDesktopEmployee()&&!isDesktopOrderOpen())forcePcEmployeeModernShell();
 }
 function renderPcEmployeeShell(){
   if(!pcEmployeeShouldShow())return;
@@ -2990,11 +3008,21 @@ function logout(){
   arpaSetVisibility();
 }
 
-// PC çalışan görünümü güvenlik ağı: geç gelen Firebase/render işlemleri eski arayüzü geri getiremez.
+// PC çalışan görünümü güvenlik ağı. Sağlıklı ekranda hiçbir DOM'a dokunmaz;
+// sipariş ekranı/diğer etkileşim yüzeyleri açıkken tamamen pasif kalır.
+function pcEmployeeShellNeedsRepair(){
+  const app=document.getElementById('app-screen'),legacy=document.getElementById('pc-employee-shell');
+  if(!app||app.style.display==='none'||!isDesktopEmployee())return false;
+  if(isDesktopOrderOpen())return false;
+  if(document.getElementById('desktop-payment-overlay')?.classList.contains('open'))return false;
+  if(document.getElementById('table-move-overlay')?.classList.contains('open'))return false;
+  return !app.classList.contains('desktop-patron')||!app.classList.contains('desktop-employee')||legacy?.classList.contains('open')||app.style.visibility==='hidden'||app.style.pointerEvents==='none';
+}
 setInterval(()=>{
-  const app=document.getElementById('app-screen');
-  if(app&&app.style.display!=='none'&&isDesktopEmployee()){forcePcEmployeeModernShell();syncPcEmployeeShell();}
-},700);
+  if(document.hidden||!pcEmployeeShellNeedsRepair())return;
+  syncDesktopPatronShell();
+  forcePcEmployeeModernShell();
+},2500);
 
 // ---------- tabs ----------
 function switchTab(tab){
@@ -4559,7 +4587,7 @@ function mposCompleteQuickSale(method){const total=mposOrderTotal();if(total<=0)
 // Mobilde yeni gün/uzak veri degisimlerinde de ekran canli kalsin.
 setInterval(()=>{
   const view=document.getElementById('view-masa');
-  if(isDesktopPos()&&hasPatronAccess()&&view&&view.style.display!=='none')renderMasaGrid();
+  if(isDesktopPos()&&hasPatronAccess()&&!isDesktopOrderOpen()&&view&&view.style.display!=='none')renderMasaGrid();
 },30000);
 setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();else if(['reports','finance','closed','logs','prepare','deliver'].includes(mposPage))mposRender();}},30000);
 
@@ -4571,7 +4599,7 @@ setInterval(()=>{if(isMobilePos()){if(mposPage==='tables')mposRenderTables();els
 // ---------- PWA: service worker kaydı ----------
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
-    const UI_BUILD='20260819-pos-v27-no-dark-mode';
+    const UI_BUILD='20260819-pos-v29-pc-desktop-stability';
     let needsRefresh=false;
     try{
       needsRefresh=localStorage.getItem('ozarpa-ui-build')!==UI_BUILD;
