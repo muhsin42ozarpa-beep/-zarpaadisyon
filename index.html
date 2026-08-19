@@ -1585,7 +1585,7 @@ let branchBannerTimer=null;
 function showBranchBanner(){
   const box=document.getElementById('branch-banner'),title=document.getElementById('branch-banner-title'),sub=document.getElementById('branch-banner-sub');if(!box)return;
   if(title)title.textContent=activeBranchName()+' Şubedesiniz';
-  if(sub)sub.textContent=activeBranch==='arli'?'Ana şube · veriler senkronize':'2. şube · ayrı Firebase verileri';
+  if(sub)sub.textContent=activeBranch==='arli'?'Ana şube · ':'2. şube · ';
   box.classList.remove('show');void box.offsetWidth;box.classList.add('show');
   if(branchBannerTimer)clearTimeout(branchBannerTimer);branchBannerTimer=setTimeout(()=>box.classList.remove('show'),5000);
 }
