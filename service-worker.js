@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ozarpa-cache-v25-two-branch';
+const CACHE_NAME = 'ozarpa-cache-v26-branch-sync-integrity';
 
 const APP_SHELL = [
   './manifest.json',
@@ -10,7 +10,9 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) =>
       Promise.all(
-        APP_SHELL.map((url) => cache.add(url).catch(() => null))
+        APP_SHELL.map((url) =>
+          cache.add(url).catch(() => null)
+        )
       )
     )
   );
@@ -21,14 +23,17 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(
-        keys
-          .filter((key) =>
-            key.startsWith('ozarpa-cache') &&
-            key !== CACHE_NAME
-          )
-          .map((key) => caches.delete(key))
-      ))
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter(
+              (key) =>
+                key.startsWith('ozarpa-cache') &&
+                key !== CACHE_NAME
+            )
+            .map((key) => caches.delete(key))
+        )
+      )
       .then(() => self.clients.claim())
   );
 });
@@ -47,7 +52,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // Firebase ve diğer harici servis isteklerine
-  // service worker kesinlikle dokunmaz.
+  // service worker karışmaz.
   if (url.origin !== self.location.origin) return;
 
   const isNavigation = request.mode === 'navigate';
@@ -56,7 +61,7 @@ self.addEventListener('fetch', (event) => {
     /\/index\.html$/i.test(url.pathname) ||
     url.pathname.endsWith('/');
 
-  // Ana uygulama her zaman önce internetten güncel gelsin.
+  // index.html her zaman önce internetten güncel alınır.
   if (isNavigation || isIndex) {
     event.respondWith(
       fetch(request, { cache: 'no-store' })
@@ -64,10 +69,9 @@ self.addEventListener('fetch', (event) => {
           if (response && response.ok) {
             const copy = response.clone();
 
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put('./index.html', copy);
-              })
+            caches
+              .open(CACHE_NAME)
+              .then((cache) => cache.put('./index.html', copy))
               .catch(() => {});
           }
 
@@ -79,7 +83,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Manifest, ikon ve aynı siteye ait diğer dosyalar:
+  // Diğer aynı-site dosyaları:
   // önce internet, internet yoksa cache.
   event.respondWith(
     fetch(request, { cache: 'no-cache' })
@@ -87,10 +91,9 @@ self.addEventListener('fetch', (event) => {
         if (response && response.ok) {
           const copy = response.clone();
 
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(request, copy);
-            })
+          caches
+            .open(CACHE_NAME)
+            .then((cache) => cache.put(request, copy))
             .catch(() => {});
         }
 
